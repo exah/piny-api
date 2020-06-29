@@ -9,7 +9,7 @@ export const UserBookmarkController = {
     try {
       const user = await User.findOne(
         { name: params.user },
-        { relations: ['bookmarks', 'bookmarks.link'] }
+        { select: ['id'], relations: ['bookmarks', 'bookmarks.link'] }
       )
 
       if (user?.bookmarks?.length) {
@@ -37,9 +37,7 @@ export const UserBookmarkController = {
       const linkCount = await Link.count({ url })
 
       if (linkCount === 0) {
-        const link = new Link()
-
-        link.url = url
+        const link = Link.create({ url })
         await link.save()
       }
 
@@ -48,13 +46,13 @@ export const UserBookmarkController = {
 
       const bookmarkCount = await Bookmark.count({ link })
 
-      if (bookmarkCount === 0 && user != null && link != null) {
-        const bookmark = new Bookmark()
-
-        bookmark.title = body.value.title
-        bookmark.privacy = PrivacyType.public
-        bookmark.user = user
-        bookmark.link = link
+      if (bookmarkCount === 0) {
+        const bookmark = Bookmark.create({
+          title: body.value.title,
+          privacy: PrivacyType.public,
+          user: user,
+          link: link,
+        })
 
         await bookmark.save()
 
