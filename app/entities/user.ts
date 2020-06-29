@@ -7,7 +7,7 @@ import {
 } from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
 
 import { AuthType } from '../constants.ts'
-import { Bookmark } from './Bookmark.ts'
+import { Bookmark } from './bookmark.ts'
 
 @Entity()
 export class User extends BaseEntity {

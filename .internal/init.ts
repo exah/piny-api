@@ -1,5 +1,5 @@
 import '../connect.ts'
-import { User } from '../app/entities/User.ts'
+import { User } from '../app/entities/user.ts'
 import { encrypt } from '../app/utils.ts'
 
 console.log('Inserting a new user into the database...')

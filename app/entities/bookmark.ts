@@ -7,8 +7,8 @@ import {
 } from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
 
 import { PrivacyType } from '../constants.ts'
-import { User } from './User.ts'
-import { Link } from './Link.ts'
+import { User } from './user.ts'
+import { Link } from './link.ts'
 
 @Entity()
 export class Bookmark extends BaseEntity {

@@ -6,7 +6,7 @@ import {
   OneToMany,
 } from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
 
-import { Bookmark } from './Bookmark.ts'
+import { Bookmark } from './bookmark.ts'
 
 @Entity()
 export class Link extends BaseEntity {
