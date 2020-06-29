@@ -1,15 +1,12 @@
 import { RouterContext } from 'https://deno.land/x/oak/mod.ts'
-import { UserModel } from '../models.ts'
+import { User } from '../entities/User.ts'
 
 export async function getUser({
   response,
   params,
 }: RouterContext<{ user: string }>) {
   try {
-    const [user] = await UserModel.where('name', params.user).get()
-
-    delete user.auth
-    delete user.pass
+    const user = await User.findOne({ name: params.user })
 
     response.body = user
   } catch (error) {
