@@ -26,6 +26,9 @@ export class User extends BaseEntity {
   @Column({ type: 'text' })
   pass: string
 
+  @Column({ type: 'simple-array' })
+  token: string[]
+
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[]
 }

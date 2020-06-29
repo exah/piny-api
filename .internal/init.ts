@@ -1,13 +1,14 @@
 import '../connect.ts'
 import { User } from '../app/entities/user.ts'
-import { encrypt } from '../app/utils.ts'
+import { hash } from '../app/utils.ts'
 
 console.log('Inserting a new user into the database...')
 
 const user = User.create({
   name: 'exah',
   email: 'r@exah.me',
-  pass: encrypt('1234'),
+  pass: hash('1234'),
+  token: [],
 })
 
 await user.save()
