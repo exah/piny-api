@@ -9,7 +9,7 @@ export const UserController = {
       response.body = user
     } catch (error) {
       response.status = 500
-      response.body = { message: error.message }
+      response.body = { message: '😭 Something went wrong' }
     }
   },
 }

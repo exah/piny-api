@@ -1,8 +1,23 @@
-import { RouterContext } from 'https://deno.land/x/oak/mod.ts'
+import { RouterContext, Body } from 'https://deno.land/x/oak/mod.ts'
 import { PrivacyType } from '../constants.ts'
 import { User } from '../entities/user.ts'
 import { Link } from '../entities/link.ts'
 import { Bookmark } from '../entities/bookmark.ts'
+
+interface BookmarkBody {
+  type: 'json'
+  value: {
+    url: string
+    privacy: PrivacyType
+    title?: string
+    description?: string
+  }
+}
+
+function assertBookmarkBody(input: Body): asserts input is BookmarkBody {
+  if (input.type === 'json' && input.value?.url) return
+  throw new Error('request `body` should least contain an `url`')
+}
 
 export const UserBookmarkController = {
   async get({ response, params }: RouterContext<{ user: string }>) {
@@ -22,16 +37,16 @@ export const UserBookmarkController = {
       console.error(error)
 
       response.status = 500
-      response.body = { message: error.message }
+      response.body = { message: '😭 Something went wrong' }
     }
   },
   async add({ request, response, params }: RouterContext<{ user: string }>) {
     try {
       const body = await request.body({
-        contentTypes: {
-          json: ['application/json'],
-        },
+        contentTypes: { json: ['application/json'] },
       })
+
+      assertBookmarkBody(body)
 
       const url = new URL(body.value.url).toString()
       const linkCount = await Link.count({ url })
@@ -49,7 +64,8 @@ export const UserBookmarkController = {
       if (bookmarkCount === 0) {
         const bookmark = Bookmark.create({
           title: body.value.title,
-          privacy: PrivacyType.public,
+          description: body.value.description,
+          privacy: body.value.privacy,
           user: user,
           link: link,
         })
@@ -66,7 +82,7 @@ export const UserBookmarkController = {
       console.error(error)
 
       response.status = 500
-      response.body = { message: error.message }
+      response.body = { message: '😭 Something went wrong' }
     }
   },
 }

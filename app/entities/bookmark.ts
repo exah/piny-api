@@ -15,10 +15,10 @@ export class Bookmark extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Column({ type: 'text' })
-  title: string
+  @Column({ type: 'text', nullable: true, default: null })
+  title: string | null
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, default: null })
   description: string | null
 
   @Column({ type: 'simple-enum', enum: PrivacyType })
