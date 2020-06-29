@@ -59,7 +59,7 @@ export const UserBookmarkController = {
       const user = await User.findOne({ name: params.user })
       const link = await Link.findOne({ url })
 
-      const bookmarkCount = await Bookmark.count({ link })
+      const bookmarkCount = await Bookmark.count({ link, user })
 
       if (bookmarkCount === 0) {
         const bookmark = Bookmark.create({

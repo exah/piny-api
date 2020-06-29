@@ -8,6 +8,7 @@ export const router = new Router()
 
 router
   .get('/', WelcomeController.get)
+  .post('/signup', AuthController.signup)
   .post('/login', AuthController.login)
   .get('/logout', AuthController.logout)
   .get('/:user', AuthController.verify, UserController.get)

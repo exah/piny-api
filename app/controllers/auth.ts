@@ -2,14 +2,6 @@ import { Context, RouterContext, Body } from 'https://deno.land/x/oak/mod.ts'
 import { hash, jwt, validate } from '../utils.ts'
 import { User } from '../entities/user.ts'
 
-interface AuthBody {
-  type: 'json'
-  value: {
-    user: string
-    pass: string
-  }
-}
-
 function getToken(input: string | null, prefix = 'Bearer ') {
   if (input?.startsWith(prefix)) {
     return input.slice(prefix.length)
@@ -18,8 +10,41 @@ function getToken(input: string | null, prefix = 'Bearer ') {
   return null
 }
 
-function assertAuthBody(input: Body): asserts input is AuthBody {
-  if (input.type === 'json' && input.value?.user && input.value?.pass) return
+interface LoginBody {
+  type: 'json'
+  value: {
+    user: string
+    pass: string
+  }
+}
+
+function assertLoginBody(input: Body): asserts input is LoginBody {
+  if (input.type === 'json' && input.value.user && input.value.pass) {
+    return
+  }
+
+  throw new Error('request `body` should contain `user` and `pass`')
+}
+
+interface SignUpBody {
+  type: 'json'
+  value: {
+    user: string
+    pass: string
+    email: string
+  }
+}
+
+function assertSignUpBody(input: Body): asserts input is SignUpBody {
+  if (
+    input.type === 'json' &&
+    input.value.user &&
+    input.value.pass &&
+    input.value.email
+  ) {
+    return
+  }
+
   throw new Error('request `body` should contain `user` and `pass`')
 }
 
@@ -48,7 +73,7 @@ export const AuthController = {
         },
       })
 
-      assertAuthBody(body)
+      assertLoginBody(body)
 
       const user = await User.findOne(
         { name: body.value.user },
@@ -56,7 +81,7 @@ export const AuthController = {
       )
 
       if (user == null) {
-        response.status = 400
+        response.status = 404
         response.body = { message: '🤷‍♂️ Not found' }
         return
       }
@@ -83,7 +108,11 @@ export const AuthController = {
     const token = getToken(request.headers.get('Authorization'))
 
     try {
-      if (!token) throw new Error('Authorization header not valid')
+      if (!token) {
+        response.status = 400
+        response.body = { message: '🤔 Are you sure you authorized?' }
+        return
+      }
 
       const user = await User.findOne({
         where: `user.token LIKE '%${token}%'`,
@@ -101,6 +130,54 @@ export const AuthController = {
       })
 
       response.body = { message: '👋 Bye' }
+    } catch (error) {
+      console.error(error)
+
+      response.status = 500
+      response.body = { message: '😭 Something went wrong' }
+    }
+  },
+  async signup({ request, response }: RouterContext<never>) {
+    try {
+      const body = await request.body({
+        contentTypes: {
+          json: ['application/json'],
+        },
+      })
+
+      assertSignUpBody(body)
+
+      const nameCount = await User.count({
+        name: body.value.user,
+      })
+
+      if (nameCount > 0) {
+        response.status = 403
+        response.body = { message: '👯‍♀️ Use different `user`' }
+        return
+      }
+
+      const emailCount = await User.count({
+        email: body.value.email,
+      })
+
+      if (emailCount > 0) {
+        response.status = 403
+        response.body = { message: '💌 Use different `email`' }
+        return
+      }
+
+      const user = User.create({
+        name: body.value.user,
+        email: body.value.email,
+        pass: hash(body.value.pass),
+        token: [],
+      })
+
+      await user.save()
+
+      response.status = 200
+      response.body = { message: '👋 Welcome, please /login' }
     } catch (error) {
       console.error(error)
 
