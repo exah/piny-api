@@ -1,5 +1,4 @@
 import '../connect.ts'
-
 import { User } from '../app/entities/User.ts'
 import { encrypt } from '../app/utils.ts'
 
