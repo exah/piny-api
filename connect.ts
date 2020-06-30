@@ -2,7 +2,7 @@ import { createConnection } from 'https://denolib.com/denolib/typeorm@v0.2.23-rc
 
 await createConnection({
   type: 'sqlite',
-  database: 'piny.db',
+  database: 'db/piny.db',
   synchronize: true,
   entities: ['app/entities/**/*.ts'],
   migrations: ['app/migrations/**/*.ts'],
