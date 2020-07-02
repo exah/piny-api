@@ -1,4 +1,4 @@
-import './connect.ts'
+import './connection.ts'
 import { app } from './app/mod.ts'
 
 const hostname = Deno.env.get('HOST') || '0.0.0.0'

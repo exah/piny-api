@@ -8,17 +8,15 @@ if (typeof key !== 'string') {
   throw new Error(`Please, add 'KEY' env variable`)
 }
 
-export const hash = (input: string) =>
-  new HmacSha256(key).update(input).toString()
+export const hash = (name: string, pass: string) =>
+  new HmacSha256(key + name).update(pass).toString()
 
-export const jwt = (user: string, ttl: number = 1000 * 60 * 5) =>
+export const jwt = (iss: string, exp: number) =>
   makeJwt({
     key,
     header: { alg: 'HS256' },
-    payload: { iss: user, iat: Date.now(), exp: Date.now() + ttl },
+    payload: { iss, iat: Date.now(), exp },
   })
 
-export const validate = (jwt: string | null) =>
-  jwt == null
-    ? Promise.resolve(false)
-    : validateJwt(jwt, key).then((result) => result.isValid)
+export const validate = (jwt: string) =>
+  validateJwt(jwt, key).then((result) => result.isValid)

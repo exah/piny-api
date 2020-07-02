@@ -8,6 +8,7 @@ import {
 
 import { AuthType } from '../constants.ts'
 import { Bookmark } from './bookmark.ts'
+import { Session } from './session.ts'
 
 @Entity()
 export class User extends BaseEntity {
@@ -26,8 +27,8 @@ export class User extends BaseEntity {
   @Column({ type: 'text' })
   pass: string
 
-  @Column({ type: 'simple-array' })
-  token: string[]
+  @OneToMany(() => Session, (session) => session.user)
+  sessions: Session[]
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[]

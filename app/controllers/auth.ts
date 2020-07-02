@@ -1,5 +1,7 @@
 import { Context, RouterContext, Body } from 'https://deno.land/x/oak/mod.ts'
+import { MONTH } from '../constants.ts'
 import { hash, jwt, validate } from '../utils.ts'
+import { Session } from '../entities/session.ts'
 import { User } from '../entities/user.ts'
 
 function getToken(input: string | null, prefix = 'Bearer ') {
@@ -52,12 +54,10 @@ export const AuthController = {
   async verify({ request, response }: Context, next: () => Promise<void>) {
     const token = getToken(request.headers.get('Authorization'))
 
-    if (await validate(token)) {
-      const count = await User.count({
-        where: `user.token LIKE '%${token}%'`,
-      })
+    if (typeof token === 'string' && (await validate(token))) {
+      const session = await Session.findOne({ token })
 
-      if (count === 1) {
+      if (session && session.expiration > Date.now()) {
         return next()
       }
     }
@@ -77,7 +77,7 @@ export const AuthController = {
 
       const user = await User.findOne(
         { name: body.value.user },
-        { select: ['id', 'pass', 'token'] }
+        { select: ['id', 'pass'], relations: ['sessions'] }
       )
 
       if (user == null) {
@@ -86,14 +86,16 @@ export const AuthController = {
         return
       }
 
-      if (user.pass !== hash(body.value.pass)) {
+      if (user.pass !== hash(body.value.user, body.value.pass)) {
         response.status = 403
         response.body = { message: '✋ Denied' }
         return
       }
 
-      const token = jwt(user.name)
-      await User.update(user.id, { token: [...user.token, token] })
+      const expiration = Date.now() + MONTH
+      const token = jwt(user.name, expiration)
+
+      await Session.create({ token, expiration, user }).save()
 
       response.status = 200
       response.body = { token, message: '👋 Hello' }
@@ -114,20 +116,15 @@ export const AuthController = {
         return
       }
 
-      const user = await User.findOne({
-        where: `user.token LIKE '%${token}%'`,
-        select: ['id', 'token'],
-      })
+      const session = await Session.findOne({ token })
 
-      if (!user) {
+      if (!session) {
         response.status = 404
         response.body = { message: '🤷‍♂️ Not found' }
         return
       }
 
-      await User.update(user.id, {
-        token: user.token.filter((item) => item !== token),
-      })
+      await Session.remove(session)
 
       response.body = { message: '👋 Bye' }
     } catch (error) {
@@ -170,8 +167,7 @@ export const AuthController = {
       const user = User.create({
         name: body.value.user,
         email: body.value.email,
-        pass: hash(body.value.pass),
-        token: [],
+        pass: hash(body.value.user, body.value.pass),
       })
 
       await user.save()
