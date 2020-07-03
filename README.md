@@ -47,9 +47,9 @@ POST /signup
 
 #### Body
 
-- `user: string` — user's name (unique)
-- `pass: string` — user's password (no restrictions)
-- `email: string` — user's email (unique)
+- `user: string` — user name (unique)
+- `pass: string` — user password (no restrictions)
+- `email: string` — user email (unique)
 
 #### Request
 
@@ -79,8 +79,8 @@ POST /login
 
 #### Body
 
-- `user: string` — user's name
-- `pass: string` — user's password
+- `user: string` — user name
+- `pass: string` — user password
 
 #### Request
 
@@ -132,7 +132,7 @@ GET /:user
 
 #### Params
 
-- `user: string` — user's name
+- `user: string` — user name
 
 #### Request
 
@@ -161,7 +161,7 @@ GET /:user/bookmarks
 
 #### Params
 
-- `user: string` — user's name
+- `user: string` — user name
 
 #### Request
 
@@ -208,7 +208,7 @@ GET /:user/tags
 
 #### Params
 
-- `user: string` — user's name
+- `user: string` — user name
 
 #### Request
 
@@ -242,7 +242,7 @@ POST /:user/bookmarks
 
 #### Params
 
-- `user: string` — user's name
+- `user: string` — user name
 
 #### Body
 
@@ -281,12 +281,12 @@ http --json POST 'https://dev.piny.link/:user/bookmarks' \
 ### 🔐 Edit bookmark
 
 ```sh
-POST /:user/bookmarks/:id
+PATCH /:user/bookmarks/:id
 ```
 
 #### Params
 
-- `user: string` — user's name
+- `user: string` — user name
 - `id: string` — bookmark id
 
 #### Body
@@ -300,7 +300,7 @@ POST /:user/bookmarks/:id
 #### Request
 
 ```sh
-http --json POST 'https://dev.piny.link/:user/bookmarks/:id' \
+http --json PATCH 'https://dev.piny.link/:user/bookmarks/:id' \
   'Authorization':'Bearer XXX' \
   'Content-Type':'application/json' \
   title="KayWay" \
