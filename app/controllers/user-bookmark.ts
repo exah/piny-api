@@ -1,9 +1,13 @@
 import { RouterContext, Body } from 'https://deno.land/x/oak/mod.ts'
-import { PrivacyType } from '../constants.ts'
+import { JSON_BODY, PrivacyType } from '../constants.ts'
 import { Bookmark } from '../entities/bookmark.ts'
 import { Link } from '../entities/link.ts'
+import { Session } from '../entities/session.ts'
 import { Tag } from '../entities/tag.ts'
 import { User } from '../entities/user.ts'
+
+type Params = { user: string }
+type State = { session: Session }
 
 interface BookmarkBody {
   type: 'json'
@@ -21,8 +25,27 @@ function assertBookmarkBody(input: Body): asserts input is BookmarkBody {
   throw new Error('request `body` should least contain an `url`')
 }
 
+async function getLink(input: string): Promise<Link> {
+  const url = new URL(input).toString()
+  const link = await Link.findOne({ url })
+
+  return link ?? Link.create({ url }).save()
+}
+
+async function getTags(input: string[] = []) {
+  const tags: Tag[] = []
+
+  for (const tagName of input) {
+    const tag = await Tag.findOne({ name: tagName })
+
+    tags.push(tag ?? (await Tag.create({ name: tagName }).save()))
+  }
+
+  return tags
+}
+
 export const UserBookmarkController = {
-  async get({ response, params }: RouterContext<{ user: string }>) {
+  async get({ response, params }: RouterContext<Params>) {
     try {
       const user = await User.findOne(
         { name: params.user },
@@ -45,59 +68,45 @@ export const UserBookmarkController = {
       response.body = { message: '😭 Something went wrong' }
     }
   },
-  async add({ request, response, params }: RouterContext<{ user: string }>) {
+  async add({
+    request,
+    response,
+    params,
+    state,
+  }: RouterContext<Params, State>) {
     try {
-      const body = await request.body({
-        contentTypes: { json: ['application/json'] },
-      })
-
-      assertBookmarkBody(body)
-
-      const url = new URL(body.value.url).toString()
-      const linkCount = await Link.count({ url })
-
-      if (linkCount === 0) {
-        const link = Link.create({ url })
-        await link.save()
-      }
-
-      const tagNames = body.value.tags ?? []
-      const tags: Tag[] = []
-
-      for (const tagName of tagNames) {
-        const tag = await Tag.findOne({ name: tagName })
-
-        if (tag) {
-          tags.push(tag)
-        } else {
-          tags.push(await Tag.create({ name: tagName }).save())
-        }
-      }
-
       const user = await User.findOne(
         { name: params.user },
         { relations: ['tags'] }
       )
 
-      const link = await Link.findOne({ url })
+      if (user?.id !== state.session.user.id) {
+        response.status = 403
+        response.body = { message: '🙅‍♂️ Forbidden' }
+        return
+      }
 
-      const bookmarkCount = await Bookmark.count({ link, user })
+      const body = await request.body(JSON_BODY)
 
-      if (user && link && bookmarkCount === 0) {
+      assertBookmarkBody(body)
+
+      const link = await getLink(body.value.url)
+      const tags = await getTags(body.value.tags)
+      const count = await Bookmark.count({ link, user })
+
+      if (count === 0) {
         const bookmark = Bookmark.create({
           title: body.value.title,
           description: body.value.description,
           privacy: body.value.privacy,
-          user: user,
-          link: link,
+          user,
+          link,
           tags,
         })
 
+        user.tags = (user.tags ?? []).concat(tags)
+
         await bookmark.save()
-
-        const userTags = user.tags ?? []
-
-        user.tags = userTags.concat(tags)
         await user.save()
 
         response.status = 201

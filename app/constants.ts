@@ -9,3 +9,9 @@ export enum AuthType {
 export enum PrivacyType {
   public = 'public',
 }
+
+export const JSON_BODY = {
+  contentTypes: {
+    json: ['application/json'],
+  },
+}

@@ -1,5 +1,5 @@
 import { Context, RouterContext, Body } from 'https://deno.land/x/oak/mod.ts'
-import { MONTH } from '../constants.ts'
+import { MONTH, JSON_BODY } from '../constants.ts'
 import { hash, jwt, validate } from '../utils.ts'
 import { Session } from '../entities/session.ts'
 import { User } from '../entities/user.ts'
@@ -51,13 +51,17 @@ function assertSignUpBody(input: Body): asserts input is SignUpBody {
 }
 
 export const AuthController = {
-  async verify({ request, response }: Context, next: () => Promise<void>) {
+  async verify(
+    { request, response, state }: Context<{ session: Session }>,
+    next: () => Promise<void>
+  ) {
     const token = getToken(request.headers.get('Authorization'))
 
     if (typeof token === 'string' && (await validate(token))) {
-      const session = await Session.findOne({ token })
+      const session = await Session.findOne({ token }, { relations: ['user'] })
 
       if (session && session.expiration > Date.now()) {
+        state.session = session
         return next()
       }
     }
@@ -67,11 +71,7 @@ export const AuthController = {
   },
   async login({ request, response }: RouterContext<never>) {
     try {
-      const body = await request.body({
-        contentTypes: {
-          json: ['application/json'],
-        },
-      })
+      const body = await request.body(JSON_BODY)
 
       assertLoginBody(body)
 
@@ -136,11 +136,7 @@ export const AuthController = {
   },
   async signup({ request, response }: RouterContext<never>) {
     try {
-      const body = await request.body({
-        contentTypes: {
-          json: ['application/json'],
-        },
-      })
+      const body = await request.body(JSON_BODY)
 
       assertSignUpBody(body)
 
