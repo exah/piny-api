@@ -3,6 +3,7 @@ import { AuthController } from './controllers/auth.ts'
 import { WelcomeController } from './controllers/welcome.ts'
 import { UserController } from './controllers/user.ts'
 import { UserBookmarkController } from './controllers/user-bookmark.ts'
+import { UserTagController } from './controllers/user-tag.ts'
 
 export const router = new Router()
 
@@ -14,3 +15,4 @@ router
   .get('/:user', AuthController.verify, UserController.get)
   .get('/:user/bookmarks', AuthController.verify, UserBookmarkController.get)
   .post('/:user/bookmarks', AuthController.verify, UserBookmarkController.add)
+  .get('/:user/tags', AuthController.verify, UserTagController.get)

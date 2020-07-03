@@ -4,11 +4,13 @@ import {
   Column,
   PrimaryGeneratedColumn,
   OneToMany,
+  ManyToMany,
 } from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
 
 import { AuthType } from '../constants.ts'
 import { Bookmark } from './bookmark.ts'
 import { Session } from './session.ts'
+import { Tag } from './tag.ts'
 
 @Entity()
 export class User extends BaseEntity {
@@ -29,6 +31,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Session, (session) => session.user)
   sessions: Session[]
+
+  @ManyToMany(() => Tag, (tag) => tag.users)
+  tags: Tag[]
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[]

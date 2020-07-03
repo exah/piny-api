@@ -1,8 +1,9 @@
 import { RouterContext, Body } from 'https://deno.land/x/oak/mod.ts'
 import { PrivacyType } from '../constants.ts'
-import { User } from '../entities/user.ts'
-import { Link } from '../entities/link.ts'
 import { Bookmark } from '../entities/bookmark.ts'
+import { Link } from '../entities/link.ts'
+import { Tag } from '../entities/tag.ts'
+import { User } from '../entities/user.ts'
 
 interface BookmarkBody {
   type: 'json'
@@ -11,6 +12,7 @@ interface BookmarkBody {
     privacy: PrivacyType
     title?: string
     description?: string
+    tags?: string[]
   }
 }
 
@@ -24,7 +26,10 @@ export const UserBookmarkController = {
     try {
       const user = await User.findOne(
         { name: params.user },
-        { select: ['id'], relations: ['bookmarks', 'bookmarks.link'] }
+        {
+          select: ['id'],
+          relations: ['bookmarks', 'bookmarks.link', 'bookmarks.tags'],
+        }
       )
 
       if (user?.bookmarks?.length) {
@@ -56,21 +61,44 @@ export const UserBookmarkController = {
         await link.save()
       }
 
-      const user = await User.findOne({ name: params.user })
+      const tagNames = body.value.tags ?? []
+      const tags: Tag[] = []
+
+      for (const tagName of tagNames) {
+        const tag = await Tag.findOne({ name: tagName })
+
+        if (tag) {
+          tags.push(tag)
+        } else {
+          tags.push(await Tag.create({ name: tagName }).save())
+        }
+      }
+
+      const user = await User.findOne(
+        { name: params.user },
+        { relations: ['tags'] }
+      )
+
       const link = await Link.findOne({ url })
 
       const bookmarkCount = await Bookmark.count({ link, user })
 
-      if (bookmarkCount === 0) {
+      if (user && link && bookmarkCount === 0) {
         const bookmark = Bookmark.create({
           title: body.value.title,
           description: body.value.description,
           privacy: body.value.privacy,
           user: user,
           link: link,
+          tags,
         })
 
         await bookmark.save()
+
+        const userTags = user.tags ?? []
+
+        user.tags = userTags.concat(tags)
+        await user.save()
 
         response.status = 201
         response.body = { message: '✨ Created' }
