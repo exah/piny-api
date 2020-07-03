@@ -98,7 +98,6 @@ http --json POST 'https://dev.piny.link/login' \
 ```sh
 {
   "token": "XXX",
-  "message": "👋 Hello"
 }
 ```
 

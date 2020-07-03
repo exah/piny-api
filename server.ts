@@ -7,6 +7,6 @@ const port = Number(Deno.env.get('PORT')) || 3000
 app.listen({ hostname, port })
 
 console.log(`
-  Welcome to 'piny-api' 👋
+  🌲 Welcome to Piny
   Server is open at http://${hostname}:${port}/
 `)
