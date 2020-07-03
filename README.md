@@ -54,7 +54,7 @@ POST /signup
 #### Request
 
 ```sh
-http --json POST 'https://dev.piny.link' \
+http --json POST 'https://dev.piny.link/signup' \
   'Content-Type':'application/json' \
   user="foo" \
   pass="1234" \
