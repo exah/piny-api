@@ -8,6 +8,8 @@ USER deno
 
 ADD . $APP_DIR
 
-RUN deno cache --unstable -c tsconfig.json server.ts
+RUN ["deno", "cache", "--unstable", "-c", "tsconfig.json", "server.ts"]
 
-CMD ["run", "--unstable", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "-c", "tsconfig.json", "server.ts"]
+ENTRYPOINT ["deno", "run", "--unstable", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "-c", "tsconfig.json"]
+
+CMD ["server.ts"]
