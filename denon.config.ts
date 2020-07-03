@@ -9,6 +9,14 @@ const config: DenonConfig = {
       unstable: true,
       tsconfig: 'tsconfig.json',
     },
+    sync: {
+      cmd: 'deno run sync.ts',
+      desc: 'Create empty database',
+      allow: ['env', 'net', 'read', 'write'],
+      unstable: true,
+      tsconfig: 'tsconfig.json',
+      watch: false,
+    },
   },
 }
 
