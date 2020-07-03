@@ -1,6 +1,6 @@
 import { Context, RouterContext, Body } from 'https://deno.land/x/oak/mod.ts'
 import { MONTH, JSON_BODY } from '../constants.ts'
-import { hash, jwt, validate } from '../utils.ts'
+import { hash, jwt, validate, assertPayload } from '../utils.ts'
 import { Session } from '../entities/session.ts'
 import { User } from '../entities/user.ts'
 
@@ -12,42 +12,15 @@ function getToken(input: string | null, prefix = 'Bearer ') {
   return null
 }
 
-interface LoginBody {
-  type: 'json'
-  value: {
-    user: string
-    pass: string
-  }
+interface LoginPayload {
+  user: string
+  pass: string
 }
 
-function assertLoginBody(input: Body): asserts input is LoginBody {
-  if (input.type === 'json' && input.value.user && input.value.pass) {
-    return
-  }
-
-  throw new Error('request `body` should contain `user` and `pass`')
-}
-
-interface SignUpBody {
-  type: 'json'
-  value: {
-    user: string
-    pass: string
-    email: string
-  }
-}
-
-function assertSignUpBody(input: Body): asserts input is SignUpBody {
-  if (
-    input.type === 'json' &&
-    input.value.user &&
-    input.value.pass &&
-    input.value.email
-  ) {
-    return
-  }
-
-  throw new Error('request `body` should contain `user` and `pass`')
+interface SignUpPayload {
+  user: string
+  pass: string
+  email: string
 }
 
 export const AuthController = {
@@ -73,7 +46,11 @@ export const AuthController = {
     try {
       const body = await request.body(JSON_BODY)
 
-      assertLoginBody(body)
+      assertPayload<LoginPayload>(
+        body,
+        (value) => Boolean(value.user && value.pass),
+        'request `body` should contain `user` and `pass`'
+      )
 
       const user = await User.findOne(
         { name: body.value.user },
@@ -98,7 +75,7 @@ export const AuthController = {
       await Session.create({ token, expiration, user }).save()
 
       response.status = 200
-      response.body = { token, message: '👋 Hello' }
+      response.body = { token }
     } catch (error) {
       console.error(error)
 
@@ -138,7 +115,11 @@ export const AuthController = {
     try {
       const body = await request.body(JSON_BODY)
 
-      assertSignUpBody(body)
+      assertPayload<SignUpPayload>(
+        body,
+        (value) => Boolean(value.user && value.pass && value.email),
+        'request `body` should contain `user`, `pass` and `email`'
+      )
 
       const nameCount = await User.count({
         name: body.value.user,

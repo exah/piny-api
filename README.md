@@ -250,7 +250,7 @@ POST /:user/bookmarks
 - `title?: string` — bookmark title (optional)
 - `description?: string` — bookmark description (optional)
 - `privacy: 'public'` — access to bookmark (only `'public'` supported at the moment)
-- `tags: string[]` — list of tags that should be assigned to the bookmark, will be added to the user tags
+- `tags?: string[]` — list of tags that should be assigned to the bookmark, will be added to the user tags (optional)
 
 #### Request
 
@@ -275,6 +275,49 @@ http --json POST 'https://dev.piny.link/:user/bookmarks' \
 ```sh
 {
   "message": "✨ Created"
+}
+```
+
+### 🔐 Edit bookmark
+
+```sh
+POST /:user/bookmarks/:id
+```
+
+#### Params
+
+- `user: string` — user's name
+- `id: string` — bookmark id
+
+#### Body
+
+- `url?: string` — bookmark url (optional)
+- `title?: string` — bookmark title (optional)
+- `description?: string` — bookmark description (optional)
+- `privacy?: 'public'` — access to bookmark (only `'public'` supported at the moment) (optional)
+- `tags?: string[]` — list of tags that should be assigned to the bookmark, will be added to the user tags (optional)
+
+#### Request
+
+```sh
+http --json POST 'https://dev.piny.link/:user/bookmarks/:id' \
+  'Authorization':'Bearer XXX' \
+  'Content-Type':'application/json' \
+  title="KayWay" \
+  description="Illustration portfolio by Ekaterina Grishina" \
+  tags:="[
+    \"illustrator\",
+    \"portfolio\"
+  ]"
+```
+
+#### Response
+
+##### 200
+
+```sh
+{
+  "message": "💾 Saved"
 }
 ```
 
