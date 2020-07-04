@@ -1,4 +1,4 @@
-import { Context, RouterContext, Body } from 'https://deno.land/x/oak/mod.ts'
+import { Context, RouterContext } from 'https://deno.land/x/oak/mod.ts'
 import { MONTH, JSON_BODY } from '../constants.ts'
 import { hash, jwt, validate, assertPayload } from '../utils.ts'
 import { Session } from '../entities/session.ts'

@@ -1,4 +1,4 @@
-import { RouterContext, Body } from 'https://deno.land/x/oak/mod.ts'
+import { RouterContext } from 'https://deno.land/x/oak/mod.ts'
 import { JSON_BODY, PrivacyType } from '../constants.ts'
 import { assertPayload } from '../utils.ts'
 import { Bookmark } from '../entities/bookmark.ts'
