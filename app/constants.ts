@@ -10,6 +10,11 @@ export enum PrivacyType {
   public = 'public',
 }
 
+export enum State {
+  active = 'active',
+  removed = 'removed',
+}
+
 export const JSON_BODY = {
   contentTypes: {
     json: ['application/json'],

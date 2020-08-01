@@ -1,5 +1,5 @@
 import { RouterContext } from 'https://deno.land/x/oak/mod.ts'
-import { JSON_BODY, PrivacyType } from '../constants.ts'
+import { JSON_BODY, PrivacyType, State } from '../constants.ts'
 import { assertPayload } from '../utils.ts'
 import { Bookmark } from '../entities/bookmark.ts'
 import { Link } from '../entities/link.ts'
@@ -17,6 +17,7 @@ interface BookmarkPayload {
   title?: string | null
   description?: string | null
   tags?: string[]
+  state?: State
 }
 
 async function getLink(input: string): Promise<Link> {
@@ -57,10 +58,11 @@ export const BookmarkController = {
       )
 
       if (user?.bookmarks?.length) {
-        response.body = user.bookmarks
+        response.body = user.bookmarks.filter(
+          (bookmark) => bookmark.state === State.active
+        )
       } else {
-        response.status = 404
-        response.body = { message: '🤷‍♂️ Not found' }
+        response.body = []
       }
     } catch (error) {
       console.error(error)
@@ -92,7 +94,11 @@ export const BookmarkController = {
       )
 
       const link = await getLink(body.value.url)
-      const count = await Bookmark.count({ link, user: state.session.user })
+      const count = await Bookmark.count({
+        link,
+        user: state.session.user,
+        state: State.active,
+      })
 
       if (count > 0) {
         response.status = 409
@@ -103,6 +109,7 @@ export const BookmarkController = {
       const bookmark = Bookmark.create({
         title: body.value.title,
         description: body.value.description,
+        state: State.active,
         privacy: body.value.privacy,
         user: state.session.user,
         link,
@@ -136,10 +143,6 @@ export const BookmarkController = {
         return
       }
 
-      const body = await request.body(JSON_BODY)
-
-      assertPayload<Partial<BookmarkPayload>>(body)
-
       const bookmark = await Bookmark.findOne({
         id: params.id,
         user: state.session.user,
@@ -150,6 +153,10 @@ export const BookmarkController = {
         response.body = { message: '🤷‍♂️ Not found' }
         return
       }
+
+      const body = await request.body(JSON_BODY)
+
+      assertPayload<Partial<BookmarkPayload>>(body)
 
       if (body.value.title !== undefined) {
         bookmark.title = body.value.title
@@ -170,6 +177,10 @@ export const BookmarkController = {
         bookmark.link = await getLink(body.value.url)
       }
 
+      if (typeof body.value.state === 'string' && body.value.state in State) {
+        bookmark.state = body.value.state
+      }
+
       if (Array.isArray(body.value.tags)) {
         bookmark.tags = await getTags(body.value.tags, state.session.user)
       }
@@ -178,6 +189,42 @@ export const BookmarkController = {
 
       response.status = 200
       response.body = { message: '💾 Saved' }
+    } catch (error) {
+      console.error(error)
+
+      response.status = 500
+      response.body = { message: '😭 Something went wrong' }
+    }
+  },
+  async remove({
+    response,
+    params,
+    state,
+  }: RouterContext<BookmarkParams, SessionState>) {
+    try {
+      if (params.user !== state.session.user.name) {
+        response.status = 403
+        response.body = { message: '🙅‍♂️ Forbidden' }
+        return
+      }
+
+      const bookmark = await Bookmark.findOne({
+        id: params.id,
+        user: state.session.user,
+      })
+
+      if (!bookmark) {
+        response.status = 404
+        response.body = { message: '🤷‍♂️ Not found' }
+        return
+      }
+
+      bookmark.state = State.removed
+
+      await bookmark.save()
+
+      response.status = 200
+      response.body = { message: '🗑 Removed' }
     } catch (error) {
       console.error(error)
 

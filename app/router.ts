@@ -16,4 +16,9 @@ router
   .get('/:user/bookmarks', AuthController.verify, BookmarkController.get)
   .post('/:user/bookmarks', AuthController.verify, BookmarkController.add)
   .patch('/:user/bookmarks/:id', AuthController.verify, BookmarkController.edit)
+  .delete(
+    '/:user/bookmarks/:id',
+    AuthController.verify,
+    BookmarkController.remove
+  )
   .get('/:user/tags', AuthController.verify, UserTagController.get)

@@ -12,8 +12,7 @@ export const UserTagController = {
       if (user?.tags?.length) {
         response.body = user.tags
       } else {
-        response.status = 404
-        response.body = { message: '🤷‍♂️ Not found' }
+        response.body = []
       }
     } catch (error) {
       console.error(error)

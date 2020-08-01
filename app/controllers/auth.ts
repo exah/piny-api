@@ -4,14 +4,6 @@ import { hash, jwt, validate, assertPayload } from '../utils.ts'
 import { Session } from '../entities/session.ts'
 import { User } from '../entities/user.ts'
 
-function getToken(input: string | null, prefix = 'Bearer ') {
-  if (input?.startsWith(prefix)) {
-    return input.slice(prefix.length)
-  }
-
-  return null
-}
-
 interface LoginPayload {
   user: string
   pass: string
@@ -23,20 +15,50 @@ interface SignUpPayload {
   email: string
 }
 
+function getToken(input: string | null, prefix = 'Bearer ') {
+  if (input?.startsWith(prefix)) {
+    return input.slice(prefix.length)
+  }
+
+  return null
+}
+
+async function getSession(input: string | null) {
+  const token = getToken(input)
+
+  if (typeof token === 'string' && (await validate(token))) {
+    const session = await Session.findOne({ token }, { relations: ['user'] })
+
+    if (session && session.expiration > Date.now()) {
+      return session
+    }
+  }
+
+  return null
+}
+
 export const AuthController = {
+  async session(
+    { request, state }: Context<{ session: Session }>,
+    next: () => Promise<void>
+  ) {
+    const session = await getSession(request.headers.get('Authorization'))
+
+    if (session !== null) {
+      state.session = session
+    }
+
+    return next()
+  },
   async verify(
     { request, response, state }: Context<{ session: Session }>,
     next: () => Promise<void>
   ) {
-    const token = getToken(request.headers.get('Authorization'))
+    const session = await getSession(request.headers.get('Authorization'))
 
-    if (typeof token === 'string' && (await validate(token))) {
-      const session = await Session.findOne({ token }, { relations: ['user'] })
-
-      if (session && session.expiration > Date.now()) {
-        state.session = session
-        return next()
-      }
+    if (session !== null) {
+      state.session = session
+      return next()
     }
 
     response.status = 401
