@@ -47,23 +47,35 @@ async function getTags(input: string[] = [], user: User) {
 }
 
 export const BookmarkController = {
-  async get({ response, params }: RouterContext<UserParams>) {
+  async get({
+    response,
+    params,
+    state,
+  }: RouterContext<UserParams, SessionState>) {
     try {
-      const user = await User.findOne(
-        { name: params.user },
-        {
-          select: ['id'],
-          relations: ['bookmarks', 'bookmarks.link', 'bookmarks.tags'],
-        }
-      )
+      const user = await User.findOne({ name: params.user }, { select: ['id'] })
 
-      if (user?.bookmarks?.length) {
-        response.body = user.bookmarks.filter(
-          (bookmark) => bookmark.state === State.active
-        )
-      } else {
-        response.body = []
+      if (user === undefined) {
+        throw new Error('User not found')
       }
+
+      const where = {
+        userId: user.id,
+        state: State.active,
+        privacy: PrivacyType.public,
+      }
+
+      if (state.session.user.id === user.id) {
+        delete where.privacy
+      }
+
+      const bookmarks = await Bookmark.find({
+        relations: ['link', 'tags'],
+        where,
+      })
+
+      response.status = 200
+      response.body = bookmarks
     } catch (error) {
       console.error(error)
 

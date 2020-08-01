@@ -8,6 +8,7 @@ export enum AuthType {
 
 export enum PrivacyType {
   public = 'public',
+  private = 'private',
 }
 
 export enum State {
