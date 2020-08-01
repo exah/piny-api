@@ -1,10 +1,12 @@
 import {
-  BaseEntity,
   Entity,
-  Column,
-  PrimaryGeneratedColumn,
+  BaseEntity,
   ManyToOne,
   ManyToMany,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
 
 import { PrivacyType, State } from '../constants.ts'
@@ -37,4 +39,10 @@ export class Bookmark extends BaseEntity {
 
   @ManyToOne(() => Link, (link) => link.bookmarks)
   link: Link
+
+  @CreateDateColumn()
+  createdAt: Date
+
+  @UpdateDateColumn()
+  updatedAt: Date
 }

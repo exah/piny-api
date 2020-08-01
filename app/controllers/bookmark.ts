@@ -21,10 +21,12 @@ interface BookmarkPayload {
 }
 
 async function getLink(input: string): Promise<Link> {
-  const url = new URL(input).toString()
-  const link = await Link.findOne({ url })
+  const url = new URL(input)
 
-  return link ?? Link.create({ url }).save()
+  const foundLink = await Link.findOne({ url: url.toString() })
+  const link = foundLink ?? Link.create({ url: url.toString() })
+
+  return link.save()
 }
 
 async function getTags(input: string[] = [], user: User) {
@@ -70,8 +72,9 @@ export const BookmarkController = {
       }
 
       const bookmarks = await Bookmark.find({
-        relations: ['link', 'tags'],
         where,
+        relations: ['link', 'tags'],
+        order: { createdAt: 'DESC' },
       })
 
       response.status = 200

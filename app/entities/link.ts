@@ -1,11 +1,14 @@
 import {
-  BaseEntity,
   Entity,
+  BaseEntity,
+  OneToMany,
   Column,
   PrimaryGeneratedColumn,
-  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
 
+import { User } from './user.ts'
 import { Bookmark } from './bookmark.ts'
 
 @Entity()
@@ -18,4 +21,10 @@ export class Link extends BaseEntity {
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.link)
   bookmarks: Bookmark[]
+
+  @CreateDateColumn()
+  createdAt: Date
+
+  @UpdateDateColumn()
+  updatedAt: Date
 }

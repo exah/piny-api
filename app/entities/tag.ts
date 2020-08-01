@@ -1,10 +1,12 @@
 import {
-  BaseEntity,
   Entity,
+  BaseEntity,
+  JoinTable,
+  ManyToMany,
   Column,
   PrimaryGeneratedColumn,
-  ManyToMany,
-  JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
 
 import { User } from './user.ts'
@@ -25,4 +27,10 @@ export class Tag extends BaseEntity {
   @ManyToMany(() => Bookmark, (bookmark) => bookmark.tags)
   @JoinTable()
   bookmarks: Bookmark[]
+
+  @CreateDateColumn()
+  createdAt: Date
+
+  @UpdateDateColumn()
+  updatedAt: Date
 }
