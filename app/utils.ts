@@ -1,7 +1,7 @@
-import { Body } from 'https://deno.land/x/oak/mod.ts'
 import { HmacSha256 } from 'https://deno.land/std@v0.56.0/hash/sha256.ts'
-import { makeJwt } from 'https://deno.land/x/djwt/create.ts'
-import { validateJwt } from 'https://deno.land/x/djwt/validate.ts'
+import { Body } from 'https://deno.land/x/oak@v5.3.1/mod.ts'
+import { makeJwt } from 'https://deno.land/x/djwt@v1.0/create.ts'
+import { validateJwt } from 'https://deno.land/x/djwt@v1.0/validate.ts'
 
 const key = Deno.env.get('KEY')
 
@@ -20,7 +20,7 @@ export const jwt = (iss: string, exp: number) =>
   })
 
 export const validate = (jwt: string) =>
-  validateJwt(jwt, key).then((result) => result.isValid)
+  validateJwt({ jwt, key, algorithm: 'HS256' }).then((result) => result.isValid)
 
 interface BodyJson<V> {
   type: 'json'
