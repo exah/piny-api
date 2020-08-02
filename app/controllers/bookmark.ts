@@ -49,7 +49,7 @@ async function getTags(input: string[] = [], user: User) {
 }
 
 export const BookmarkController = {
-  async get({
+  async all({
     response,
     params,
     state,
@@ -92,6 +92,26 @@ export const BookmarkController = {
 
       response.status = 200
       response.body = bookmarks
+    } catch (error) {
+      console.error(error)
+
+      response.status = 500
+      response.body = { message: '😭 Something went wrong' }
+    }
+  },
+  async get({ response, params }: RouterContext<BookmarkParams, SessionState>) {
+    try {
+      const bookmark = await Bookmark.findOne(
+        { id: params.id },
+        { relations: ['link', 'tags'] }
+      )
+
+      if (bookmark === undefined) {
+        throw new Error('Not found')
+      }
+
+      response.status = 200
+      response.body = bookmark
     } catch (error) {
       console.error(error)
 
