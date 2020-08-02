@@ -153,15 +153,15 @@ http GET 'https://dev.piny.link/:user' \
 }
 ```
 
-### 🔐 Get user bookmarks
+### 🌍/🔐 Get user bookmarks
 
 ```sh
-GET /:user/bookmarks
+GET /:user?/bookmarks
 ```
 
 #### Params
 
-- `user: string` — user name
+- `user?: string` — user name (if omitted, get bookmarks of current user)
 
 #### Request
 
@@ -180,6 +180,7 @@ http GET 'https://dev.piny.link/:user/bookmarks' \
     "id": "ff7b3bb2-5fad-4924-81a6-5bedc3ded3dd",
     "title": "KayWay",
     "description": "Illustration portfolio by Ekaterina Grishina",
+    "state": "active",
     "privacy": "public",
     "link": {
       "id": "a6f7584f-c1a5-42e8-bd98-e1bb003fc219",
@@ -194,7 +195,9 @@ http GET 'https://dev.piny.link/:user/bookmarks' \
         "id": "823e8339-2296-4972-aeed-951df1826228",
         "name": "portfolio"
       }
-    ]
+    ],
+    "createdAt": "2020-08-02T00:34:45.000Z",
+    "updatedAt": "2020-08-02T00:34:45.000Z"
   },
   ...
 ]
@@ -237,12 +240,8 @@ http GET 'https://dev.piny.link/:user/tags' \
 ### 🔐 Create bookmark
 
 ```sh
-POST /:user/bookmarks
+POST /bookmarks
 ```
-
-#### Params
-
-- `user: string` — user name
 
 #### Body
 
@@ -255,7 +254,7 @@ POST /:user/bookmarks
 #### Request
 
 ```sh
-http --json POST 'https://dev.piny.link/:user/bookmarks' \
+http --json POST 'https://dev.piny.link/bookmarks' \
   'Authorization':'Bearer XXX' \
   'Content-Type':'application/json' \
   title="KayWay" \
@@ -281,12 +280,11 @@ http --json POST 'https://dev.piny.link/:user/bookmarks' \
 ### 🔐 Edit bookmark
 
 ```sh
-PATCH /:user/bookmarks/:id
+PATCH /bookmarks/:id
 ```
 
 #### Params
 
-- `user: string` — user name
 - `id: string` — bookmark id
 
 #### Body
@@ -300,7 +298,7 @@ PATCH /:user/bookmarks/:id
 #### Request
 
 ```sh
-http --json PATCH 'https://dev.piny.link/:user/bookmarks/:id' \
+http --json PATCH 'https://dev.piny.link/bookmarks/:id' \
   'Authorization':'Bearer XXX' \
   'Content-Type':'application/json' \
   title="KayWay" \
@@ -318,6 +316,31 @@ http --json PATCH 'https://dev.piny.link/:user/bookmarks/:id' \
 ```sh
 {
   "message": "💾 Saved"
+}
+```
+
+### 🔐 Delete bookmark
+
+```sh
+DELETE /bookmarks/:id
+```
+
+#### Params
+
+- `id: string` — bookmark id
+
+#### Request
+
+```sh
+http DELETE 'https://dev.piny.link/bookmarks/:id' \
+  'Authorization':'Bearer XXX'
+```
+
+##### 200
+
+```sh
+{
+  "message": "🗑 Removed"
 }
 ```
 
