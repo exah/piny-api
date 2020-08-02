@@ -6,12 +6,12 @@ export enum AuthType {
   pass = 'pass',
 }
 
-export enum PrivacyType {
+export enum BookmarkPrivacy {
   public = 'public',
   private = 'private',
 }
 
-export enum State {
+export enum BookmarkState {
   active = 'active',
   removed = 'removed',
 }

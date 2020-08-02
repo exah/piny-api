@@ -1,5 +1,5 @@
 import { RouterContext } from 'https://deno.land/x/oak@v5.3.1/mod.ts'
-import { JSON_BODY, PrivacyType, State } from '../constants.ts'
+import { JSON_BODY, BookmarkPrivacy, BookmarkState } from '../constants.ts'
 import { assertPayload } from '../utils.ts'
 import { Bookmark } from '../entities/bookmark.ts'
 import { Link } from '../entities/link.ts'
@@ -8,16 +8,16 @@ import { Tag } from '../entities/tag.ts'
 import { User } from '../entities/user.ts'
 
 type UserParams = { user: string }
-type BookmarkParams = UserParams & { id: string }
+type BookmarkParams = { id: string }
 type SessionState = { session: Session }
 
 interface BookmarkPayload {
   url: string
-  privacy: PrivacyType
+  privacy: BookmarkPrivacy
   title?: string | null
   description?: string | null
   tags?: string[]
-  state?: State
+  state?: BookmarkState
 }
 
 async function getLink(input: string): Promise<Link> {
@@ -53,21 +53,34 @@ export const BookmarkController = {
     response,
     params,
     state,
-  }: RouterContext<UserParams, SessionState>) {
+  }: RouterContext<UserParams, Partial<SessionState>>) {
     try {
-      const user = await User.findOne({ name: params.user }, { select: ['id'] })
+      let user: User
 
-      if (user === undefined) {
-        throw new Error('User not found')
+      if (params.user) {
+        const foundUser = await User.findOne(
+          { name: params.user },
+          { select: ['id'] }
+        )
+
+        if (foundUser === undefined) {
+          throw new Error('User not found')
+        }
+
+        user = foundUser
+      } else if (state.session) {
+        user = state.session.user
+      } else {
+        throw new Error('Please login')
       }
 
       const where = {
         userId: user.id,
-        state: State.active,
-        privacy: PrivacyType.public,
+        state: BookmarkState.active,
+        privacy: BookmarkPrivacy.public,
       }
 
-      if (state.session.user.id === user.id) {
+      if (state.session?.user.id === user.id) {
         delete where.privacy
       }
 
@@ -86,25 +99,14 @@ export const BookmarkController = {
       response.body = { message: '😭 Something went wrong' }
     }
   },
-  async add({
-    request,
-    response,
-    params,
-    state,
-  }: RouterContext<UserParams, SessionState>) {
+  async add({ request, response, state }: RouterContext<never, SessionState>) {
     try {
-      if (params.user !== state.session.user.name) {
-        response.status = 403
-        response.body = { message: '🙅‍♂️ Forbidden' }
-        return
-      }
-
       const body = await request.body(JSON_BODY)
 
       assertPayload<BookmarkPayload>(
         body,
         (value) =>
-          typeof value.url === 'string' && value.privacy in PrivacyType,
+          typeof value.url === 'string' && value.privacy in BookmarkPrivacy,
         'request `body` should contain `url` and valid `privacy` fields'
       )
 
@@ -112,7 +114,7 @@ export const BookmarkController = {
       const count = await Bookmark.count({
         link,
         user: state.session.user,
-        state: State.active,
+        state: BookmarkState.active,
       })
 
       if (count > 0) {
@@ -124,7 +126,7 @@ export const BookmarkController = {
       const bookmark = Bookmark.create({
         title: body.value.title,
         description: body.value.description,
-        state: State.active,
+        state: BookmarkState.active,
         privacy: body.value.privacy,
         user: state.session.user,
         link,
@@ -152,12 +154,6 @@ export const BookmarkController = {
     state,
   }: RouterContext<BookmarkParams, SessionState>) {
     try {
-      if (params.user !== state.session.user.name) {
-        response.status = 403
-        response.body = { message: '🙅‍♂️ Forbidden' }
-        return
-      }
-
       const bookmark = await Bookmark.findOne({
         id: params.id,
         user: state.session.user,
@@ -183,7 +179,7 @@ export const BookmarkController = {
 
       if (
         typeof body.value.privacy === 'string' &&
-        body.value.privacy in PrivacyType
+        body.value.privacy in BookmarkPrivacy
       ) {
         bookmark.privacy = body.value.privacy
       }
@@ -192,7 +188,10 @@ export const BookmarkController = {
         bookmark.link = await getLink(body.value.url)
       }
 
-      if (typeof body.value.state === 'string' && body.value.state in State) {
+      if (
+        typeof body.value.state === 'string' &&
+        body.value.state in BookmarkState
+      ) {
         bookmark.state = body.value.state
       }
 
@@ -217,12 +216,6 @@ export const BookmarkController = {
     state,
   }: RouterContext<BookmarkParams, SessionState>) {
     try {
-      if (params.user !== state.session.user.name) {
-        response.status = 403
-        response.body = { message: '🙅‍♂️ Forbidden' }
-        return
-      }
-
       const bookmark = await Bookmark.findOne({
         id: params.id,
         user: state.session.user,
@@ -234,7 +227,7 @@ export const BookmarkController = {
         return
       }
 
-      bookmark.state = State.removed
+      bookmark.state = BookmarkState.removed
 
       await bookmark.save()
 

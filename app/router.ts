@@ -12,13 +12,10 @@ router
   .post('/signup', AuthController.signup)
   .post('/login', AuthController.login)
   .get('/logout', AuthController.logout)
+  .get('/bookmarks', AuthController.verify, BookmarkController.get)
+  .post('/bookmarks', AuthController.verify, BookmarkController.add)
+  .patch('/bookmarks/:id', AuthController.verify, BookmarkController.edit)
+  .delete('/bookmarks/:id', AuthController.verify, BookmarkController.remove)
   .get('/:user', AuthController.verify, UserController.get)
-  .get('/:user/bookmarks', AuthController.verify, BookmarkController.get)
-  .post('/:user/bookmarks', AuthController.verify, BookmarkController.add)
-  .patch('/:user/bookmarks/:id', AuthController.verify, BookmarkController.edit)
-  .delete(
-    '/:user/bookmarks/:id',
-    AuthController.verify,
-    BookmarkController.remove
-  )
+  .get('/:user/bookmarks', AuthController.session, BookmarkController.get)
   .get('/:user/tags', AuthController.verify, UserTagController.get)
