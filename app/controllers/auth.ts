@@ -46,6 +46,8 @@ export const AuthController = {
 
     if (session !== null) {
       state.session = session
+    } else {
+      delete state.session
     }
 
     return next()
@@ -59,6 +61,8 @@ export const AuthController = {
     if (session !== null) {
       state.session = session
       return next()
+    } else {
+      delete state.session
     }
 
     response.status = 401
