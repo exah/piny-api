@@ -75,7 +75,7 @@ export const BookmarkController = {
       }
 
       const where = {
-        userId: user.id,
+        user: user,
         state: BookmarkState.active,
         privacy: BookmarkPrivacy.public,
       }
