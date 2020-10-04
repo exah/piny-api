@@ -6,9 +6,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
+} from 'typeorm'
 
-import { User } from './user.ts'
+import { User } from './user'
 
 @Entity()
 export class Session extends BaseEntity {

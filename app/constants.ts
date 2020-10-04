@@ -6,18 +6,12 @@ export enum AuthType {
   pass = 'pass',
 }
 
-export enum BookmarkPrivacy {
+export enum Privacy {
   public = 'public',
   private = 'private',
 }
 
-export enum BookmarkState {
+export enum State {
   active = 'active',
   removed = 'removed',
-}
-
-export const JSON_BODY = {
-  contentTypes: {
-    json: ['application/json'],
-  },
 }

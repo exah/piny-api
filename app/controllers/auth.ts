@@ -1,18 +1,33 @@
-import { Context, RouterContext } from 'https://deno.land/x/oak@v5.3.1/mod.ts'
-import { MONTH, JSON_BODY } from '../constants.ts'
-import { hash, jwt, validate, assertPayload } from '../utils.ts'
-import { Session } from '../entities/session.ts'
-import { User } from '../entities/user.ts'
+import parse from 'co-body'
+
+import { MONTH } from '../constants'
+import { hash, createToken, validateToken } from '../utils'
+import { RouterContext } from '../types'
+import { Session } from '../entities/session'
+import { User } from '../entities/user'
 
 interface LoginPayload {
   user: string
   pass: string
 }
 
-interface SignUpPayload {
-  user: string
-  pass: string
+interface SignupPayload extends LoginPayload {
   email: string
+}
+
+function assertLoginPayload(input: unknown): asserts input is LoginPayload {
+  if (input && typeof input === 'object' && 'user' in input && 'pass' in input)
+    return
+
+  throw new Error('input should container `user` and `pass`')
+}
+
+function assertSignupPayload(input: unknown): asserts input is SignupPayload {
+  assertLoginPayload(input)
+
+  if ('email' in input) return
+
+  throw new Error('input should container `email`')
 }
 
 function getToken(input: string | null, prefix = 'Bearer ') {
@@ -26,7 +41,7 @@ function getToken(input: string | null, prefix = 'Bearer ') {
 async function getSession(input: string | null) {
   const token = getToken(input)
 
-  if (typeof token === 'string' && (await validate(token))) {
+  if (typeof token === 'string' && (await validateToken(token))) {
     const session = await Session.findOne({ token }, { relations: ['user'] })
 
     if (session && session.expiration > Date.now()) {
@@ -39,10 +54,10 @@ async function getSession(input: string | null) {
 
 export const AuthController = {
   async session(
-    { request, state }: Context<{ session: Session }>,
+    { request, state }: RouterContext<never, { session?: Session }>,
     next: () => Promise<void>
   ) {
-    const session = await getSession(request.headers.get('Authorization'))
+    const session = await getSession(request.headers.authorization)
 
     if (session !== null) {
       state.session = session
@@ -53,10 +68,10 @@ export const AuthController = {
     return next()
   },
   async verify(
-    { request, response, state }: Context<{ session: Session }>,
+    { request, response, state }: RouterContext<never, { session?: Session }>,
     next: () => Promise<void>
   ) {
-    const session = await getSession(request.headers.get('Authorization'))
+    const session = await getSession(request.headers.authorization)
 
     if (session !== null) {
       state.session = session
@@ -68,18 +83,14 @@ export const AuthController = {
     response.status = 401
     response.body = { message: '🙅‍♂️ Not authorized' }
   },
-  async login({ request, response }: RouterContext<never>) {
+  async login({ request, response }: RouterContext) {
     try {
-      const body = await request.body(JSON_BODY)
+      const body = await parse.json(request)
 
-      assertPayload<LoginPayload>(
-        body,
-        (value) => Boolean(value.user && value.pass),
-        'request `body` should contain `user` and `pass`'
-      )
+      assertLoginPayload(body)
 
       const user = await User.findOne(
-        { name: body.value.user },
+        { name: body.user },
         { select: ['id', 'pass'], relations: ['sessions'] }
       )
 
@@ -89,14 +100,14 @@ export const AuthController = {
         return
       }
 
-      if (user.pass !== hash(body.value.user, body.value.pass)) {
+      if (user.pass !== hash(body.user, body.pass)) {
         response.status = 403
         response.body = { message: '✋ Denied' }
         return
       }
 
       const expiration = Date.now() + MONTH
-      const token = await jwt(user.name, expiration)
+      const token = await createToken(user.name, expiration)
 
       await Session.create({ token, expiration, user }).save()
 
@@ -109,8 +120,8 @@ export const AuthController = {
       response.body = { message: '😭 Something went wrong' }
     }
   },
-  async logout({ request, response }: RouterContext<never>) {
-    const token = getToken(request.headers.get('Authorization'))
+  async logout({ request, response }: RouterContext) {
+    const token = getToken(request.headers.authorization)
 
     try {
       if (!token) {
@@ -137,18 +148,14 @@ export const AuthController = {
       response.body = { message: '😭 Something went wrong' }
     }
   },
-  async signup({ request, response }: RouterContext<never>) {
+  async signup({ request, response }: RouterContext) {
     try {
-      const body = await request.body(JSON_BODY)
+      const body = await parse.json(request)
 
-      assertPayload<SignUpPayload>(
-        body,
-        (value) => Boolean(value.user && value.pass && value.email),
-        'request `body` should contain `user`, `pass` and `email`'
-      )
+      assertSignupPayload(body)
 
       const nameCount = await User.count({
-        name: body.value.user,
+        name: body.user,
       })
 
       if (nameCount > 0) {
@@ -158,7 +165,7 @@ export const AuthController = {
       }
 
       const emailCount = await User.count({
-        email: body.value.email,
+        email: body.email,
       })
 
       if (emailCount > 0) {
@@ -168,9 +175,9 @@ export const AuthController = {
       }
 
       const user = User.create({
-        name: body.value.user,
-        email: body.value.email,
-        pass: hash(body.value.user, body.value.pass),
+        name: body.user,
+        email: body.email,
+        pass: hash(body.user, body.pass),
       })
 
       await user.save()
