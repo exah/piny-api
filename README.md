@@ -33,7 +33,6 @@ KEY="secret-key" npm run dev
 Production:
 
 ```sh
-npm run build
 KEY="secret-key" npm start
 ```
 
