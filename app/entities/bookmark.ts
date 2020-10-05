@@ -7,12 +7,12 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
+} from 'typeorm'
 
-import { BookmarkPrivacy, BookmarkState } from '../constants.ts'
-import { User } from './user.ts'
-import { Link } from './link.ts'
-import { Tag } from './tag.ts'
+import { Privacy, State } from '../constants'
+import { User } from './user'
+import { Link } from './link'
+import { Tag } from './tag'
 
 @Entity()
 export class Bookmark extends BaseEntity {
@@ -25,11 +25,11 @@ export class Bookmark extends BaseEntity {
   @Column({ type: 'text', nullable: true, default: null })
   description: string | null
 
-  @Column({ type: 'simple-enum', enum: BookmarkState })
-  state: BookmarkState
+  @Column({ type: 'simple-enum', enum: State })
+  state: State
 
-  @Column({ type: 'simple-enum', enum: BookmarkPrivacy })
-  privacy: BookmarkPrivacy
+  @Column({ type: 'simple-enum', enum: Privacy })
+  privacy: Privacy
 
   @ManyToOne(() => User, (user) => user.bookmarks)
   user: User

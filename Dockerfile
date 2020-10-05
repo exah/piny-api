@@ -1,15 +1,12 @@
-FROM hayd/alpine-deno:1.1.1
+FROM node:14-alpine
+LABEL name="piny-api"
 
-ENV APP_DIR /app/
+WORKDIR /app
 
-WORKDIR $APP_DIR
+COPY package*.json .
+RUN npm ci --only=production
 
-USER deno
+COPY . .
+RUN npm run build
 
-ADD . $APP_DIR
-
-RUN ["deno", "cache", "--unstable", "-c", "tsconfig.json", "server.ts"]
-
-ENTRYPOINT ["deno", "run", "--unstable", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "-c", "tsconfig.json"]
-
-CMD ["server.ts"]
+CMD npm start

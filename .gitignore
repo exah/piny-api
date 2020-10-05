@@ -117,3 +117,6 @@ dist
 
 # sqlite
 *.db
+
+# VSCode settings
+*.vscode

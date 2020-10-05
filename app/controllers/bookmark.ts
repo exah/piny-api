@@ -1,11 +1,12 @@
-import { RouterContext } from 'https://deno.land/x/oak@v5.3.1/mod.ts'
-import { JSON_BODY, BookmarkPrivacy, BookmarkState } from '../constants.ts'
-import { assertPayload } from '../utils.ts'
-import { Bookmark } from '../entities/bookmark.ts'
-import { Link } from '../entities/link.ts'
-import { Session } from '../entities/session.ts'
-import { Tag } from '../entities/tag.ts'
-import { User } from '../entities/user.ts'
+import parse from 'co-body'
+
+import { RouterContext } from '../types'
+import { Privacy, State } from '../constants'
+import { Bookmark } from '../entities/bookmark'
+import { Link } from '../entities/link'
+import { Session } from '../entities/session'
+import { Tag } from '../entities/tag'
+import { User } from '../entities/user'
 
 type UserParams = { user: string }
 type BookmarkParams = { id: string }
@@ -13,11 +14,37 @@ type SessionState = { session: Session }
 
 interface BookmarkPayload {
   url: string
-  privacy: BookmarkPrivacy
+  privacy: Privacy
   title?: string | null
   description?: string | null
   tags?: string[]
-  state?: BookmarkState
+  state?: State
+}
+
+function assertPartialBookmarkPayload(
+  input: unknown
+): asserts input is Partial<BookmarkPayload> {
+  if (input !== null && typeof input === 'object') return
+
+  throw new Error('input should be an object')
+}
+
+function assertBookmarkPayload(
+  input: unknown
+): asserts input is BookmarkPayload {
+  assertPartialBookmarkPayload(input)
+
+  if (
+    typeof input.url === 'string' &&
+    typeof input.privacy === 'string' &&
+    input.privacy in Privacy
+  ) {
+    return
+  }
+
+  throw new Error(
+    'request `body` should contain `url` and valid `privacy` fields'
+  )
 }
 
 async function getLink(input: string): Promise<Link> {
@@ -74,10 +101,14 @@ export const BookmarkController = {
         throw new Error('Please login')
       }
 
-      const where = {
+      const where: {
+        user: User
+        state: State
+        privacy?: Privacy
+      } = {
         user: user,
-        state: BookmarkState.active,
-        privacy: BookmarkPrivacy.public,
+        state: State.active,
+        privacy: Privacy.public,
       }
 
       if (state.session?.user.id === user.id) {
@@ -121,20 +152,15 @@ export const BookmarkController = {
   },
   async add({ request, response, state }: RouterContext<never, SessionState>) {
     try {
-      const body = await request.body(JSON_BODY)
+      const body = await parse.json(request)
 
-      assertPayload<BookmarkPayload>(
-        body,
-        (value) =>
-          typeof value.url === 'string' && value.privacy in BookmarkPrivacy,
-        'request `body` should contain `url` and valid `privacy` fields'
-      )
+      assertBookmarkPayload(body)
 
-      const link = await getLink(body.value.url)
+      const link = await getLink(body.url)
       const count = await Bookmark.count({
         link,
         user: state.session.user,
-        state: BookmarkState.active,
+        state: State.active,
       })
 
       if (count > 0) {
@@ -144,16 +170,16 @@ export const BookmarkController = {
       }
 
       const bookmark = Bookmark.create({
-        title: body.value.title,
-        description: body.value.description,
-        state: BookmarkState.active,
-        privacy: body.value.privacy,
+        title: body.title,
+        description: body.description,
+        state: State.active,
+        privacy: body.privacy,
         user: state.session.user,
         link,
       })
 
-      if (Array.isArray(body.value.tags)) {
-        bookmark.tags = await getTags(body.value.tags, state.session.user)
+      if (Array.isArray(body.tags)) {
+        bookmark.tags = await getTags(body.tags, state.session.user)
       }
 
       await bookmark.save()
@@ -185,38 +211,32 @@ export const BookmarkController = {
         return
       }
 
-      const body = await request.body(JSON_BODY)
+      const body = await parse.json(request)
 
-      assertPayload<Partial<BookmarkPayload>>(body)
+      assertPartialBookmarkPayload(body)
 
-      if (body.value.title !== undefined) {
-        bookmark.title = body.value.title
+      if (body.title !== undefined) {
+        bookmark.title = body.title
       }
 
-      if (body.value.description !== undefined) {
-        bookmark.description = body.value.description
+      if (body.description !== undefined) {
+        bookmark.description = body.description
       }
 
-      if (
-        typeof body.value.privacy === 'string' &&
-        body.value.privacy in BookmarkPrivacy
-      ) {
-        bookmark.privacy = body.value.privacy
+      if (typeof body.privacy === 'string' && body.privacy in Privacy) {
+        bookmark.privacy = body.privacy
       }
 
-      if (typeof body.value.url === 'string') {
-        bookmark.link = await getLink(body.value.url)
+      if (typeof body.url === 'string') {
+        bookmark.link = await getLink(body.url)
       }
 
-      if (
-        typeof body.value.state === 'string' &&
-        body.value.state in BookmarkState
-      ) {
-        bookmark.state = body.value.state
+      if (typeof body.state === 'string' && body.state in State) {
+        bookmark.state = body.state
       }
 
-      if (Array.isArray(body.value.tags)) {
-        bookmark.tags = await getTags(body.value.tags, state.session.user)
+      if (Array.isArray(body.tags)) {
+        bookmark.tags = await getTags(body.tags, state.session.user)
       }
 
       await bookmark.save()
@@ -247,7 +267,7 @@ export const BookmarkController = {
         return
       }
 
-      bookmark.state = BookmarkState.removed
+      bookmark.state = State.removed
 
       await bookmark.save()
 

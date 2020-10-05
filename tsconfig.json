@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
     "strict": true,
-    "target": "esnext",
+    "target": "ESNext",
+    "moduleResolution": "node",
     "experimentalDecorators": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "esModuleInterop": true
   }
 }

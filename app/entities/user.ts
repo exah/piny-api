@@ -7,13 +7,12 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
+} from 'typeorm'
 
-import { AuthType } from '../constants.ts'
-import { Bookmark } from './bookmark.ts'
-import { Session } from './session.ts'
-import { Tag } from './tag.ts'
-import { Link } from './link.ts'
+import { AuthType } from '../constants'
+import { Bookmark } from './bookmark'
+import { Session } from './session'
+import { Tag } from './tag'
 
 @Entity()
 export class User extends BaseEntity {

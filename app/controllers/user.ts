@@ -1,5 +1,5 @@
-import { RouterContext } from 'https://deno.land/x/oak@v5.3.1/mod.ts'
-import { User } from '../entities/user.ts'
+import { RouterContext } from '../types'
+import { User } from '../entities/user'
 
 export const UserController = {
   async get({ response, params }: RouterContext<{ user: string }>) {

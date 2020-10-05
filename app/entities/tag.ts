@@ -7,10 +7,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'https://denolib.com/denolib/typeorm@v0.2.23-rc5/mod.ts'
+} from 'typeorm'
 
-import { User } from './user.ts'
-import { Bookmark } from './bookmark.ts'
+import { User } from './user'
+import { Bookmark } from './bookmark'
 
 @Entity()
 export class Tag extends BaseEntity {
