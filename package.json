@@ -1,12 +1,10 @@
 {
   "name": "piny-api",
   "version": "1.0.0",
-  "description": "🚧 This is work in progress",
-  "type": "commonjs",
-  "main": "out/index.js",
+  "description": "API server for tiny bookmarking service",
+  "private": true,
   "scripts": {
-    "start": "node out",
-    "build": "tsc -m commonjs -p tsconfig.json --outDir out",
+    "start": "ts-node -T index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "sync": "ts-node ./node_modules/typeorm/cli.js schema:sync",
     "dev": "nodemon index.ts"
@@ -16,7 +14,7 @@
     "url": "git+https://github.com/exah/piny-api.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "John Grishin <hi@johngrish.in>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/exah/piny-api/issues"

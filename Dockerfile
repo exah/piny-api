@@ -3,10 +3,8 @@ LABEL name="piny-api"
 
 WORKDIR /app
 
-COPY package*.json .
+COPY package*.json ./
 RUN npm ci --only=production
 
-COPY . .
-RUN npm run build
-
+COPY . ./
 CMD npm start
