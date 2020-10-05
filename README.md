@@ -8,21 +8,33 @@
 
 ## Requirements
 
-- [Deno](https://deno.land/) 1.x
-- [`denon`](https://deno.land/x/denon)
+- [node](https://nodejs.org) 14.x
 
 ## Quick start
+
+Install dependencies:
+
+```sh
+npm install
+```
 
 Create empty database:
 
 ```sh
-denon sync
+npm run sync
 ```
 
-Start server:
+Start dev server:
 
 ```sh
-KEY="secret-key" denon start
+KEY="secret-key" npm run dev
+```
+
+Production:
+
+```sh
+npm run build
+KEY="secret-key" npm start
 ```
 
 ## API

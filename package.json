@@ -5,9 +5,10 @@
   "type": "commonjs",
   "main": "out/index.js",
   "scripts": {
-    "start": "NODE_ENV=production node out",
+    "start": "node out",
     "build": "tsc -m commonjs -p tsconfig.json --outDir out",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "sync": "ts-node ./node_modules/typeorm/cli.js schema:sync",
     "dev": "nodemon index.ts"
   },
   "repository": {
