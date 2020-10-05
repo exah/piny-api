@@ -2,10 +2,13 @@
   "name": "piny-api",
   "version": "1.0.0",
   "description": "🚧 This is work in progress",
-  "main": "index.js",
+  "type": "commonjs",
+  "main": "out/index.js",
   "scripts": {
-    "dev": "nodemon index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_ENV=production node out",
+    "build": "tsc -m commonjs -p tsconfig.json --outDir out",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.ts"
   },
   "repository": {
     "type": "git",
