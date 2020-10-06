@@ -1,10 +1,11 @@
 import parse from 'co-body'
 
+import * as Errors from '../errors'
 import { MONTH } from '../constants'
-import { hash, createToken, validateToken } from '../utils'
-import { RouterContext } from '../types'
-import { Session } from '../entities/session'
 import { User } from '../entities/user'
+import { Session } from '../entities/session'
+import { RouterContext } from '../types'
+import { hash, createToken, validateToken } from '../utils'
 
 interface LoginPayload {
   user: string
@@ -15,19 +16,21 @@ interface SignupPayload extends LoginPayload {
   email: string
 }
 
-function assertLoginPayload(input: unknown): asserts input is LoginPayload {
-  if (input && typeof input === 'object' && 'user' in input && 'pass' in input)
+function assertLoginPayload(body: unknown): asserts body is LoginPayload {
+  if (body && typeof body === 'object' && 'user' in body && 'pass' in body)
     return
 
-  throw new Error('input should container `user` and `pass`')
+  throw new Errors.BadRequest(
+    `🤦‍♂️ request body should contain 'user' and 'pass'`
+  )
 }
 
-function assertSignupPayload(input: unknown): asserts input is SignupPayload {
-  assertLoginPayload(input)
+function assertSignupPayload(body: unknown): asserts body is SignupPayload {
+  assertLoginPayload(body)
 
-  if ('email' in input) return
+  if ('email' in body) return
 
-  throw new Error('input should container `email`')
+  throw new Errors.BadRequest(`🤦‍♂️ request body should contain 'email'`)
 }
 
 function getToken(input: string | null, prefix = 'Bearer ') {
@@ -57,7 +60,7 @@ export const AuthController = {
     { request, state }: RouterContext<never, { session?: Session }>,
     next: () => Promise<void>
   ) {
-    const session = await getSession(request.headers.authorization)
+    const session = await getSession(request.get('Authorization'))
 
     if (session !== null) {
       state.session = session
@@ -68,10 +71,10 @@ export const AuthController = {
     return next()
   },
   async verify(
-    { request, response, state }: RouterContext<never, { session?: Session }>,
+    { request, state }: RouterContext<never, { session?: Session }>,
     next: () => Promise<void>
   ) {
-    const session = await getSession(request.headers.authorization)
+    const session = await getSession(request.get('Authorization'))
 
     if (session !== null) {
       state.session = session
@@ -80,115 +83,81 @@ export const AuthController = {
       delete state.session
     }
 
-    response.status = 401
-    response.body = { message: '🙅‍♂️ Not authorized' }
+    throw new Errors.NotAuthorised()
   },
   async login({ request, response }: RouterContext) {
-    try {
-      const body = await parse.json(request)
+    const body = await parse.json(request)
 
-      assertLoginPayload(body)
+    assertLoginPayload(body)
 
-      const user = await User.findOne(
-        { name: body.user },
-        { select: ['id', 'pass'], relations: ['sessions'] }
-      )
+    const user = await User.findOne(
+      { name: body.user },
+      { select: ['id', 'pass'], relations: ['sessions'] }
+    )
 
-      if (user == null) {
-        response.status = 404
-        response.body = { message: '🤷‍♂️ Not found' }
-        return
-      }
-
-      if (user.pass !== hash(body.user, body.pass)) {
-        response.status = 403
-        response.body = { message: '✋ Denied' }
-        return
-      }
-
-      const expiration = Date.now() + MONTH
-      const token = await createToken(user.name, expiration)
-
-      await Session.create({ token, expiration, user }).save()
-
-      response.status = 200
-      response.body = { token }
-    } catch (error) {
-      console.error(error)
-
-      response.status = 500
-      response.body = { message: '😭 Something went wrong' }
+    if (user == null) {
+      throw new Errors.NotFound()
     }
+
+    if (user.pass !== hash(body.user, body.pass)) {
+      throw new Errors.Denied()
+    }
+
+    const expiration = Date.now() + MONTH
+    const token = await createToken(user.name, expiration)
+
+    await Session.create({ token, expiration, user }).save()
+
+    response.status = 200
+    response.body = { token }
   },
   async logout({ request, response }: RouterContext) {
-    const token = getToken(request.headers.authorization)
+    const token = getToken(request.get('Authorization'))
 
-    try {
-      if (!token) {
-        response.status = 400
-        response.body = { message: '🤔 Are you sure you authorized?' }
-        return
-      }
-
-      const session = await Session.findOne({ token })
-
-      if (!session) {
-        response.status = 404
-        response.body = { message: '🤷‍♂️ Not found' }
-        return
-      }
-
-      await Session.remove(session)
-
-      response.body = { message: '👋 Bye' }
-    } catch (error) {
-      console.error(error)
-
-      response.status = 500
-      response.body = { message: '😭 Something went wrong' }
+    if (!token) {
+      throw new Errors.NotAuthorised()
     }
+
+    const session = await Session.findOne({ token })
+
+    if (!session) {
+      throw new Errors.NotFound()
+    }
+
+    await Session.remove(session)
+
+    response.body = { message: '👋 Bye' }
   },
   async signup({ request, response }: RouterContext) {
-    try {
-      const body = await parse.json(request)
+    const body = await parse.json(request)
 
-      assertSignupPayload(body)
+    assertSignupPayload(body)
 
-      const nameCount = await User.count({
-        name: body.user,
-      })
+    const nameCount = await User.count({
+      name: body.user,
+    })
 
-      if (nameCount > 0) {
-        response.status = 403
-        response.body = { message: '👯‍♀️ Use different `user`' }
-        return
-      }
-
-      const emailCount = await User.count({
-        email: body.email,
-      })
-
-      if (emailCount > 0) {
-        response.status = 403
-        response.body = { message: '💌 Use different `email`' }
-        return
-      }
-
-      const user = User.create({
-        name: body.user,
-        email: body.email,
-        pass: hash(body.user, body.pass),
-      })
-
-      await user.save()
-
-      response.status = 200
-      response.body = { message: '👋 Welcome, please /login' }
-    } catch (error) {
-      console.error(error)
-
-      response.status = 500
-      response.body = { message: '😭 Something went wrong' }
+    if (nameCount > 0) {
+      throw new Errors.Denied('👯‍♀️ Use different `user`')
     }
+
+    const emailCount = await User.count({
+      email: body.email,
+    })
+
+    if (emailCount > 0) {
+      throw new Errors.Denied('💌 Use different `email`')
+    }
+
+    const user = User.create({
+      name: body.user,
+      email: body.email,
+      pass: hash(body.user, body.pass),
+    })
+
+    await user.save()
+
+    response.status = 200
+    response.body = { message: '👋 Welcome, please /login' }
   },
 }
