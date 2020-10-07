@@ -6,7 +6,7 @@ export class ResponseError extends Error {
 
   constructor(description?: string) {
     super()
-    this.description = description
+    if (description) this.description = description
   }
 }
 

@@ -1,18 +1,20 @@
+import { v4 as UUID } from 'uuid'
 import { Context, Next } from 'koa'
-import { ResponseError } from '../errors'
+import { ResponseError } from '../utils/errors'
 
 export async function handleError(context: Context, next: Next) {
   try {
     await next()
   } catch (error) {
-    console.error(error)
+    const id = UUID()
+    console.error(Object.assign(error, { id }))
 
     if (error instanceof ResponseError) {
       context.status = error.status
-      context.body = { message: error.description || error.message }
+      context.body = { id, message: error.description || error.message }
     } else {
       context.status = 500
-      context.body = { message: '😭 Something went wrong' }
+      context.body = { id, message: '😭 Something went wrong' }
     }
   }
 }
