@@ -1,11 +1,11 @@
 import parse from 'co-body'
 
-import * as Errors from '../errors'
-import { MONTH } from '../constants'
+import * as Errors from '../utils/errors'
+import { hash, createToken, validateToken } from '../utils/auth'
+import { Durations } from '../constants'
 import { User } from '../entities/user'
 import { Session } from '../entities/session'
 import { RouterContext } from '../types'
-import { hash, createToken, validateToken } from '../utils'
 
 interface LoginPayload {
   user: string
@@ -103,7 +103,7 @@ export const AuthController = {
       throw new Errors.Denied()
     }
 
-    const expiration = Date.now() + MONTH
+    const expiration = Date.now() + Durations.MONTH
     const token = await createToken(user.name, expiration)
 
     await Session.create({ token, expiration, user }).save()

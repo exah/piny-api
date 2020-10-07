@@ -1,6 +1,6 @@
 import parse from 'co-body'
 
-import * as Errors from '../errors'
+import * as Errors from '../utils/errors'
 import { RouterContext } from '../types'
 import { Privacy, State } from '../constants'
 import { Bookmark } from '../entities/bookmark'

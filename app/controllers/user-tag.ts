@@ -2,7 +2,7 @@ import { RouterContext } from '../types'
 import { User } from '../entities/user'
 
 export const UserTagController = {
-  async get({ response, params }: RouterContext<{ user: string }>) {
+  async all({ response, params }: RouterContext<{ user: string }>) {
     const user = await User.findOne(
       { name: params.user },
       { select: ['id'], relations: ['tags'] }
