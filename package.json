@@ -34,7 +34,7 @@
     "co-body": "^6.0.0",
     "jsonwebtoken": "^9.0.0",
     "koa": "^2.13.0",
-    "nodemon": "^2.0.4",
+    "nodemon": "^2.0.20",
     "sqlite3": "^5.1.2",
     "ts-node": "^9.0.0",
     "typeorm": "^0.2.28",
