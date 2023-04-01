@@ -15,7 +15,7 @@ export class BadRequest extends ResponseError {
   message = '👎 Bad request'
 }
 
-export class NotAuthorised extends ResponseError {
+export class NotAuthorized extends ResponseError {
   status = 401
   message = '🙅‍♂️ Not authorized'
 }

@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { Privacy, State } from '../constants'
+import { Privacy, State } from '../constants/pin'
 import { User } from './user'
 import { Link } from './link'
 import { Tag } from './tag'
