@@ -9,9 +9,17 @@ import { Session } from '../entities/session'
 import { Tag } from '../entities/tag'
 import { User } from '../entities/user'
 
-type UserParams = { user: string }
-type BookmarkParams = { id: string }
-type SessionState = { session: Session }
+interface UserParams {
+  user: string
+}
+
+interface BookmarkParams {
+  id: string
+}
+
+interface SessionState {
+  session: Session
+}
 
 interface BookmarkPayload {
   url: string
@@ -51,7 +59,10 @@ function assertBookmarkPayload(
 async function getLink(input: string): Promise<Link> {
   const url = new URL(input)
 
-  const foundLink = await Link.findOne({ url: url.toString() })
+  const foundLink = await Link.findOne({
+    where: { url: url.toString() },
+  })
+
   const link = foundLink ?? Link.create({ url: url.toString() })
 
   return link.save()
@@ -61,7 +72,11 @@ async function getTags(input: string[] = [], user: User) {
   const nextTags: Tag[] = []
 
   for (const name of input) {
-    const foundTag = await Tag.findOne({ name }, { relations: ['users'] })
+    const foundTag = await Tag.findOne({
+      where: { name },
+      relations: { users: true },
+    })
+
     const tag = foundTag ?? Tag.create({ name })
 
     if (tag.users) {
@@ -85,12 +100,12 @@ export const BookmarkController = {
     let user: User
 
     if (params.user) {
-      const foundUser = await User.findOne(
-        { name: params.user },
-        { select: ['id'] }
-      )
+      const foundUser = await User.findOne({
+        where: { name: params.user },
+        select: ['id'],
+      })
 
-      if (foundUser === undefined) {
+      if (foundUser == null) {
         throw new Errors.NotFound()
       }
 
@@ -102,11 +117,11 @@ export const BookmarkController = {
     }
 
     const where: {
-      user: User
+      user: Pick<User, 'id'>
       state: State
       privacy?: Privacy
     } = {
-      user: user,
+      user: { id: user.id },
       state: State.active,
       privacy: Privacy.public,
     }
@@ -117,7 +132,7 @@ export const BookmarkController = {
 
     const bookmarks = await Bookmark.find({
       where,
-      relations: ['link', 'tags'],
+      relations: { link: true, tags: true },
       order: { createdAt: 'DESC' },
     })
 
@@ -125,10 +140,10 @@ export const BookmarkController = {
     response.body = bookmarks
   },
   async get({ response, params }: RouterContext<BookmarkParams, SessionState>) {
-    const bookmark = await Bookmark.findOne(
-      { id: params.id },
-      { relations: ['link', 'tags'] }
-    )
+    const bookmark = await Bookmark.findOne({
+      where: { id: params.id },
+      relations: { link: true, tags: true },
+    })
 
     if (bookmark === undefined) {
       throw new Errors.NotFound()
@@ -144,9 +159,11 @@ export const BookmarkController = {
 
     const link = await getLink(body.url)
     const count = await Bookmark.count({
-      link,
-      user: state.session.user,
-      state: State.active,
+      where: {
+        link: { id: link.id },
+        user: { id: state.session.user.id },
+        state: State.active,
+      },
     })
 
     if (count > 0) {
@@ -178,8 +195,7 @@ export const BookmarkController = {
     state,
   }: RouterContext<BookmarkParams, SessionState>) {
     const bookmark = await Bookmark.findOne({
-      id: params.id,
-      user: state.session.user,
+      where: { id: params.id, user: { id: state.session.user.id } },
     })
 
     if (!bookmark) {
@@ -225,8 +241,7 @@ export const BookmarkController = {
     state,
   }: RouterContext<BookmarkParams, SessionState>) {
     const bookmark = await Bookmark.findOne({
-      id: params.id,
-      user: state.session.user,
+      where: { id: params.id, user: { id: state.session.user.id } },
     })
 
     if (!bookmark) {

@@ -45,7 +45,10 @@ async function getSession(input: string | null) {
   const token = getToken(input)
 
   if (typeof token === 'string' && (await validateToken(token))) {
-    const session = await Session.findOne({ token }, { relations: ['user'] })
+    const session = await Session.findOne({
+      where: { token },
+      relations: { user: true },
+    })
 
     if (session && session.expiration > Date.now()) {
       return session
@@ -90,10 +93,11 @@ export const AuthController = {
 
     assertLoginPayload(body)
 
-    const user = await User.findOne(
-      { name: body.user },
-      { select: ['id', 'pass'], relations: ['sessions'] }
-    )
+    const user = await User.findOne({
+      where: { name: body.user },
+      select: ['id', 'pass'],
+      relations: { sessions: true },
+    })
 
     if (user == null) {
       throw new Errors.NotFound()
@@ -118,7 +122,9 @@ export const AuthController = {
       throw new Errors.NotAuthorised()
     }
 
-    const session = await Session.findOne({ token })
+    const session = await Session.findOne({
+      where: { token },
+    })
 
     if (!session) {
       throw new Errors.NotFound()
@@ -134,7 +140,7 @@ export const AuthController = {
     assertSignupPayload(body)
 
     const nameCount = await User.count({
-      name: body.user,
+      where: { name: body.user },
     })
 
     if (nameCount > 0) {
@@ -142,7 +148,7 @@ export const AuthController = {
     }
 
     const emailCount = await User.count({
-      email: body.email,
+      where: { email: body.email },
     })
 
     if (emailCount > 0) {

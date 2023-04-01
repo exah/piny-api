@@ -19,13 +19,31 @@ export const createToken = (iss: string, exp: number) =>
       { iss, iat: Date.now(), exp },
       key,
       { algorithm: 'HS256' },
-      (error, result) => (error ? reject(error) : resolve(result))
+      (error, result) => {
+        if (error) {
+          return reject(error)
+        }
+
+        if (result === undefined) {
+          return reject(new TypeError('sign result is undefined'))
+        } else {
+          return resolve(result)
+        }
+      }
     )
   )
 
 export const validateToken = (input: string) =>
   new Promise<string | object>((resolve, reject) =>
-    jwt.verify(input, key, { algorithms: ['HS256'] }, (error, result) =>
-      error ? reject(error) : resolve(result)
-    )
+    jwt.verify(input, key, { algorithms: ['HS256'] }, (error, result) => {
+      if (error) {
+        return reject(error)
+      }
+
+      if (result === undefined) {
+        return reject(new TypeError('verify result is undefined'))
+      } else {
+        return resolve(result)
+      }
+    })
   )
