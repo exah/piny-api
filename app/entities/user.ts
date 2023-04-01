@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { AuthType } from '../constants'
+import { AuthType } from '../constants/auth'
 import { Bookmark } from './bookmark'
 import { Session } from './session'
 import { Tag } from './tag'

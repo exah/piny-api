@@ -1,24 +1,23 @@
 import Router from '@koa/router'
-
-import { Routes } from './constants'
-import { AuthController } from './controllers/auth'
-import { WelcomeController } from './controllers/welcome'
-import { UserController } from './controllers/user'
-import { BookmarkController } from './controllers/bookmark'
-import { UserTagController } from './controllers/user-tag'
+import * as Path from './constants/paths'
+import * as auth from './functions/auth'
+import * as welcome from './functions/welcome'
+import * as user from './functions/user'
+import * as bookmark from './functions/bookmark'
+import * as userTag from './functions/user-tag'
 
 export const router = new Router()
 
 router
-  .get(Routes.WELCOME, WelcomeController.get)
-  .post(Routes.SIGNUP, AuthController.signup)
-  .post(Routes.LOGIN, AuthController.login)
-  .get(Routes.LOGOUT, AuthController.logout)
-  .get(Routes.BOOKMARKS, AuthController.verify, BookmarkController.all)
-  .post(Routes.BOOKMARKS, AuthController.verify, BookmarkController.add)
-  .get(Routes.BOOKMARK, AuthController.verify, BookmarkController.get)
-  .patch(Routes.BOOKMARK, AuthController.verify, BookmarkController.edit)
-  .delete(Routes.BOOKMARK, AuthController.verify, BookmarkController.remove)
-  .get(Routes.USER, AuthController.verify, UserController.get)
-  .get(Routes.USER_BOOKMARKS, AuthController.session, BookmarkController.all)
-  .get(Routes.USER_TAGS, AuthController.verify, UserTagController.all)
+  .get(Path.WELCOME, welcome.get)
+  .post(Path.SIGNUP, auth.signup)
+  .post(Path.LOGIN, auth.login)
+  .get(Path.LOGOUT, auth.logout)
+  .get(Path.BOOKMARKS, auth.verify, bookmark.all)
+  .post(Path.BOOKMARKS, auth.verify, bookmark.add)
+  .get(Path.BOOKMARK, auth.verify, bookmark.get)
+  .patch(Path.BOOKMARK, auth.verify, bookmark.edit)
+  .delete(Path.BOOKMARK, auth.verify, bookmark.remove)
+  .get(Path.USER, auth.verify, user.get)
+  .get(Path.USER_BOOKMARKS, auth.session, bookmark.all)
+  .get(Path.USER_TAGS, auth.verify, userTag.all)
