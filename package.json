@@ -5,10 +5,10 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "ts-node -T index.ts",
+    "start": "ts-node -T server.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "sync": "ts-node sync.ts",
-    "dev": "nodemon index.ts"
+    "dev": "nodemon server.ts"
   },
   "repository": {
     "type": "git",
