@@ -2,9 +2,15 @@
   "compilerOptions": {
     "strict": true,
     "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noEmit": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   }
 }
