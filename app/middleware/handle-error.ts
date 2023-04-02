@@ -14,10 +14,11 @@ export async function handleError(context: Context, next: Next) {
       if (error instanceof ResponseError) {
         context.status = error.status
         context.body = { id, message: error.description || error.message }
+        return
       }
-    } else {
-      context.status = 500
-      context.body = { id, message: '😭 Something went wrong' }
     }
+
+    context.status = 500
+    context.body = { id, message: '😭 Something went wrong' }
   }
 }
