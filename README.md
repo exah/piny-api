@@ -217,7 +217,7 @@ http GET 'https://dev.piny.link/:user/bookmarks' \
 ### 🔐 Get user tags
 
 ```sh
-GET /:user/tags
+GET /:user?/tags
 ```
 
 #### Params
@@ -356,4 +356,5 @@ http DELETE 'https://dev.piny.link/bookmarks/:id' \
 ```
 
 ---
+
 © Ivan Grishin

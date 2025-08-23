@@ -4,6 +4,7 @@ import { welcomeRoutes } from './routes/welcome'
 import { authRoutes } from './routes/auth'
 import { bookmarkRoutes } from './routes/bookmark'
 import { userRoutes } from './routes/user'
+import { tagRoutes } from './routes/tags'
 
 export const main = new Koa()
 
@@ -17,6 +18,9 @@ main.use(authRoutes.allowedMethods())
 
 main.use(bookmarkRoutes.routes())
 main.use(bookmarkRoutes.allowedMethods())
+
+main.use(tagRoutes.routes())
+main.use(tagRoutes.allowedMethods())
 
 main.use(userRoutes.routes())
 main.use(userRoutes.allowedMethods())
