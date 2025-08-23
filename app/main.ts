@@ -1,5 +1,6 @@
 import Koa from 'koa'
 import { handleError } from './middleware/handle-error'
+import { welcomeRoutes } from './routes/welcome'
 import { authRoutes } from './routes/auth'
 import { bookmarkRoutes } from './routes/bookmark'
 import { userRoutes } from './routes/user'
@@ -7,6 +8,9 @@ import { userRoutes } from './routes/user'
 export const main = new Koa()
 
 main.use(handleError)
+
+main.use(welcomeRoutes.routes())
+main.use(welcomeRoutes.allowedMethods())
 
 main.use(authRoutes.routes())
 main.use(authRoutes.allowedMethods())
