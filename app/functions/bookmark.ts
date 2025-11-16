@@ -141,6 +141,10 @@ export async function all({
     order: { createdAt: 'DESC' },
   })
 
+  if (bookmarks.length === 0 && where.privacy === Privacy.public) {
+    throw new NotFound()
+  }
+
   response.status = 200
   response.body = bookmarks
 }

@@ -67,6 +67,17 @@ describe('get user bookmarks', () => {
     ])
   })
 
+  test('unauthorized -> public bookmarks -> not found', async () => {
+    const user = await createUserMock()
+
+    await createBookmarkMock({ user, privacy: 'private' })
+    await createBookmarkMock({ user, privacy: 'private' })
+
+    await expect(() => api.get(`/${user.name}/bookmarks`)).rejects.toThrowError(
+      'Request failed with status code 404'
+    )
+  })
+
   test('authorized -> all bookmarks', async () => {
     const session = await createSessionMock()
     const bookmarks = [
