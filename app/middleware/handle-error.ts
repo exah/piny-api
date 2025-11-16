@@ -9,7 +9,9 @@ export async function handleError(context: Context, next: Next) {
     const id = crypto.randomUUID()
 
     if (error instanceof Error) {
-      console.error(Object.assign(error, { id }))
+      if (process.env.NODE_ENV !== 'test') {
+        console.error(Object.assign(error, { id }))
+      }
 
       if (error instanceof ResponseError) {
         context.status = error.status

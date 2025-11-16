@@ -1,12 +1,11 @@
 import './app/data-source'
 import { main } from './app/main'
+import { getServerHostPort, getServerURL } from './app/utils/get-server-config'
 
-const hostname = process.env.HOST || '0.0.0.0'
-const port = Number(process.env.PORT) || 3000
-
-main.listen({ hostname, port })
+const { host, port } = getServerHostPort()
+main.listen({ host, port })
 
 console.log(`
   🌲 Welcome to Piny
-  Server is open at http://${hostname}:${port}/
+  Server is open at ${getServerURL({ host, port })}
 `)
