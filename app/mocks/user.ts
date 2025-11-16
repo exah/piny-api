@@ -1,7 +1,7 @@
-import { User } from '../entities/user'
 import { faker } from '@faker-js/faker'
+import { User } from '../entities/user'
 
-interface UserMock extends Partial<User> {}
+interface UserMock extends Partial<Pick<User, 'name' | 'pass' | 'email'>> {}
 
 export function createUserMock({
   name = faker.internet.username(),

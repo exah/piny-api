@@ -7,12 +7,14 @@ interface SessionMock extends Partial<Pick<Session, 'user' | 'expiration'>> {}
 
 export async function createSessionMock({
   user: mockedUser,
-  expiration = Date.now() + Time.DAY,
+  expiration = Date.now() + Time.HOUR,
 }: SessionMock = {}) {
   const user = mockedUser ?? (await createUserMock())
+  const token = await createToken(user.name, expiration)
+
   const session = Session.create({
     user,
-    token: await createToken(user.name, expiration),
+    token,
     expiration,
   })
 
