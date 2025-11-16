@@ -25,10 +25,10 @@ export class Bookmark extends BaseEntity {
   @Column({ type: 'text', nullable: true, default: null })
   description: string | null
 
-  @Column({ type: 'simple-enum', enum: State })
+  @Column({ type: 'simple-enum', enum: Object.keys(State) })
   state: State
 
-  @Column({ type: 'simple-enum', enum: Privacy })
+  @Column({ type: 'simple-enum', enum: Object.keys(Privacy) })
   privacy: Privacy
 
   @ManyToOne(() => User, (user) => user.bookmarks)

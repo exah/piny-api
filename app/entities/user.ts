@@ -25,7 +25,11 @@ export class User extends BaseEntity {
   @Column({ type: 'text', unique: true })
   email: string
 
-  @Column({ type: 'simple-enum', enum: AuthType, default: AuthType.pass })
+  @Column({
+    type: 'simple-enum',
+    enum: Object.keys(AuthType),
+    default: AuthType.pass,
+  })
   auth: AuthType
 
   @Column({ type: 'text' })

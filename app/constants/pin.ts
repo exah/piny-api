@@ -1,9 +1,13 @@
-export enum Privacy {
-  public = 'public',
-  private = 'private',
-}
+export const Privacy = {
+  public: 'public',
+  private: 'private',
+} as const
 
-export enum State {
-  active = 'active',
-  removed = 'removed',
-}
+export type Privacy = keyof typeof Privacy
+
+export const State = {
+  active: 'active',
+  removed: 'removed',
+} as const
+
+export type State = keyof typeof State
