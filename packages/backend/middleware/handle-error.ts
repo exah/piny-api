@@ -10,7 +10,12 @@ export async function handleError(context: Context, next: Next) {
 
     if (error instanceof Error) {
       if (process.env.NODE_ENV !== 'test') {
-        console.error(Object.assign(error, { id }))
+        console.error(
+          Object.assign(error, {
+            id,
+            url: context.request.url,
+          })
+        )
       }
 
       if (error instanceof ResponseError) {

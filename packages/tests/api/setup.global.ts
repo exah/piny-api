@@ -1,5 +1,5 @@
 import type { TestProject } from 'vitest/node'
-import { getServerHostPort } from '../app/utils/get-server-config'
+import { getServerHostPort } from '@piny/api/config'
 
 export function setup(project: TestProject) {
   let { port, host } = getServerHostPort()

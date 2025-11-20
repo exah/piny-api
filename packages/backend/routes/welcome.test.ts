@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { api } from '../../testing/api'
+import { api } from '@piny/tests/api'
 
 test('welcome', async () => {
   const response = await api.get('/')

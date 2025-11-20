@@ -21,19 +21,19 @@ npm install
 Create empty database:
 
 ```sh
-npm run sync
+npm -w @piny/api run sync
 ```
 
 Start dev server:
 
 ```sh
-KEY="secret-key" npm run dev
+KEY="secret-key" npm -w @piny/api run dev
 ```
 
 Production:
 
 ```sh
-KEY="secret-key" npm start
+KEY="secret-key" npm -w @piny/api start
 ```
 
 ## API

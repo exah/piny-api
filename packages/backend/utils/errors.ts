@@ -1,5 +1,7 @@
 export class ResponseError extends Error {
   name: string = 'ResponseError'
+  id: number
+  url: string
   status: number
   message: string
   description?: string

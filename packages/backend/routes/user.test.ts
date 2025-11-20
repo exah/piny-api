@@ -1,5 +1,5 @@
 import { expect, test, describe } from 'vitest'
-import { api } from '../../testing/api'
+import { api } from '@piny/tests/api'
 import type { Bookmark } from '../entities'
 import { createSessionMock } from '../mocks/session'
 import { createUserMock } from '../mocks/user'

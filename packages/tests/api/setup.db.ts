@@ -1,6 +1,6 @@
 import { beforeAll, afterAll } from 'vitest'
 import { DataSource } from 'typeorm'
-import { ENTITIES } from '../app/entities'
+import { ENTITIES } from '@piny/backend/entities'
 
 const dataSource = new DataSource({
   type: 'sqlite',

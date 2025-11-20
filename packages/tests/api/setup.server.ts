@@ -1,11 +1,11 @@
 import { beforeAll, afterAll, inject } from 'vitest'
 import type { Server } from 'node:http'
-import { main } from '../app/main'
+import { app } from '@piny/api/app'
 
 let server: Server
 
 beforeAll(() => {
-  server = main.listen(inject('server'))
+  server = app.listen(inject('server'))
 })
 
 afterAll(() => {

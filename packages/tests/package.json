@@ -1,0 +1,16 @@
+{
+  "name": "@piny/tests",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest"
+  },
+  "exports": {
+    "./api": "./api/index.ts"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
+    "vitest": "^4.0.9",
+    "ya-fetch": "^2.1.5"
+  }
+}
