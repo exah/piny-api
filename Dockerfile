@@ -1,10 +1,9 @@
-FROM node:22.18.0-alpine
+FROM node:24.11.1-alpine
 LABEL name="piny-api"
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --only=production
-
 COPY . ./
+RUN npm ci --omit=dev
+
 CMD npm -w @piny/api start

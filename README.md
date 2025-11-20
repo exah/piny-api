@@ -8,7 +8,7 @@
 
 ## Requirements
 
-- [node](https://nodejs.org) 14.x
+- [node](https://nodejs.org) 24.x
 
 ## Quick start
 

@@ -9,18 +9,16 @@
     "type": "git",
     "url": "git+https://github.com/exah/piny-api.git"
   },
+  "keywords": [],
+  "author": "John Grishin <hi@johngrish.in>",
+  "license": "ISC",
+  "bugs": "https://github.com/exah/piny-api/issues",
+  "homepage": "https://github.com/exah/piny-api#readme",
   "prettier": {
     "arrowParens": "always",
     "singleQuote": true,
     "semi": false,
     "trailingComma": "es5",
     "printWidth": 80
-  },
-  "keywords": [],
-  "author": "John Grishin <hi@johngrish.in>",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/exah/piny-api/issues"
-  },
-  "homepage": "https://github.com/exah/piny-api#readme"
+  }
 }
