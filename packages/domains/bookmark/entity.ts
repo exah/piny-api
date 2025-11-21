@@ -9,10 +9,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { Privacy, State } from '../constants/pin'
-import { User } from './user'
-import { Link } from './link'
-import { Tag } from './tag'
+import { User } from '@piny/user/entity'
+import { Link } from '@piny/link/entity'
+import { Tag } from '@piny/tag/entity'
+
+import { Privacy, State } from './constants'
 
 @Entity()
 export class Bookmark extends BaseEntity {

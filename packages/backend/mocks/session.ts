@@ -1,5 +1,5 @@
+import { Session } from '@piny/session/entity'
 import * as Time from '../constants/time'
-import { Session } from '../entities/session'
 import { createToken } from '../utils/auth'
 import { createUserMock } from './user'
 

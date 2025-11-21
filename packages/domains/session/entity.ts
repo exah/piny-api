@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { User } from './user'
+import { User } from '@piny/user/entity'
 
 @Entity()
 export class Session extends BaseEntity {

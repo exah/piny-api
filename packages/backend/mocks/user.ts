@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { User } from '../entities/user'
+import { User } from '@piny/user/entity'
 
 interface UserMock extends Partial<Pick<User, 'name' | 'pass' | 'email'>> {}
 

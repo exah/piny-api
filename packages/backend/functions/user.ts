@@ -1,7 +1,7 @@
 import { assert } from '@piny/tools/assert'
+import { User } from '@piny/user/entity'
 import { RouterContext } from '../types/router'
 import { NotFound } from '../utils/errors'
-import { User } from '../entities/user'
 
 export async function get({
   response,

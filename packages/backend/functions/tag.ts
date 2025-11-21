@@ -1,6 +1,6 @@
+import { Tag } from '@piny/tag/entity'
+import { User } from '@piny/user/entity'
 import { RouterContext } from '../types/router'
-import { Tag } from '../entities/tag'
-import { User } from '../entities/user'
 import { Denied, NotFound } from '../utils/errors'
 
 export async function all({

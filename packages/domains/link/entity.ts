@@ -1,31 +1,24 @@
 import {
   Entity,
   BaseEntity,
-  JoinTable,
-  ManyToMany,
+  OneToMany,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm'
 
-import { User } from './user'
-import { Bookmark } from './bookmark'
+import { Bookmark } from '@piny/bookmark/entity'
 
 @Entity()
-export class Tag extends BaseEntity {
+export class Link extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Column({ type: 'text', unique: true })
-  name: string
+  url: string
 
-  @ManyToMany(() => User, (user) => user.tags)
-  @JoinTable()
-  users: User[]
-
-  @ManyToMany(() => Bookmark, (bookmark) => bookmark.tags)
-  @JoinTable()
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.link)
   bookmarks: Bookmark[]
 
   @CreateDateColumn()

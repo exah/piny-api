@@ -9,10 +9,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { AuthType } from '../constants/auth'
-import { Bookmark } from './bookmark'
-import { Session } from './session'
-import { Tag } from './tag'
+import { Bookmark } from '@piny/bookmark/entity'
+import { AuthType } from '@piny/session/constants'
+import { Session } from '@piny/session/entity'
+import { Tag } from '@piny/tag/entity'
 
 @Entity()
 export class User extends BaseEntity {

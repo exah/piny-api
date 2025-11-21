@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { Bookmark } from '../entities/bookmark'
+import { Bookmark } from '@piny/bookmark/entity'
 import { createUserMock } from './user'
 import { createLinkMock } from './link'
 import { createTagsListMock } from './tag'

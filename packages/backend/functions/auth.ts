@@ -1,10 +1,9 @@
 import parse from 'co-body'
-
+import { User } from '@piny/user/entity'
+import { Session } from '@piny/session/entity'
 import { BadRequest, NotAuthorized, NotFound, Denied } from '../utils/errors'
 import { hash, createToken, validateToken } from '../utils/auth'
 import * as Time from '../constants/time'
-import { User } from '../entities/user'
-import { Session } from '../entities/session'
 import { RouterContext } from '../types/router'
 
 interface LoginPayload {
