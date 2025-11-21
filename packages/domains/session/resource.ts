@@ -1,15 +1,16 @@
 import parse from 'co-body'
 import { User } from '@piny/user/entities'
-import { Session } from '@piny/session/entities'
+import { assert } from '@piny/tools/assert'
 import {
   BadRequest,
   NotAuthorized,
   NotFound,
   Denied,
 } from '@piny/error/response'
-import { Time } from '@piny/tools/constants'
 import type { RouterContext } from '@piny/api/types/router'
-import { hash, createToken } from './utils'
+import { Session } from './entities'
+import { createRefreshedSession } from './functions'
+import { hash, createToken, getTokenExpiration } from './utils'
 
 interface LoginPayload {
   user: string
@@ -62,7 +63,7 @@ export async function login({ request, response }: RouterContext) {
     throw new Denied()
   }
 
-  const expiration = Date.now() + 4 * Time.WEEK
+  const expiration = getTokenExpiration()
   const token = await createToken(user.name, expiration)
 
   await Session.create({ token, expiration, user }).save()
@@ -121,4 +122,13 @@ export async function signup({ request, response }: RouterContext) {
 
   response.status = 200
   response.body = { message: '👋 Welcome, please /login' }
+}
+
+export async function refreshSession({ response, state }: RouterContext) {
+  assert(state.session)
+
+  const session = await createRefreshedSession(state.session)
+
+  response.status = 200
+  response.body = { token: session.token }
 }

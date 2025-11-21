@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
+import { Time } from '@piny/tools/constants'
 
 const key = process.env.KEY
 
@@ -47,3 +48,5 @@ export const validateToken = (input: string) =>
       }
     })
   )
+
+export const getTokenExpiration = (now = Date.now()) => now + 4 * Time.WEEK
