@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "tsx server.ts",
-    "test": "vitest",
+    "test": "tsx check.ts",
     "dev": "tsx watch server.ts"
   },
   "exports": {
