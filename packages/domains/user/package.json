@@ -3,9 +3,13 @@
   "type": "module",
   "private": true,
   "exports": {
-    "./entity": "./entity.ts"
+    "./entities": "./entities.ts",
+    "./mocks": "./mocks.ts"
   },
   "dependencies": {
     "typeorm": "^0.3.27"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.1.0"
   }
 }

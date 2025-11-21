@@ -1,9 +1,9 @@
 import { expect, test, describe } from 'vitest'
 import { api } from '@piny/tests/api'
-import type { Bookmark } from '../entities'
-import { createSessionMock } from '../mocks/session'
-import { createUserMock } from '../mocks/user'
-import { createBookmarkMock } from '../mocks/bookmark'
+import type { Bookmark } from '@piny/bookmark/entities'
+import { createSessionMock } from '@piny/session/mocks'
+import { createUserMock } from '@piny/user/mocks'
+import { createBookmarkMock } from '@piny/bookmark/mocks'
 
 describe('get user', () => {
   test('unauthorized -> error', async () => {

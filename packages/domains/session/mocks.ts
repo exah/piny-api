@@ -1,7 +1,7 @@
-import { Session } from '@piny/session/entity'
-import * as Time from '../constants/time'
-import { createToken } from '../utils/auth'
-import { createUserMock } from './user'
+import { Time } from '@piny/backend/constants'
+import { createUserMock } from '@piny/user/mocks'
+import { Session } from './entities'
+import { createToken } from './utils'
 
 interface SessionMock extends Partial<Pick<Session, 'user' | 'expiration'>> {}
 

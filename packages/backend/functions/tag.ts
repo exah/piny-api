@@ -1,5 +1,5 @@
-import { Tag } from '@piny/tag/entity'
-import { User } from '@piny/user/entity'
+import { Tag } from '@piny/tag/entities'
+import { User } from '@piny/user/entities'
 import { RouterContext } from '../types/router'
 import { Denied, NotFound } from '../utils/errors'
 

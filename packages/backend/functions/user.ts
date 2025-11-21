@@ -1,5 +1,5 @@
 import { assert } from '@piny/tools/assert'
-import { User } from '@piny/user/entity'
+import { User } from '@piny/user/entities'
 import { RouterContext } from '../types/router'
 import { NotFound } from '../utils/errors'
 

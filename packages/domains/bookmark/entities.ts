@@ -9,9 +9,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { User } from '@piny/user/entity'
-import { Link } from '@piny/link/entity'
-import { Tag } from '@piny/tag/entity'
+import { User } from '@piny/user/entities'
+import { Link } from '@piny/link/entities'
+import { Tag } from '@piny/tag/entities'
 
 import { Privacy, State } from './constants'
 

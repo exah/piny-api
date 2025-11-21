@@ -1,10 +1,10 @@
 import parse from 'co-body'
 import { assert } from '@piny/tools/assert'
 import { Privacy, State } from '@piny/bookmark/constants'
-import { Bookmark } from '@piny/bookmark/entity'
-import { Link } from '@piny/link/entity'
-import { Tag } from '@piny/tag/entity'
-import { User } from '@piny/user/entity'
+import { Bookmark } from '@piny/bookmark/entities'
+import { Link } from '@piny/link/entities'
+import { Tag } from '@piny/tag/entities'
+import { User } from '@piny/user/entities'
 import {
   NotAcceptable,
   BadRequest,

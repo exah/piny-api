@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { User } from '@piny/user/entity'
-import { Bookmark } from '@piny/bookmark/entity'
+import { User } from '@piny/user/entities'
+import { Bookmark } from '@piny/bookmark/entities'
 
 @Entity()
 export class Tag extends BaseEntity {

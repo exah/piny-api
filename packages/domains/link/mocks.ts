@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { Link } from '@piny/link/entity'
+import { Link } from './entities'
 
 export function createLinkMock(url = faker.internet.url()) {
   const link = Link.create({

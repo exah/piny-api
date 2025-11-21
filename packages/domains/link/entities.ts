@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { Bookmark } from '@piny/bookmark/entity'
+import { Bookmark } from '@piny/bookmark/entities'
 
 @Entity()
 export class Link extends BaseEntity {

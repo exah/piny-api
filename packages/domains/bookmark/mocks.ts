@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
-import { Bookmark } from '@piny/bookmark/entity'
-import { createUserMock } from './user'
-import { createLinkMock } from './link'
-import { createTagsListMock } from './tag'
+import { createUserMock } from '@piny/user/mocks'
+import { createLinkMock } from '@piny/link/mocks'
+import { createTagsListMock } from '@piny/tag/mocks'
+import { Bookmark } from './entities'
 
 interface BookmarkMock
   extends Partial<
