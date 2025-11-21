@@ -1,0 +1,8 @@
+{
+  "name": "@piny/tools",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./assert": "./assert.ts"
+  }
+}

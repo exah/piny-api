@@ -1,18 +1,13 @@
 import { RouterContext } from '../types/router'
 import { Tag } from '../entities/tag'
-import { Session } from '../entities/session'
 import { User } from '../entities/user'
 import { Denied, NotFound } from '../utils/errors'
-
-interface SessionState {
-  session: Session
-}
 
 export async function all({
   response,
   params,
   state,
-}: RouterContext<{ user: string }, Partial<SessionState>>) {
+}: RouterContext<{ user: string }>) {
   let user: User
 
   if (params.user) {

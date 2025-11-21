@@ -1,4 +1,5 @@
 import parse from 'co-body'
+import { assert } from '@piny/tools/assert'
 
 import {
   NotAcceptable,
@@ -11,20 +12,15 @@ import { RouterContext } from '../types/router'
 import { Privacy, State } from '../constants/pin'
 import { Bookmark } from '../entities/bookmark'
 import { Link } from '../entities/link'
-import { Session } from '../entities/session'
 import { Tag } from '../entities/tag'
 import { User } from '../entities/user'
 
-interface UserParams {
+type UserParams = {
   user: string
 }
 
-interface BookmarkParams {
+type BookmarkParams = {
   id: string
-}
-
-interface SessionState {
-  session: Session
 }
 
 interface BookmarkPayload {
@@ -101,7 +97,7 @@ export async function all({
   response,
   params,
   state,
-}: RouterContext<UserParams, Partial<SessionState>>) {
+}: RouterContext<UserParams>) {
   let user: User
 
   if (params.user) {
@@ -149,10 +145,7 @@ export async function all({
   response.body = bookmarks
 }
 
-export async function get({
-  response,
-  params,
-}: RouterContext<BookmarkParams, SessionState>) {
+export async function get({ response, params }: RouterContext<BookmarkParams>) {
   const bookmark = await Bookmark.findOne({
     where: { id: params.id },
     relations: { link: true, tags: true },
@@ -166,13 +159,10 @@ export async function get({
   response.body = bookmark
 }
 
-export async function add({
-  request,
-  response,
-  state,
-}: RouterContext<never, SessionState>) {
+export async function add({ request, response, state }: RouterContext<never>) {
   const body = await parse.json(request)
 
+  assert(state.session)
   assertBookmarkPayload(body)
 
   const link = await getLink(body.url)
@@ -212,7 +202,9 @@ export async function edit({
   response,
   params,
   state,
-}: RouterContext<BookmarkParams, SessionState>) {
+}: RouterContext<BookmarkParams>) {
+  assert(state.session)
+
   const bookmark = await Bookmark.findOne({
     where: { id: params.id, user: { id: state.session.user.id } },
   })
@@ -259,7 +251,9 @@ export async function remove({
   response,
   params,
   state,
-}: RouterContext<BookmarkParams, SessionState>) {
+}: RouterContext<BookmarkParams>) {
+  assert(state.session)
+
   const bookmark = await Bookmark.findOne({
     where: { id: params.id, user: { id: state.session.user.id } },
   })

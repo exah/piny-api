@@ -1,7 +1,11 @@
 import { RouterContext as BaseRouterContext } from '@koa/router'
+import { Session } from '../entities/session'
 
-export interface RouterContext<Params = unknown, State = unknown>
-  extends Omit<BaseRouterContext, 'params' | 'state'> {
+export interface RouterContext<Params extends Record<string, string> = {}>
+  extends BaseRouterContext<RouterSessionState> {
   params: Params
-  state: State
+}
+
+export interface RouterSessionState {
+  session: Session | undefined
 }

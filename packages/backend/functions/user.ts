@@ -1,19 +1,16 @@
+import { assert } from '@piny/tools/assert'
 import { RouterContext } from '../types/router'
-import { Session } from '../entities/session'
 import { NotFound } from '../utils/errors'
 import { User } from '../entities/user'
-
-interface SessionState {
-  session: Session
-}
 
 export async function get({
   response,
   params,
   state,
-}: RouterContext<{ user: string }, SessionState>) {
-  const select: (keyof User)[] = ['id', 'name']
+}: RouterContext<{ user: string }>) {
+  assert(state.session)
 
+  const select: (keyof User)[] = ['id', 'name']
   if (state.session.user.name === params.user) {
     select.push('email')
   }
