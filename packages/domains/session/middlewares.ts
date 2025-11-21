@@ -1,6 +1,6 @@
 import { Session } from '@piny/session/entities'
-import { NotAuthorized } from '@piny/backend/utils/errors'
-import type { RouterContext } from '@piny/backend/types/router'
+import { NotAuthorized } from '@piny/error/response'
+import type { RouterContext } from '@piny/api/types/router'
 import { validateToken } from './utils'
 
 function getToken(input: string | null, prefix = 'Bearer ') {

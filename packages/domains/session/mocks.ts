@@ -1,4 +1,4 @@
-import { Time } from '@piny/backend/constants'
+import { Time } from '@piny/tools/constants'
 import { createUserMock } from '@piny/user/mocks'
 import { Session } from './entities'
 import { createToken } from './utils'

@@ -1,4 +1,4 @@
-import './data-source'
+import '@piny/db/init'
 import { getServerHostPort, getServerURL } from './config'
 import { app } from './app'
 

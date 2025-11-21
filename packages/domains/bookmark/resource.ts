@@ -9,8 +9,8 @@ import {
   Denied,
   Conflict,
   NotFound,
-} from '@piny/backend/utils/errors'
-import { RouterContext } from '@piny/backend/types/router'
+} from '@piny/error/response'
+import type { RouterContext } from '@piny/api/types/router'
 import { Privacy, State } from './constants'
 import { Bookmark } from './entities'
 

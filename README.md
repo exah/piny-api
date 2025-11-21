@@ -21,7 +21,7 @@ npm install
 Create empty database:
 
 ```sh
-npm -w @piny/api run sync
+npm -w @piny/db run sync
 ```
 
 Start dev server:

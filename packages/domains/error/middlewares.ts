@@ -1,6 +1,6 @@
 import { Context, Next } from 'koa'
 import crypto from 'crypto'
-import { ResponseError } from '../utils/errors'
+import { ResponseError } from './response'
 
 export async function handleError(context: Context, next: Next) {
   try {

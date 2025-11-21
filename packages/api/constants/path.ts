@@ -1,4 +1,4 @@
-import { createPath } from '../utils/create-path'
+import { createPath } from '@piny/tools/create-path'
 
 export const WELCOME = createPath('/')
 export const SIGNUP = createPath('/signup')

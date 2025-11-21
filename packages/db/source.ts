@@ -1,11 +1,9 @@
 import * as path from 'node:path'
 import { DataSource } from 'typeorm'
-import { ENTITIES } from '@piny/backend/entities'
+import { ENTITIES_REGISTRY } from './entities'
 
 export const dataSource = new DataSource({
   type: 'sqlite',
   database: path.join(import.meta.dirname, '../../db/piny.db'),
-  entities: ENTITIES,
+  entities: ENTITIES_REGISTRY,
 })
-
-await dataSource.initialize()

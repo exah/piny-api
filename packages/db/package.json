@@ -1,0 +1,25 @@
+{
+  "name": "@piny/db",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./entities": "./entities.ts",
+    "./init": "./init.ts",
+    "./source": "./source.ts",
+    "./sync": "./sync.ts"
+  },
+  "scripts": {
+    "sync": "tsx sync.ts"
+  },
+  "dependencies": {
+    "@piny/bookmark": "*",
+    "@piny/link": "*",
+    "@piny/session": "*",
+    "@piny/tag": "*",
+    "@piny/tools": "*",
+    "@piny/user": "*",
+    "@types/sqlite3": "^3.1.11",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.27"
+  }
+}
