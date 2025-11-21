@@ -3,7 +3,8 @@
   "type": "module",
   "private": true,
   "workspaces": [
-    "./packages/*"
+    "./packages/*",
+    "./packages/domains/*"
   ],
   "repository": {
     "type": "git",

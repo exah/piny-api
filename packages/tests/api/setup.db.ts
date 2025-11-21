@@ -1,11 +1,11 @@
 import { beforeAll, afterAll } from 'vitest'
 import { DataSource } from 'typeorm'
-import { ENTITIES } from '@piny/backend/entities'
+import { ENTITIES_REGISTRY } from '@piny/db/entities'
 
 const dataSource = new DataSource({
   type: 'sqlite',
   database: ':memory:',
-  entities: ENTITIES,
+  entities: ENTITIES_REGISTRY,
   dropSchema: true,
   synchronize: true,
   logging: false,

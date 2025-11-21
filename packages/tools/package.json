@@ -3,6 +3,8 @@
   "type": "module",
   "private": true,
   "exports": {
-    "./assert": "./assert.ts"
+    "./assert": "./assert.ts",
+    "./constants": "./constants/index.ts",
+    "./create-path": "./create-path.ts"
   }
 }

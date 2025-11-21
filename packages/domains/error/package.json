@@ -1,0 +1,9 @@
+{
+  "name": "@piny/error",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./middlewares": "./middlewares.ts",
+    "./response": "./response.ts"
+  }
+}
