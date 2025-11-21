@@ -5,7 +5,9 @@
   "exports": {
     "./constants": "./constants.ts",
     "./entities": "./entities.ts",
+    "./middlewares": "./middlewares.ts",
     "./mocks": "./mocks.ts",
+    "./resource": "./resource.ts",
     "./utils": "./utils.ts"
   },
   "dependencies": {

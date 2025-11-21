@@ -1,6 +1,6 @@
 import Router from '@koa/router'
-import * as Path from '../constants/path'
-import * as auth from '../functions/auth'
+import * as auth from '@piny/session/resource'
+import { Path } from '../constants'
 
 export const authRoutes = new Router()
 

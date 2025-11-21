@@ -1,9 +1,9 @@
 import Router from '@koa/router'
-import * as Path from '../constants/path'
-import * as auth from '../functions/auth'
-import * as user from '../functions/user'
-import * as bookmark from '../functions/bookmark'
-import * as tag from '../functions/tag'
+import * as auth from '@piny/session/middlewares'
+import * as bookmark from '@piny/bookmark/resource'
+import * as tag from '@piny/tag/resource'
+import * as user from '@piny/user/resource'
+import { Path } from '../constants'
 
 export const userRoutes = new Router()
 

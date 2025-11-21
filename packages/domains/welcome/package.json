@@ -1,0 +1,8 @@
+{
+  "name": "@piny/welcome",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./resource": "./resource.ts"
+  }
+}

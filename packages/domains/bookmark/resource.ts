@@ -1,7 +1,5 @@
 import parse from 'co-body'
 import { assert } from '@piny/tools/assert'
-import { Privacy, State } from '@piny/bookmark/constants'
-import { Bookmark } from '@piny/bookmark/entities'
 import { Link } from '@piny/link/entities'
 import { Tag } from '@piny/tag/entities'
 import { User } from '@piny/user/entities'
@@ -11,8 +9,10 @@ import {
   Denied,
   Conflict,
   NotFound,
-} from '../utils/errors'
-import { RouterContext } from '../types/router'
+} from '@piny/backend/utils/errors'
+import { RouterContext } from '@piny/backend/types/router'
+import { Privacy, State } from './constants'
+import { Bookmark } from './entities'
 
 type UserParams = {
   user: string

@@ -1,6 +1,6 @@
 import Router from '@koa/router'
-import * as Path from '../constants/path'
-import * as welcome from '../functions/welcome'
+import * as welcome from '@piny/welcome/resource'
+import { Path } from '../constants'
 
 export const welcomeRoutes = new Router()
 

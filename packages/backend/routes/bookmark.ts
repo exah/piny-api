@@ -1,7 +1,7 @@
 import Router from '@koa/router'
-import * as Path from '../constants/path'
-import * as auth from '../functions/auth'
-import * as bookmark from '../functions/bookmark'
+import * as auth from '@piny/session/middlewares'
+import * as bookmark from '@piny/bookmark/resource'
+import { Path } from '../constants'
 
 export const bookmarkRoutes = new Router()
 

@@ -6,7 +6,8 @@
     "./constants": "./constants/index.ts",
     "./entities": "./entities/index.ts",
     "./middleware": "./middleware/index.ts",
-    "./routes": "./routes/index.ts"
+    "./routes": "./routes/index.ts",
+    "./utils/errors": "./utils/errors.ts"
   },
   "dependencies": {
     "@koa/router": "^12.0.2",

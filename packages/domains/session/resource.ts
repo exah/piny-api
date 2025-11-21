@@ -1,10 +1,15 @@
 import parse from 'co-body'
 import { User } from '@piny/user/entities'
 import { Session } from '@piny/session/entities'
-import { BadRequest, NotAuthorized, NotFound, Denied } from '../utils/errors'
-import { hash, createToken, validateToken } from '@piny/session/utils'
-import * as Time from '../constants/time'
-import { RouterContext } from '../types/router'
+import {
+  BadRequest,
+  NotAuthorized,
+  NotFound,
+  Denied,
+} from '@piny/backend/utils/errors'
+import { Time } from '@piny/backend/constants'
+import { RouterContext } from '@piny/backend/types/router'
+import { hash, createToken } from './utils'
 
 interface LoginPayload {
   user: string
@@ -36,54 +41,6 @@ function getToken(input: string | null, prefix = 'Bearer ') {
   }
 
   return null
-}
-
-async function getSession(input: string | null) {
-  const token = getToken(input)
-
-  if (typeof token === 'string' && (await validateToken(token))) {
-    const session = await Session.findOne({
-      where: { token },
-      relations: { user: true },
-    })
-
-    if (session && session.expiration > Date.now()) {
-      return session
-    }
-  }
-
-  return null
-}
-
-export async function session(
-  { request, state }: RouterContext<never>,
-  next: () => Promise<void>
-) {
-  const session = await getSession(request.get('Authorization'))
-
-  if (session !== null) {
-    state.session = session
-  } else {
-    delete state.session
-  }
-
-  return next()
-}
-
-export async function verify(
-  { request, state }: RouterContext<never>,
-  next: () => Promise<void>
-) {
-  const session = await getSession(request.get('Authorization'))
-
-  if (session !== null) {
-    state.session = session
-    return next()
-  } else {
-    delete state.session
-  }
-
-  throw new NotAuthorized()
 }
 
 export async function login({ request, response }: RouterContext) {
@@ -136,7 +93,6 @@ export async function logout({ request, response }: RouterContext) {
 
 export async function signup({ request, response }: RouterContext) {
   const body = await parse.json(request)
-
   assertSignupPayload(body)
 
   const nameCount = await User.count({
