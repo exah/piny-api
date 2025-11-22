@@ -9,14 +9,15 @@ import {
 } from 'typeorm'
 
 import { User } from '@piny/user/entities'
+import type { SessionId, SessionToken } from './types'
 
 @Entity()
 export class Session extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: SessionId
 
   @Column({ type: 'text', unique: true, primary: true })
-  token: string
+  token: SessionToken
 
   @Column({ type: 'integer' })
   expiration: number

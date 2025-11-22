@@ -5,9 +5,12 @@
   "exports": {
     "./constants": "./constants.ts",
     "./entities": "./entities.ts",
+    "./functions": "./functions.ts",
     "./middlewares": "./middlewares.ts",
     "./mocks": "./mocks.ts",
     "./resource": "./resource.ts",
+    "./schemas": "./schemas.ts",
+    "./types": "./types.ts",
     "./utils": "./utils.ts"
   },
   "dependencies": {
@@ -15,7 +18,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "co-body": "^6.2.0",
     "jsonwebtoken": "^9.0.2",
-    "typeorm": "^0.3.27"
+    "typeorm": "^0.3.27",
+    "valibot": "^1.1.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.1.0"

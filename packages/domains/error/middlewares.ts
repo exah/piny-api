@@ -1,31 +1,44 @@
 import { Context, Next } from 'koa'
+import { isValiError } from 'valibot'
 import crypto from 'crypto'
-import { ResponseError } from './response'
+import { ResponseError, BadRequest, SomethingWentWrong } from './errors'
+import type { ResponseErrorVariant } from './errors'
 
-export async function handleError(context: Context, next: Next) {
+function getResponseError(error: unknown): ResponseErrorVariant {
+  if (isValiError(error)) {
+    return new BadRequest(
+      `🤦‍♂️ Bad request: ${error.issues
+        .map((issue) => issue.message)
+        .join(', ')}`,
+      { cause: error, meta: error.issues }
+    )
+  } else if (error instanceof ResponseError) {
+    return error
+  } else {
+    return new SomethingWentWrong(undefined, { cause: error })
+  }
+}
+
+export async function catchErrors(context: Context, next: Next) {
   try {
     await next()
   } catch (error) {
     const id = crypto.randomUUID()
+    const responseError = Object.assign(getResponseError(error), {
+      id,
+      url: context.request.URL,
+    })
 
-    if (error instanceof Error) {
-      if (process.env.NODE_ENV !== 'test') {
-        console.error(
-          Object.assign(error, {
-            id,
-            url: context.request.url,
-          })
-        )
-      }
-
-      if (error instanceof ResponseError) {
-        context.status = error.status
-        context.body = { id, message: error.description || error.message }
-        return
-      }
+    if (process.env.NODE_ENV !== 'test') {
+      console.error(responseError)
     }
 
-    context.status = 500
-    context.body = { id, message: '😭 Something went wrong' }
+    context.status = responseError.status
+    context.body = {
+      id,
+      code: responseError.code,
+      meta: responseError.meta,
+      message: responseError.description || responseError.message,
+    }
   }
 }

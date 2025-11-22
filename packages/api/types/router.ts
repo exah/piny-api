@@ -1,8 +1,11 @@
-import { RouterContext as BaseRouterContext } from '@koa/router'
+import type * as Koa from '@koa/router'
 import type { Session } from '@piny/session/entities'
 
-export interface RouterContext<Params extends Record<string, string> = {}>
-  extends BaseRouterContext<RouterSessionState> {
+export interface RouterContext<
+  Response = never,
+  Params extends Record<string, string> = {},
+  State = RouterSessionState
+> extends Koa.RouterContext<State, unknown, Response> {
   params: Params
 }
 

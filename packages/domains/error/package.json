@@ -3,7 +3,11 @@
   "type": "module",
   "private": true,
   "exports": {
-    "./middlewares": "./middlewares.ts",
-    "./response": "./response.ts"
+    ".": "./errors.ts",
+    "./constants": "./constants/index.ts",
+    "./middlewares": "./middlewares.ts"
+  },
+  "dependencies": {
+    "valibot": "^1.1.0"
   }
 }

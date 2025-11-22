@@ -1,8 +1,8 @@
 import Koa from 'koa'
-import { handleError } from '@piny/error/middlewares'
+import { catchErrors } from '@piny/error/middlewares'
 import { routes } from './routes'
 
 export const app = new Koa()
 
-app.use(handleError)
+app.use(catchErrors)
 app.use(routes.middleware())

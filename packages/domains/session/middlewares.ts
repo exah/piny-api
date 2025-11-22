@@ -1,20 +1,12 @@
 import { Session } from '@piny/session/entities'
-import { NotAuthorized } from '@piny/error/response'
+import { Unauthorized } from '@piny/error'
 import type { RouterContext } from '@piny/api/types/router'
-import { validateToken } from './utils'
-
-function getToken(input: string | null, prefix = 'Bearer ') {
-  if (input?.startsWith(prefix)) {
-    return input.slice(prefix.length)
-  }
-
-  return null
-}
+import { getPrefixedToken, validateToken } from './utils'
 
 async function getSession(input: string | null) {
-  const token = getToken(input)
+  const token = await getPrefixedToken(input)
 
-  if (typeof token === 'string' && (await validateToken(token))) {
+  if (token !== null && (await validateToken(token))) {
     const session = await Session.findOne({
       where: { token },
       relations: { user: true },
@@ -56,5 +48,5 @@ export async function verify(
     delete state.session
   }
 
-  throw new NotAuthorized()
+  throw new Unauthorized()
 }

@@ -1,13 +1,13 @@
 import { assert } from '@piny/tools/assert'
 import type { RouterContext } from '@piny/api/types/router'
-import { NotFound } from '@piny/error/response'
+import { NotFound } from '@piny/error'
 import { User } from './entities'
 
 export async function get({
   response,
   params,
   state,
-}: RouterContext<{ user: string }>) {
+}: RouterContext<never, { user: string }>) {
   assert(state.session)
 
   const select: (keyof User)[] = ['id', 'name']

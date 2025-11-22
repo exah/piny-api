@@ -1,13 +1,13 @@
 import { User } from '@piny/user/entities'
 import type { RouterContext } from '@piny/api/types/router'
-import { Denied, NotFound } from '@piny/error/response'
+import { Forbidden, NotFound } from '@piny/error'
 import { Tag } from './entities'
 
 export async function all({
   response,
   params,
   state,
-}: RouterContext<{ user: string }>) {
+}: RouterContext<never, { user: string }>) {
   let user: User
 
   if (params.user) {
@@ -24,7 +24,7 @@ export async function all({
   } else if (state.session) {
     user = state.session.user
   } else {
-    throw new Denied()
+    throw new Forbidden()
   }
 
   const tags = await Tag.find({

@@ -6,10 +6,10 @@ import { User } from '@piny/user/entities'
 import {
   NotAcceptable,
   BadRequest,
-  Denied,
+  Forbidden,
   Conflict,
   NotFound,
-} from '@piny/error/response'
+} from '@piny/error'
 import type { RouterContext } from '@piny/api/types/router'
 import { Privacy, State } from './constants'
 import { Bookmark } from './entities'
@@ -96,7 +96,7 @@ export async function all({
   response,
   params,
   state,
-}: RouterContext<UserParams>) {
+}: RouterContext<never, UserParams>) {
   let user: User
 
   if (params.user) {
@@ -113,7 +113,7 @@ export async function all({
   } else if (state.session) {
     user = state.session.user
   } else {
-    throw new Denied()
+    throw new Forbidden()
   }
 
   const where: {
@@ -144,7 +144,10 @@ export async function all({
   response.body = bookmarks
 }
 
-export async function get({ response, params }: RouterContext<BookmarkParams>) {
+export async function get({
+  response,
+  params,
+}: RouterContext<never, BookmarkParams>) {
   const bookmark = await Bookmark.findOne({
     where: { id: params.id },
     relations: { link: true, tags: true },
@@ -158,7 +161,11 @@ export async function get({ response, params }: RouterContext<BookmarkParams>) {
   response.body = bookmark
 }
 
-export async function add({ request, response, state }: RouterContext<never>) {
+export async function add({
+  request,
+  response,
+  state,
+}: RouterContext<never, never>) {
   const body = await parse.json(request)
 
   assert(state.session)
@@ -201,7 +208,7 @@ export async function edit({
   response,
   params,
   state,
-}: RouterContext<BookmarkParams>) {
+}: RouterContext<never, BookmarkParams>) {
   assert(state.session)
 
   const bookmark = await Bookmark.findOne({
@@ -250,7 +257,7 @@ export async function remove({
   response,
   params,
   state,
-}: RouterContext<BookmarkParams>) {
+}: RouterContext<never, BookmarkParams>) {
   assert(state.session)
 
   const bookmark = await Bookmark.findOne({
