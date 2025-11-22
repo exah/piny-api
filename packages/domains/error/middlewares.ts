@@ -1,10 +1,10 @@
 import { Context, Next } from 'koa'
 import { isValiError } from 'valibot'
 import crypto from 'crypto'
-import { ResponseError, BadRequest, SomethingWentWrong } from './errors'
-import type { ResponseErrorVariant } from './errors'
+import { BadRequest, SomethingWentWrong } from './errors'
+import { isResponseError } from './utils'
 
-function getResponseError(error: unknown): ResponseErrorVariant {
+function getResponseError(error: unknown) {
   if (isValiError(error)) {
     return new BadRequest(
       `🤦‍♂️ Bad request: ${error.issues
@@ -12,7 +12,7 @@ function getResponseError(error: unknown): ResponseErrorVariant {
         .join(', ')}`,
       { cause: error, meta: error.issues }
     )
-  } else if (error instanceof ResponseError) {
+  } else if (isResponseError(error)) {
     return error
   } else {
     return new SomethingWentWrong(undefined, { cause: error })
@@ -24,21 +24,13 @@ export async function catchErrors(context: Context, next: Next) {
     await next()
   } catch (error) {
     const id = crypto.randomUUID()
-    const responseError = Object.assign(getResponseError(error), {
-      id,
-      url: context.request.URL,
-    })
+    const responseError = getResponseError(error)
 
-    if (process.env.NODE_ENV !== 'test') {
-      console.error(responseError)
-    }
-
-    context.status = responseError.status
-    context.body = {
+    context.throw(responseError.status, {
       id,
       code: responseError.code,
       meta: responseError.meta,
       message: responseError.description || responseError.message,
-    }
+    })
   }
 }
