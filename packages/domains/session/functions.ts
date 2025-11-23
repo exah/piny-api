@@ -1,7 +1,9 @@
 import { Session } from './entities'
 import { createToken, getTokenExpiration } from './utils'
 
-export async function createRefreshedSession(previousSession: Session) {
+export async function createRefreshedSession(
+  previousSession: Session
+): Promise<Session> {
   const expiration = getTokenExpiration()
 
   const token = await createToken(previousSession.user.name, expiration)

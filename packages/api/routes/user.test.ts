@@ -23,6 +23,7 @@ describe('get user', () => {
     expect(response.status).toBe(200)
     expect(await response.json()).toStrictEqual({
       id: expect.any(String),
+      type: 'current',
       name: session.user.name,
       email: session.user.email,
     })
@@ -39,6 +40,7 @@ describe('get user', () => {
     expect(response.status).toBe(200)
     expect(await response.json()).toStrictEqual({
       id: expect.any(String),
+      type: 'other',
       name: user.name,
     })
   })

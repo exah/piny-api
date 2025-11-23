@@ -13,11 +13,12 @@ import { AuthType } from '@piny/session/constants'
 import { Session } from '@piny/session/entities'
 import { Bookmark } from '@piny/bookmark/entities'
 import { Tag } from '@piny/tag/entities'
+import type { UserId } from './types'
 
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: UserId
 
   @Column({ type: 'text', unique: true })
   name: string

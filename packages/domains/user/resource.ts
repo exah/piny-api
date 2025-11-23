@@ -1,34 +1,30 @@
+import { match } from 'lil-match'
 import { assert } from '@piny/tools/assert'
 import type { RouterContext } from '@piny/api/types/router'
-import { NotFound } from '@piny/error'
-import { User } from './entities'
+import { UserResponse } from './types'
+import { getSessionUserType, getUserByName } from './functions'
 
-export async function get({
+export async function getUser({
   response,
   params,
   state,
-}: RouterContext<never, { user: string }>) {
+}: RouterContext<UserResponse, { user?: string }>) {
   assert(state.session)
+  assert(params.user)
 
-  const select: (keyof User)[] = ['id', 'name']
-  if (state.session.user.name === params.user) {
-    select.push('email')
-  }
+  const user = await getUserByName(params.user)
 
-  const user = await User.findOne({
-    where: { name: params.user },
-    select,
-  })
-
-  if (user === null) {
-    throw new NotFound('User not found')
-  }
-
-  const exposedUser: Partial<User> = { ...user }
-
-  if (state.session.user.id !== user.id) {
-    delete exposedUser.email
-  }
-
-  response.body = exposedUser
+  response.body = match(getSessionUserType(state.session, user))
+    .with('current', (type) => ({
+      id: user.id,
+      type,
+      name: user.name,
+      email: user.email,
+    }))
+    .with('other', (type) => ({
+      id: user.id,
+      type,
+      name: user.name,
+    }))
+    .exhaustive('Invalid user type')
 }
