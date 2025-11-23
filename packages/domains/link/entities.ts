@@ -8,18 +8,18 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { Bookmark } from '@piny/bookmark/entities'
+import { BookmarkEntity } from '@piny/bookmark/entities'
 
 @Entity()
-export class Link extends BaseEntity {
+export class LinkEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Column({ type: 'text', unique: true })
   url: string
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.link)
-  bookmarks: Bookmark[]
+  @OneToMany(() => BookmarkEntity, (bookmark) => bookmark.link)
+  bookmarks: BookmarkEntity[]
 
   @CreateDateColumn()
   createdAt: Date

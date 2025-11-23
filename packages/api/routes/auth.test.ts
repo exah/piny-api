@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { api } from '@piny/tests/api'
-import type { User } from '@piny/user/entities'
+import type { User } from '@piny/user/types'
 import { createSessionMock } from '@piny/session/mocks'
 
 test('refresh session', async ({ annotate }) => {
@@ -18,7 +18,7 @@ test('refresh session', async ({ annotate }) => {
 
   expect(initialUser.id).toEqual(initialSession.user.id)
   expect(initialUser.name).toEqual(initialSession.user.name)
-  expect(initialUser.email).toEqual(initialSession.user.email)
+  expect(initialUser.type).toBe('current')
 
   await annotate('session token is updated')
 

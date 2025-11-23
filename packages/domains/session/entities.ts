@@ -8,11 +8,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { User } from '@piny/user/entities'
+import { UserEntity } from '@piny/user/entities'
 import type { SessionId, SessionToken } from './types'
 
 @Entity()
-export class Session extends BaseEntity {
+export class SessionEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: SessionId
 
@@ -22,8 +22,8 @@ export class Session extends BaseEntity {
   @Column({ type: 'integer' })
   expiration: number
 
-  @ManyToOne(() => User, (user) => user.sessions)
-  user: User
+  @ManyToOne(() => UserEntity, (user) => user.sessions)
+  user: UserEntity
 
   @CreateDateColumn()
   createdAt: Date

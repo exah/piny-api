@@ -1,6 +1,6 @@
 import { expect, test, describe } from 'vitest'
 import { api } from '@piny/tests/api'
-import type { Bookmark } from '@piny/bookmark/entities'
+import type { BookmarkEntity } from '@piny/bookmark/entities'
 import { createSessionMock } from '@piny/session/mocks'
 import { createUserMock } from '@piny/user/mocks'
 import { createBookmarkMock } from '@piny/bookmark/mocks'
@@ -59,7 +59,9 @@ describe('get user bookmarks', () => {
       await createBookmarkMock({ user, privacy: 'public' }),
     ]
 
-    const json = await api.get(`/${user.name}/bookmarks`).json<Bookmark[]>()
+    const json = await api
+      .get(`/${user.name}/bookmarks`)
+      .json<BookmarkEntity[]>()
 
     expect(json).toHaveLength(publicBookmarks.length)
     expect(json).toStrictEqual([
@@ -92,7 +94,7 @@ describe('get user bookmarks', () => {
       .get(`/${session.user.name}/bookmarks`, {
         headers: { Authorization: `Bearer ${session.token}` },
       })
-      .json<Bookmark[]>()
+      .json<BookmarkEntity[]>()
 
     expect(json).toHaveLength(bookmarks.length)
     expect(json).toStrictEqual([

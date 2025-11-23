@@ -10,13 +10,13 @@ import {
 } from 'typeorm'
 
 import { AuthType } from '@piny/session/constants'
-import { Session } from '@piny/session/entities'
-import { Bookmark } from '@piny/bookmark/entities'
-import { Tag } from '@piny/tag/entities'
+import { SessionEntity } from '@piny/session/entities'
+import { BookmarkEntity } from '@piny/bookmark/entities'
+import { TagEntity } from '@piny/tag/entities'
 import type { UserId } from './types'
 
 @Entity()
-export class User extends BaseEntity {
+export class UserEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: UserId
 
@@ -36,14 +36,14 @@ export class User extends BaseEntity {
   @Column({ type: 'text' })
   pass: string
 
-  @OneToMany(() => Session, (session) => session.user)
-  sessions: Session[]
+  @OneToMany(() => SessionEntity, (session) => session.user)
+  sessions: SessionEntity[]
 
-  @ManyToMany(() => Tag, (tag) => tag.users)
-  tags: Tag[]
+  @ManyToMany(() => TagEntity, (tag) => tag.users)
+  tags: TagEntity[]
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
-  bookmarks: Bookmark[]
+  @OneToMany(() => BookmarkEntity, (bookmark) => bookmark.user)
+  bookmarks: BookmarkEntity[]
 
   @CreateDateColumn()
   createdAt: Date

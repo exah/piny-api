@@ -1,17 +1,18 @@
-import { User } from '@piny/user/entities'
+import { UserEntity } from '@piny/user/entities'
 import type { RouterContext } from '@piny/api/types/router'
 import { Forbidden, NotFound } from '@piny/error'
-import { Tag } from './entities'
+import type { TagsListResponse, Tag } from './types'
+import { getUserTags } from './functions'
 
-export async function all({
+export async function getTags({
   response,
   params,
   state,
-}: RouterContext<never, { user: string }>) {
-  let user: User
+}: RouterContext<TagsListResponse, { user?: string }>) {
+  let user: UserEntity
 
   if (params.user) {
-    const foundUser = await User.findOne({
+    const foundUser = await UserEntity.findOne({
       where: { name: params.user },
       select: ['id'],
     })
@@ -27,10 +28,6 @@ export async function all({
     throw new Forbidden()
   }
 
-  const tags = await Tag.find({
-    where: { users: [{ name: user.name }] },
-    select: ['id', 'name'],
-  })
-
-  response.body = tags
+  const tags = await getUserTags(user)
+  response.body = tags.map((tag): Tag => ({ id: tag.id, name: tag.name }))
 }

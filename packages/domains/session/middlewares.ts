@@ -1,4 +1,4 @@
-import { Session } from '@piny/session/entities'
+import { SessionEntity } from '@piny/session/entities'
 import { Unauthorized } from '@piny/error'
 import type { RouterContext } from '@piny/api/types/router'
 import { getPrefixedToken, validateToken } from './utils'
@@ -7,7 +7,7 @@ async function getSession(input: string | null) {
   const token = await getPrefixedToken(input)
 
   if (token !== null && (await validateToken(token))) {
-    const session = await Session.findOne({
+    const session = await SessionEntity.findOne({
       where: { token },
       relations: { user: true },
     })

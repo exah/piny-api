@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
-import { Tag } from './entities'
+import { TagEntity } from './entities'
 
 export function createTagMock(name = faker.string.nanoid()) {
-  const tag = Tag.create({
+  const tag = TagEntity.create({
     name,
   })
 

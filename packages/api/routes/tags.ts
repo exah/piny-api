@@ -5,4 +5,4 @@ import { Path } from '../constants'
 
 export const tagRoutes = new Router()
 
-tagRoutes.get(Path.TAGS, auth.verify, tag.all)
+tagRoutes.get(Path.TAGS, auth.verify, tag.getTags)

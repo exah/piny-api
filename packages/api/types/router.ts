@@ -1,5 +1,5 @@
 import type * as Koa from '@koa/router'
-import type { Session } from '@piny/session/entities'
+import type { SessionEntity } from '@piny/session/entities'
 
 export interface RouterContext<
   Response = never,
@@ -10,5 +10,5 @@ export interface RouterContext<
 }
 
 export interface RouterSessionState {
-  session: Session | undefined
+  session: SessionEntity | undefined
 }

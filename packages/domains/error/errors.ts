@@ -45,37 +45,37 @@ export class BadRequest<Meta = never> extends ResponseError<Meta> {
   message = '👎 Bad request'
 }
 
-export class Unauthorized extends ResponseError {
+export class Unauthorized<Meta = never> extends ResponseError<Meta> {
   code: typeof ErrorCode.UNAUTHORIZED = ErrorCode.UNAUTHORIZED
   status = 401
   message = '🙅‍♂️ Not authorized'
 }
 
-export class Forbidden extends ResponseError {
+export class Forbidden<Meta = never> extends ResponseError<Meta> {
   code: typeof ErrorCode.FORBIDDEN = ErrorCode.FORBIDDEN
   status = 403
   message = '✋ Denied'
 }
 
-export class NotFound extends ResponseError {
+export class NotFound<Meta = never> extends ResponseError<Meta> {
   code: typeof ErrorCode.NOT_FOUND = ErrorCode.NOT_FOUND
   status = 404
   message = '🤷‍♂️ Not found'
 }
 
-export class NotAcceptable extends ResponseError {
+export class NotAcceptable<Meta = never> extends ResponseError<Meta> {
   code: typeof ErrorCode.NOT_ACCEPTABLE = ErrorCode.NOT_ACCEPTABLE
   status = 406
   message = '👀 What is it?'
 }
 
-export class Conflict extends ResponseError {
+export class Conflict<Meta = never> extends ResponseError<Meta> {
   code: typeof ErrorCode.CONFLICT = ErrorCode.CONFLICT
   status = 409
   message = '🙅‍♂️ Already exists'
 }
 
-export class SomethingWentWrong extends ResponseError {
+export class SomethingWentWrong<Meta = never> extends ResponseError<Meta> {
   code: typeof ErrorCode.SOMETHING_WENT_WRONG = ErrorCode.SOMETHING_WENT_WRONG
   status = 500
   message = '😭 Something went wrong'

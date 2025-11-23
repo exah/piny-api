@@ -9,14 +9,14 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { User } from '@piny/user/entities'
-import { Link } from '@piny/link/entities'
-import { Tag } from '@piny/tag/entities'
+import { UserEntity } from '@piny/user/entities'
+import { LinkEntity } from '@piny/link/entities'
+import { TagEntity } from '@piny/tag/entities'
 
 import { Privacy, State } from './constants'
 
 @Entity()
-export class Bookmark extends BaseEntity {
+export class BookmarkEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
@@ -32,14 +32,14 @@ export class Bookmark extends BaseEntity {
   @Column({ type: 'simple-enum', enum: Object.keys(Privacy) })
   privacy: Privacy
 
-  @ManyToOne(() => User, (user) => user.bookmarks)
-  user: User
+  @ManyToOne(() => UserEntity, (user) => user.bookmarks)
+  user: UserEntity
 
-  @ManyToMany(() => Tag, (tag) => tag.bookmarks)
-  tags: Tag[]
+  @ManyToMany(() => TagEntity, (tag) => tag.bookmarks)
+  tags: TagEntity[]
 
-  @ManyToOne(() => Link, (link) => link.bookmarks)
-  link: Link
+  @ManyToOne(() => LinkEntity, (link) => link.bookmarks)
+  link: LinkEntity
 
   @CreateDateColumn()
   createdAt: Date

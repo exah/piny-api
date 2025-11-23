@@ -1,8 +1,8 @@
 import parse from 'co-body'
 import { assert } from '@piny/tools/assert'
-import { Link } from '@piny/link/entities'
-import { Tag } from '@piny/tag/entities'
-import { User } from '@piny/user/entities'
+import { LinkEntity } from '@piny/link/entities'
+import { TagEntity } from '@piny/tag/entities'
+import { UserEntity } from '@piny/user/entities'
 import {
   NotAcceptable,
   BadRequest,
@@ -12,7 +12,7 @@ import {
 } from '@piny/error'
 import type { RouterContext } from '@piny/api/types/router'
 import { Privacy, State } from './constants'
-import { Bookmark } from './entities'
+import { BookmarkEntity } from './entities'
 
 type UserParams = {
   user: string
@@ -57,28 +57,28 @@ function assertBookmarkPayload(
   )
 }
 
-async function getLink(input: string): Promise<Link> {
+async function getLink(input: string): Promise<LinkEntity> {
   const url = new URL(input)
 
-  const foundLink = await Link.findOne({
+  const foundLink = await LinkEntity.findOne({
     where: { url: url.toString() },
   })
 
-  const link = foundLink ?? Link.create({ url: url.toString() })
+  const link = foundLink ?? LinkEntity.create({ url: url.toString() })
 
   return link.save()
 }
 
-async function getTags(input: string[] = [], user: User) {
-  const nextTags: Tag[] = []
+async function getTags(input: string[] = [], user: UserEntity) {
+  const nextTags: TagEntity[] = []
 
   for (const name of input) {
-    const foundTag = await Tag.findOne({
+    const foundTag = await TagEntity.findOne({
       where: { name },
       relations: { users: true },
     })
 
-    const tag = foundTag ?? Tag.create({ name })
+    const tag = foundTag ?? TagEntity.create({ name })
 
     if (tag.users) {
       tag.users.push(user)
@@ -97,10 +97,10 @@ export async function all({
   params,
   state,
 }: RouterContext<never, UserParams>) {
-  let user: User
+  let user: UserEntity
 
   if (params.user) {
-    const foundUser = await User.findOne({
+    const foundUser = await UserEntity.findOne({
       where: { name: params.user },
       select: ['id'],
     })
@@ -117,7 +117,7 @@ export async function all({
   }
 
   const where: {
-    user: Pick<User, 'id'>
+    user: Pick<UserEntity, 'id'>
     state: State
     privacy?: Privacy
   } = {
@@ -130,7 +130,7 @@ export async function all({
     delete where.privacy
   }
 
-  const bookmarks = await Bookmark.find({
+  const bookmarks = await BookmarkEntity.find({
     where,
     relations: { link: true, tags: true },
     order: { createdAt: 'DESC' },
@@ -148,7 +148,7 @@ export async function get({
   response,
   params,
 }: RouterContext<never, BookmarkParams>) {
-  const bookmark = await Bookmark.findOne({
+  const bookmark = await BookmarkEntity.findOne({
     where: { id: params.id },
     relations: { link: true, tags: true },
   })
@@ -172,7 +172,7 @@ export async function add({
   assertBookmarkPayload(body)
 
   const link = await getLink(body.url)
-  const count = await Bookmark.count({
+  const count = await BookmarkEntity.count({
     where: {
       link: { id: link.id },
       user: { id: state.session.user.id },
@@ -184,7 +184,7 @@ export async function add({
     throw new Conflict()
   }
 
-  const bookmark = Bookmark.create({
+  const bookmark = BookmarkEntity.create({
     title: body.title,
     description: body.description,
     state: State.active,
@@ -211,7 +211,7 @@ export async function edit({
 }: RouterContext<never, BookmarkParams>) {
   assert(state.session)
 
-  const bookmark = await Bookmark.findOne({
+  const bookmark = await BookmarkEntity.findOne({
     where: { id: params.id, user: { id: state.session.user.id } },
   })
 
@@ -260,7 +260,7 @@ export async function remove({
 }: RouterContext<never, BookmarkParams>) {
   assert(state.session)
 
-  const bookmark = await Bookmark.findOne({
+  const bookmark = await BookmarkEntity.findOne({
     where: { id: params.id, user: { id: state.session.user.id } },
   })
 

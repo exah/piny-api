@@ -1,10 +1,10 @@
 import parse from 'co-body'
 import * as v from 'valibot'
-import { User } from '@piny/user/entities'
+import { UserEntity } from '@piny/user/entities'
 import { assert } from '@piny/tools/assert'
 import { Unauthorized, NotFound, Forbidden } from '@piny/error'
 import type { RouterContext } from '@piny/api/types/router'
-import { Session } from './entities'
+import { SessionEntity } from './entities'
 import { createRefreshedSession } from './functions'
 import { hash, createToken, getTokenExpiration } from './utils'
 import type { TokenResponse, MessageResponse } from './types'
@@ -32,7 +32,7 @@ export async function login({
 }: RouterContext<TokenResponse>) {
   const body = await parseLoginPayload(await parse.json(request))
 
-  const user = await User.findOne({
+  const user = await UserEntity.findOne({
     where: { name: body.user },
     select: ['id', 'pass'],
     relations: { sessions: true },
@@ -49,7 +49,7 @@ export async function login({
   const expiration = getTokenExpiration()
   const token = await createToken(user.name, expiration)
 
-  await Session.create({ token, expiration, user }).save()
+  await SessionEntity.create({ token, expiration, user }).save()
 
   response.status = 200
   response.body = { token }
@@ -65,7 +65,7 @@ export async function logout({
     throw new Unauthorized()
   }
 
-  const session = await Session.findOne({
+  const session = await SessionEntity.findOne({
     where: { token },
   })
 
@@ -73,7 +73,7 @@ export async function logout({
     throw new NotFound()
   }
 
-  await Session.remove(session)
+  await SessionEntity.remove(session)
 
   response.body = { message: '👋 Bye' }
 }
@@ -84,7 +84,7 @@ export async function signup({
 }: RouterContext<MessageResponse>) {
   const body = await parseSignupPayload(await parse.json(request))
 
-  const nameCount = await User.count({
+  const nameCount = await UserEntity.count({
     where: { name: body.user },
   })
 
@@ -92,7 +92,7 @@ export async function signup({
     throw new Forbidden('👯‍♀️ Use different `user`')
   }
 
-  const emailCount = await User.count({
+  const emailCount = await UserEntity.count({
     where: { email: body.email },
   })
 
@@ -100,7 +100,7 @@ export async function signup({
     throw new Forbidden('💌 Use different `email`')
   }
 
-  const user = User.create({
+  const user = UserEntity.create({
     name: body.user,
     email: body.email,
     pass: hash(body.user, body.pass),

@@ -1,14 +1,14 @@
 import { match } from 'lil-match'
 import { assert } from '@piny/tools/assert'
 import type { RouterContext } from '@piny/api/types/router'
-import { UserResponse } from './types'
+import { User } from './types'
 import { getSessionUserType, getUserByName } from './functions'
 
 export async function getUser({
   response,
   params,
   state,
-}: RouterContext<UserResponse, { user?: string }>) {
+}: RouterContext<User, { user?: string }>) {
   assert(state.session)
   assert(params.user)
 

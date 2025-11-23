@@ -9,24 +9,25 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { User } from '@piny/user/entities'
-import { Bookmark } from '@piny/bookmark/entities'
+import { UserEntity } from '@piny/user/entities'
+import { BookmarkEntity } from '@piny/bookmark/entities'
+import type { TagId } from './types'
 
 @Entity()
-export class Tag extends BaseEntity {
+export class TagEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: TagId
 
   @Column({ type: 'text', unique: true })
   name: string
 
-  @ManyToMany(() => User, (user) => user.tags)
+  @ManyToMany(() => UserEntity, (user) => user.tags)
   @JoinTable()
-  users: User[]
+  users: UserEntity[]
 
-  @ManyToMany(() => Bookmark, (bookmark) => bookmark.tags)
+  @ManyToMany(() => BookmarkEntity, (bookmark) => bookmark.tags)
   @JoinTable()
-  bookmarks: Bookmark[]
+  bookmarks: BookmarkEntity[]
 
   @CreateDateColumn()
   createdAt: Date

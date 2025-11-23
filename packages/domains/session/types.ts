@@ -1,5 +1,5 @@
-import * as v from 'valibot'
-import {
+import type * as v from 'valibot'
+import type {
   SessionIdSchema,
   SessionTokenSchema,
   LoginPayloadSchema,

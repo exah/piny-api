@@ -2,12 +2,12 @@ import { faker } from '@faker-js/faker'
 import { createUserMock } from '@piny/user/mocks'
 import { createLinkMock } from '@piny/link/mocks'
 import { createTagsListMock } from '@piny/tag/mocks'
-import { Bookmark } from './entities'
+import { BookmarkEntity } from './entities'
 
 interface BookmarkMock
   extends Partial<
     Pick<
-      Bookmark,
+      BookmarkEntity,
       'title' | 'description' | 'state' | 'privacy' | 'link' | 'user' | 'tags'
     >
   > {
@@ -30,7 +30,7 @@ export async function createBookmarkMock({
   const link = mockedLink ?? (await createLinkMock(linkURL))
   const tags = mockedTags ?? (await createTagsListMock(tagsList))
 
-  const bookmark = Bookmark.create({
+  const bookmark = BookmarkEntity.create({
     title,
     description,
     link,
