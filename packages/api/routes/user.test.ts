@@ -1,6 +1,7 @@
 import { expect, test, describe } from 'vitest'
 import { api } from '@piny/tests/api'
 import type { BookmarkEntity } from '@piny/bookmark/entities'
+import type { Tag } from '@piny/tag/types'
 import { createSessionMock } from '@piny/session/mocks'
 import { createUserMock } from '@piny/user/mocks'
 import { createBookmarkMock } from '@piny/bookmark/mocks'
@@ -82,12 +83,35 @@ describe('get user bookmarks', () => {
     )
   })
 
+  test('unauthorized -> public tags', async () => {
+    const user = await createUserMock()
+
+    await createBookmarkMock({ user, privacy: 'private' })
+    const publicBookmarks = [
+      await createBookmarkMock({ user, privacy: 'public' }),
+    ]
+
+    const tags = publicBookmarks.flatMap((item) => item.tags)
+    const json = await api.get(`/${user.name}/tags`).json<Tag[]>()
+
+    expect(json).toHaveLength(tags.length)
+    expect(json).toContainEqual({ id: tags[0].id, name: tags[0].name })
+  })
+
+  test('unauthorized -> public tags -> not found', async () => {
+    const user = await createUserMock()
+
+    await createBookmarkMock({ user, privacy: 'private' })
+    await expect(() => api.get(`/${user.name}/tags`)).rejects.toThrowError(
+      'Request failed with status code 404'
+    )
+  })
+
   test('authorized -> all bookmarks', async () => {
     const session = await createSessionMock()
     const bookmarks = [
       await createBookmarkMock({ user: session.user, privacy: 'private' }),
       await createBookmarkMock({ user: session.user, privacy: 'public' }),
-      await createBookmarkMock({ user: session.user, privacy: 'private' }),
     ]
 
     const json = await api
@@ -100,7 +124,25 @@ describe('get user bookmarks', () => {
     expect(json).toStrictEqual([
       expect.objectContaining({ id: bookmarks[0].id }),
       expect.objectContaining({ id: bookmarks[1].id }),
-      expect.objectContaining({ id: bookmarks[2].id }),
     ])
+  })
+
+  test('authorized -> all tags', async () => {
+    const session = await createSessionMock()
+
+    const bookmarks = [
+      await createBookmarkMock({ user: session.user, privacy: 'private' }),
+      await createBookmarkMock({ user: session.user, privacy: 'public' }),
+    ]
+
+    const tags = bookmarks.flatMap((item) => item.tags)
+    const json = await api
+      .get(`/${session.user.name}/tags`, {
+        headers: { Authorization: `Bearer ${session.token}` },
+      })
+      .json<Tag[]>()
+
+    expect(json).toHaveLength(tags.length)
+    expect(json).toContainEqual({ id: tags[0].id, name: tags[0].name })
   })
 })

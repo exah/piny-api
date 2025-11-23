@@ -26,6 +26,10 @@ export async function catchErrors(context: Context, next: Next) {
     const id = crypto.randomUUID()
     const responseError = getResponseError(error)
 
+    if (process.env.NODE_ENV !== 'test') {
+      console.error(responseError)
+    }
+
     context.throw(responseError.status, {
       id,
       code: responseError.code,

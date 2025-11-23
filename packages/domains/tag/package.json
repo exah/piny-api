@@ -11,6 +11,7 @@
     "./types": "./types.ts"
   },
   "dependencies": {
+    "lil-match": "^1.2.1",
     "typeorm": "^0.3.27",
     "valibot": "^1.1.0"
   },

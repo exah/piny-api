@@ -28,7 +28,7 @@ export async function createBookmarkMock({
 }: BookmarkMock = {}) {
   const user = mockedUser ?? (await createUserMock())
   const link = mockedLink ?? (await createLinkMock(linkURL))
-  const tags = mockedTags ?? (await createTagsListMock(tagsList))
+  const tags = mockedTags ?? (await createTagsListMock(tagsList, user))
 
   const bookmark = BookmarkEntity.create({
     title,
