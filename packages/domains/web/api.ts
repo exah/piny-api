@@ -1,10 +1,10 @@
 import * as YF from 'ya-fetch'
 import * as v from 'valibot'
-import { SomethingWentWrong } from '@piny/error'
-import { ERRORS_REGISTRY } from '@piny/error/registry'
+import { SomethingWentWrong } from '@piny/status/errors'
+import { ERRORS_REGISTRY } from '@piny/status/registry'
 import { ensure } from '@piny/tools/assert'
 import { getServerHostPort, getServerURL } from '@piny/api/config'
-import { ErrorResponseSchema } from '@piny/error/schemas'
+import { ErrorResponseSchema } from '@piny/status/schemas'
 
 export const api = YF.create({
   base: getServerURL(getServerHostPort()).toString(),

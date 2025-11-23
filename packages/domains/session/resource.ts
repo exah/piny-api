@@ -2,12 +2,13 @@ import parse from 'co-body'
 import * as v from 'valibot'
 import { UserEntity } from '@piny/user/entities'
 import { assert } from '@piny/tools/assert'
-import { Unauthorized, NotFound, Forbidden } from '@piny/error'
+import { Unauthorized, NotFound, Forbidden } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
+import type { MessageResponse } from '@piny/status/types'
 import { SessionEntity } from './entities'
 import { createRefreshedSession } from './functions'
 import { hash, createToken, getTokenExpiration } from './utils'
-import type { TokenResponse, MessageResponse } from './types'
+import type { TokenResponse } from './types'
 import {
   LoginPayloadSchema,
   SignupPayloadSchema,

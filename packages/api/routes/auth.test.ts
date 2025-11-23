@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { api } from '@piny/tests/api'
-import { Unauthorized } from '@piny/error'
+import { Unauthorized } from '@piny/status/errors'
 import type { User } from '@piny/user/types'
 import { createSessionMock } from '@piny/session/mocks'
 

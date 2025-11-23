@@ -18,10 +18,6 @@ export const SignupPayloadSchema = v.object({
   email: v.pipe(v.string(), v.email()),
 })
 
-export const MessageResponseSchema = v.object({
-  message: v.string(),
-})
-
 export const TokenResponseSchema = v.object({
   token: SessionTokenSchema,
 })

@@ -1,17 +1,17 @@
 import { UserEntity } from '@piny/user/entities'
 import type { RouterContext } from '@piny/api/types/router'
-import { NotFound } from '@piny/error'
-import type { TagsListResponse, Tag } from './types'
+import { NotFound } from '@piny/status/errors'
 import { getSessionUserType, getUserByName } from '@piny/user/functions'
-import type { UserType } from '@piny/user/types'
+import type { UserType, UserParams } from '@piny/user/types'
 import { ensure } from '@piny/tools/assert'
 import { getUserTags } from './functions'
+import type { TagsListResponse, Tag } from './types'
 
 export async function getTags({
   response,
   params,
   state,
-}: RouterContext<TagsListResponse, { user?: string }>) {
+}: RouterContext<TagsListResponse, UserParams>) {
   let user: UserEntity
   if (params.user) {
     user = await getUserByName(params.user)

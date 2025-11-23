@@ -1,14 +1,14 @@
 {
-  "name": "@piny/error",
+  "name": "@piny/status",
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./errors.ts",
     "./constants": "./constants/index.ts",
+    "./errors": "./errors.ts",
     "./middlewares": "./middlewares.ts",
+    "./registry": "./registry.ts",
     "./schemas": "./schemas.ts",
     "./types": "./types.ts",
-    "./registry": "./registry.ts",
     "./utils": "./utils.ts"
   },
   "dependencies": {

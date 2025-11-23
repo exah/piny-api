@@ -12,6 +12,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitAny": true,
+    "noErrorTruncation": true,
     "noEmit": true
   },
   "ts-node": {

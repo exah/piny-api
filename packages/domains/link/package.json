@@ -4,7 +4,9 @@
   "private": true,
   "exports": {
     "./entities": "./entities.ts",
-    "./mocks": "./mocks.ts"
+    "./mocks": "./mocks.ts",
+    "./schemas": "./schemas.ts",
+    "./types": "./types.ts"
   },
   "dependencies": {
     "typeorm": "^0.3.27"

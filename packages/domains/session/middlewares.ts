@@ -1,5 +1,5 @@
 import { SessionEntity } from '@piny/session/entities'
-import { Unauthorized } from '@piny/error'
+import { Unauthorized } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import { getPrefixedToken, validateToken } from './utils'
 

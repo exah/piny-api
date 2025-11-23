@@ -1,7 +1,7 @@
 import Koa from 'koa'
 import logger from 'koa-pino-logger'
 import pretty from 'pino-pretty'
-import { catchErrors } from '@piny/error/middlewares'
+import { catchErrors } from '@piny/status/middlewares'
 import { routes } from './routes'
 
 export const app = new Koa()

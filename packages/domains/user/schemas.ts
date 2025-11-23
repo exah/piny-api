@@ -15,3 +15,7 @@ export const UserResponseSchema = v.variant('type', [
     name: v.string(),
   }),
 ])
+
+export const UserParamsSchema = v.object({
+  user: v.optional(v.string()),
+})

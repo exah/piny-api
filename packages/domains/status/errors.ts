@@ -2,15 +2,6 @@ import type { ErrorCode } from './types'
 import { ErrorCodeSchema } from './schemas'
 import { getErrorCode } from './utils'
 
-export type ResponseErrorVariant =
-  | BadRequest
-  | Unauthorized
-  | Forbidden
-  | NotFound
-  | NotAcceptable
-  | Conflict
-  | SomethingWentWrong
-
 interface ResponseErrorOptions<Meta = never> {
   cause?: unknown
   meta?: Meta
@@ -53,7 +44,7 @@ export class BadRequest<Meta = never> extends ResponseError<Meta> {
 export class Unauthorized<Meta = never> extends ResponseError<Meta> {
   static code = ErrorCodeSchema.enum.UNAUTHORIZED
   status = 401
-  message = '🙅‍♂️ Not authorized'
+  message = '🙅‍♂️ Unauthorized'
 }
 
 export class Forbidden<Meta = never> extends ResponseError<Meta> {

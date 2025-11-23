@@ -3,59 +3,34 @@ import { assert } from '@piny/tools/assert'
 import { LinkEntity } from '@piny/link/entities'
 import { TagEntity } from '@piny/tag/entities'
 import { UserEntity } from '@piny/user/entities'
-import {
-  NotAcceptable,
-  BadRequest,
-  Forbidden,
-  Conflict,
-  NotFound,
-} from '@piny/error'
+import type { MessageResponse } from '@piny/status/types'
+import { Forbidden, Conflict, NotFound } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
+import type { UserParams } from '@piny/user/types'
+import type { Bookmark, BookmarkParams, BookmarksListResponse } from './types'
 import { Privacy, State } from './constants'
 import { BookmarkEntity } from './entities'
+import { createSchemaParser } from '@piny/tools/parse-schema'
+import {
+  CreateBookmarkPayloadSchema,
+  UpdateBookmarkPayloadSchema,
+  BookmarkSchema,
+  BookmarksListResponseSchema,
+} from './schemas'
 
-type UserParams = {
-  user: string
-}
+const parseBookmark = createSchemaParser(BookmarkSchema)
 
-type BookmarkParams = {
-  id: string
-}
+const parseBookmarksListResponse = createSchemaParser(
+  BookmarksListResponseSchema
+)
 
-interface BookmarkPayload {
-  url: string
-  privacy: Privacy
-  title?: string | null
-  description?: string | null
-  tags?: string[]
-  state?: State
-}
+const parseCreateBookmarkPayload = createSchemaParser(
+  CreateBookmarkPayloadSchema
+)
 
-function assertPartialBookmarkPayload(
-  input: unknown
-): asserts input is Partial<BookmarkPayload> {
-  if (input !== null && typeof input === 'object') return
-
-  throw new NotAcceptable()
-}
-
-function assertBookmarkPayload(
-  input: unknown
-): asserts input is BookmarkPayload {
-  assertPartialBookmarkPayload(input)
-
-  if (
-    typeof input.url === 'string' &&
-    typeof input.privacy === 'string' &&
-    input.privacy in Privacy
-  ) {
-    return
-  }
-
-  throw new BadRequest(
-    `🤦‍♂️ request body should contain 'url' and valid 'privacy' fields`
-  )
-}
+const parseUpdateBookmarkPayload = createSchemaParser(
+  UpdateBookmarkPayloadSchema
+)
 
 async function getLink(input: string): Promise<LinkEntity> {
   const url = new URL(input)
@@ -96,7 +71,7 @@ export async function all({
   response,
   params,
   state,
-}: RouterContext<never, UserParams>) {
+}: RouterContext<BookmarksListResponse, UserParams>) {
   let user: UserEntity
 
   if (params.user) {
@@ -141,37 +116,36 @@ export async function all({
   }
 
   response.status = 200
-  response.body = bookmarks
+  response.body = await parseBookmarksListResponse(bookmarks)
 }
 
 export async function get({
   response,
   params,
-}: RouterContext<never, BookmarkParams>) {
+}: RouterContext<Bookmark, BookmarkParams>) {
   const bookmark = await BookmarkEntity.findOne({
-    where: { id: params.id },
+    where: { id: params.bookmarkId },
     relations: { link: true, tags: true },
   })
 
-  if (bookmark === undefined) {
+  if (bookmark === null) {
     throw new NotFound()
   }
 
   response.status = 200
-  response.body = bookmark
+  response.body = await parseBookmark(bookmark)
 }
 
 export async function add({
   request,
   response,
   state,
-}: RouterContext<never, never>) {
-  const body = await parse.json(request)
-
+}: RouterContext<MessageResponse>) {
   assert(state.session)
-  assertBookmarkPayload(body)
 
+  const body = await parseCreateBookmarkPayload(await parse.json(request))
   const link = await getLink(body.url)
+
   const count = await BookmarkEntity.count({
     where: {
       link: { id: link.id },
@@ -208,20 +182,19 @@ export async function edit({
   response,
   params,
   state,
-}: RouterContext<never, BookmarkParams>) {
+}: RouterContext<MessageResponse, BookmarkParams>) {
+  assert(params.bookmarkId)
   assert(state.session)
 
   const bookmark = await BookmarkEntity.findOne({
-    where: { id: params.id, user: { id: state.session.user.id } },
+    where: { id: params.bookmarkId, user: { id: state.session.user.id } },
   })
 
   if (!bookmark) {
     throw new NotFound()
   }
 
-  const body = await parse.json(request)
-
-  assertPartialBookmarkPayload(body)
+  const body = await parseUpdateBookmarkPayload(await parse.json(request))
 
   if (body.title !== undefined) {
     bookmark.title = body.title
@@ -257,11 +230,12 @@ export async function remove({
   response,
   params,
   state,
-}: RouterContext<never, BookmarkParams>) {
+}: RouterContext<MessageResponse, BookmarkParams>) {
+  assert(params.bookmarkId)
   assert(state.session)
 
   const bookmark = await BookmarkEntity.findOne({
-    where: { id: params.id, user: { id: state.session.user.id } },
+    where: { id: params.bookmarkId, user: { id: state.session.user.id } },
   })
 
   if (!bookmark) {

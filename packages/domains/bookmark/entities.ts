@@ -14,11 +14,12 @@ import { LinkEntity } from '@piny/link/entities'
 import { TagEntity } from '@piny/tag/entities'
 
 import { Privacy, State } from './constants'
+import type { BookmarkId } from './types'
 
 @Entity()
 export class BookmarkEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: BookmarkId
 
   @Column({ type: 'text', nullable: true, default: null })
   title: string | null

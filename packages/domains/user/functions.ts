@@ -1,4 +1,4 @@
-import { NotFound } from '@piny/error'
+import { NotFound } from '@piny/status/errors'
 import { SessionEntity } from '@piny/session/entities'
 import { UserEntity } from './entities'
 import type { UserType } from './types'
