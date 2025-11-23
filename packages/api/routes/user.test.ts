@@ -2,6 +2,7 @@ import { expect, test, describe } from 'vitest'
 import { api } from '@piny/tests/api'
 import type { BookmarkEntity } from '@piny/bookmark/entities'
 import type { Tag } from '@piny/tag/types'
+import { Unauthorized, NotFound } from '@piny/error'
 import { createSessionMock } from '@piny/session/mocks'
 import { createUserMock } from '@piny/user/mocks'
 import { createBookmarkMock } from '@piny/bookmark/mocks'
@@ -11,7 +12,7 @@ describe('get user', () => {
     const user = await createUserMock()
 
     await expect(() => api.get(`/${user.name}`)).rejects.toThrowError(
-      'Request failed with status code 401'
+      Unauthorized
     )
   })
 
@@ -79,7 +80,7 @@ describe('get user bookmarks', () => {
     await createBookmarkMock({ user, privacy: 'private' })
 
     await expect(() => api.get(`/${user.name}/bookmarks`)).rejects.toThrowError(
-      'Request failed with status code 404'
+      NotFound
     )
   })
 
@@ -103,7 +104,7 @@ describe('get user bookmarks', () => {
 
     await createBookmarkMock({ user, privacy: 'private' })
     await expect(() => api.get(`/${user.name}/tags`)).rejects.toThrowError(
-      'Request failed with status code 404'
+      NotFound
     )
   })
 

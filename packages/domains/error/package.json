@@ -6,6 +6,9 @@
     ".": "./errors.ts",
     "./constants": "./constants/index.ts",
     "./middlewares": "./middlewares.ts",
+    "./schemas": "./schemas.ts",
+    "./types": "./types.ts",
+    "./registry": "./registry.ts",
     "./utils": "./utils.ts"
   },
   "dependencies": {

@@ -1,8 +1,9 @@
-import { Context, Next } from 'koa'
+import { Next } from 'koa'
 import { isValiError } from 'valibot'
-import crypto from 'crypto'
+import { RouterContext } from '@piny/api/types/router'
 import { BadRequest, SomethingWentWrong } from './errors'
-import { isResponseError } from './utils'
+import { createErrorId, isResponseError } from './utils'
+import type { ErrorResponse } from './types'
 
 function getResponseError(error: unknown) {
   if (isValiError(error)) {
@@ -19,22 +20,24 @@ function getResponseError(error: unknown) {
   }
 }
 
-export async function catchErrors(context: Context, next: Next) {
+export async function catchErrors(
+  context: RouterContext<ErrorResponse>,
+  next: Next
+) {
   try {
     await next()
   } catch (error) {
-    const id = crypto.randomUUID()
+    const id = await createErrorId()
     const responseError = getResponseError(error)
 
-    if (process.env.NODE_ENV !== 'test') {
-      console.error(responseError)
-    }
-
-    context.throw(responseError.status, {
+    context.response.status = responseError.status
+    context.response.body = {
       id,
       code: responseError.code,
       meta: responseError.meta,
       message: responseError.description || responseError.message,
-    })
+    }
+
+    context.app.emit('error', responseError, context)
   }
 }
