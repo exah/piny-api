@@ -5,7 +5,6 @@
   "exports": {
     "./assert": "./assert.ts",
     "./constants": "./constants/index.ts",
-    "./create-path": "./create-path.ts",
-    "./parse-schema": "./parse-schema.ts"
+    "./create-path": "./create-path.ts"
   }
 }

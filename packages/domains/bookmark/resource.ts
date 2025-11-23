@@ -1,4 +1,3 @@
-import parse from 'co-body'
 import { assert } from '@piny/tools/assert'
 import { LinkEntity } from '@piny/link/entities'
 import { TagEntity } from '@piny/tag/entities'
@@ -10,27 +9,12 @@ import type { UserParams } from '@piny/user/types'
 import type { Bookmark, BookmarkParams, BookmarksListResponse } from './types'
 import { Privacy, State } from './constants'
 import { BookmarkEntity } from './entities'
-import { createSchemaParser } from '@piny/tools/parse-schema'
 import {
   CreateBookmarkPayloadSchema,
   UpdateBookmarkPayloadSchema,
   BookmarkSchema,
   BookmarksListResponseSchema,
 } from './schemas'
-
-const parseBookmark = createSchemaParser(BookmarkSchema)
-
-const parseBookmarksListResponse = createSchemaParser(
-  BookmarksListResponseSchema
-)
-
-const parseCreateBookmarkPayload = createSchemaParser(
-  CreateBookmarkPayloadSchema
-)
-
-const parseUpdateBookmarkPayload = createSchemaParser(
-  UpdateBookmarkPayloadSchema
-)
 
 async function getLink(input: string): Promise<LinkEntity> {
   const url = new URL(input)
@@ -68,9 +52,9 @@ async function getTags(input: string[] = [], user: UserEntity) {
 }
 
 export async function all({
-  response,
   params,
   state,
+  reply,
 }: RouterContext<BookmarksListResponse, UserParams>) {
   let user: UserEntity
 
@@ -115,13 +99,12 @@ export async function all({
     throw new NotFound()
   }
 
-  response.status = 200
-  response.body = await parseBookmarksListResponse(bookmarks)
+  reply(200, BookmarksListResponseSchema, bookmarks)
 }
 
 export async function get({
-  response,
   params,
+  reply,
 }: RouterContext<Bookmark, BookmarkParams>) {
   const bookmark = await BookmarkEntity.findOne({
     where: { id: params.bookmarkId },
@@ -132,18 +115,17 @@ export async function get({
     throw new NotFound()
   }
 
-  response.status = 200
-  response.body = await parseBookmark(bookmark)
+  reply(200, BookmarkSchema, bookmark)
 }
 
 export async function add({
-  request,
+  receive,
   response,
   state,
 }: RouterContext<MessageResponse>) {
   assert(state.session)
 
-  const body = await parseCreateBookmarkPayload(await parse.json(request))
+  const body = await receive(CreateBookmarkPayloadSchema)
   const link = await getLink(body.url)
 
   const count = await BookmarkEntity.count({
@@ -178,7 +160,7 @@ export async function add({
 }
 
 export async function edit({
-  request,
+  receive,
   response,
   params,
   state,
@@ -194,7 +176,7 @@ export async function edit({
     throw new NotFound()
   }
 
-  const body = await parseUpdateBookmarkPayload(await parse.json(request))
+  const body = await receive(UpdateBookmarkPayloadSchema)
 
   if (body.title !== undefined) {
     bookmark.title = body.title

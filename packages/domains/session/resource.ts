@@ -1,4 +1,3 @@
-import parse from 'co-body'
 import * as v from 'valibot'
 import { UserEntity } from '@piny/user/entities'
 import { assert } from '@piny/tools/assert'
@@ -7,16 +6,16 @@ import type { RouterContext } from '@piny/api/types/router'
 import type { MessageResponse } from '@piny/status/types'
 import { SessionEntity } from './entities'
 import { createRefreshedSession } from './functions'
+import { MessageResponseSchema } from '@piny/status/schemas'
 import { hash, createToken, getTokenExpiration } from './utils'
 import type { TokenResponse } from './types'
+import { TokenResponseSchema } from './schemas'
 import {
   LoginPayloadSchema,
   SignupPayloadSchema,
   SessionTokenSchema,
 } from './schemas'
 
-const parseLoginPayload = v.parserAsync(LoginPayloadSchema)
-const parseSignupPayload = v.parserAsync(SignupPayloadSchema)
 const parseSessionToken = v.parserAsync(SessionTokenSchema)
 
 async function getToken(input: string | null, prefix = 'Bearer ') {
@@ -28,10 +27,10 @@ async function getToken(input: string | null, prefix = 'Bearer ') {
 }
 
 export async function login({
-  request,
+  receive,
   response,
 }: RouterContext<TokenResponse>) {
-  const body = await parseLoginPayload(await parse.json(request))
+  const body = await receive(LoginPayloadSchema)
 
   const user = await UserEntity.findOne({
     where: { name: body.user },
@@ -80,10 +79,10 @@ export async function logout({
 }
 
 export async function signup({
-  request,
-  response,
+  receive,
+  reply,
 }: RouterContext<MessageResponse>) {
-  const body = await parseSignupPayload(await parse.json(request))
+  const body = await receive(SignupPayloadSchema)
 
   const nameCount = await UserEntity.count({
     where: { name: body.user },
@@ -109,18 +108,18 @@ export async function signup({
 
   await user.save()
 
-  response.status = 200
-  response.body = { message: '👋 Welcome, please /login' }
+  reply(200, MessageResponseSchema, {
+    message: '👋 Welcome, please /login',
+  })
 }
 
 export async function refreshSession({
-  response,
   state,
+  reply,
 }: RouterContext<TokenResponse>) {
   assert(state.session)
 
   const session = await createRefreshedSession(state.session)
 
-  response.status = 200
-  response.body = { token: session.token }
+  reply(200, TokenResponseSchema, { token: session.token })
 }

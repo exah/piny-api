@@ -5,12 +5,13 @@ import { getSessionUserType, getUserByName } from '@piny/user/functions'
 import type { UserType, UserParams } from '@piny/user/types'
 import { ensure } from '@piny/tools/assert'
 import { getUserTags } from './functions'
-import type { TagsListResponse, Tag } from './types'
+import { TagsListResponseSchema } from './schemas'
+import type { TagsListResponse } from './types'
 
 export async function getTags({
-  response,
   params,
   state,
+  reply,
 }: RouterContext<TagsListResponse, UserParams>) {
   let user: UserEntity
   if (params.user) {
@@ -29,5 +30,5 @@ export async function getTags({
     throw new NotFound()
   }
 
-  response.body = tags.map((tag): Tag => ({ id: tag.id, name: tag.name }))
+  reply(200, TagsListResponseSchema, tags)
 }

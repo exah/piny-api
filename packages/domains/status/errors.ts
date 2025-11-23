@@ -11,6 +11,7 @@ interface ResponseErrorOptions<Meta = never> {
 
 export abstract class ResponseError<Meta = never> extends Error {
   name = 'ResponseError'
+  expose = true
 
   readonly code: ErrorCode
   readonly status: number
