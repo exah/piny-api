@@ -6,7 +6,6 @@ import type { RouterContext } from '@piny/api/types/router'
 import type { MessageResponse } from '@piny/status/types'
 import { SessionEntity } from './entities'
 import { createRefreshedSession } from './functions'
-import { MessageResponseSchema } from '@piny/status/schemas'
 import { hash, createToken, getTokenExpiration } from './utils'
 import type { TokenResponse } from './types'
 import { TokenResponseSchema } from './schemas'
@@ -57,7 +56,7 @@ export async function login({
 
 export async function logout({
   request,
-  response,
+  reply,
 }: RouterContext<MessageResponse>) {
   const token = await getToken(request.get('Authorization'))
 
@@ -75,7 +74,7 @@ export async function logout({
 
   await SessionEntity.remove(session)
 
-  response.body = { message: '👋 Bye' }
+  reply(200, '👋 Bye')
 }
 
 export async function signup({
@@ -108,9 +107,7 @@ export async function signup({
 
   await user.save()
 
-  reply(200, MessageResponseSchema, {
-    message: '👋 Welcome, please /login',
-  })
+  reply(200, '👋 Welcome, please /login')
 }
 
 export async function refreshSession({

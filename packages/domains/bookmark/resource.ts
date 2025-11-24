@@ -120,7 +120,7 @@ export async function get({
 
 export async function add({
   receive,
-  response,
+  reply,
   state,
 }: RouterContext<MessageResponse>) {
   assert(state.session)
@@ -155,13 +155,12 @@ export async function add({
 
   await bookmark.save()
 
-  response.status = 201
-  response.body = { message: '✨ Created' }
+  reply(201, '✨ Created')
 }
 
 export async function edit({
   receive,
-  response,
+  reply,
   params,
   state,
 }: RouterContext<MessageResponse, BookmarkParams>) {
@@ -204,13 +203,12 @@ export async function edit({
 
   await bookmark.save()
 
-  response.status = 200
-  response.body = { message: '💾 Saved' }
+  reply(200, '💾 Saved')
 }
 
 export async function remove({
-  response,
   params,
+  reply,
   state,
 }: RouterContext<MessageResponse, BookmarkParams>) {
   assert(params.bookmarkId)
@@ -228,6 +226,5 @@ export async function remove({
 
   await bookmark.save()
 
-  response.status = 200
-  response.body = { message: '🗑 Removed' }
+  reply(200, '🗑 Removed')
 }

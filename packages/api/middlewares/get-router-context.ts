@@ -1,6 +1,7 @@
 import Koa from 'koa'
 import parse from 'co-body'
 import * as v from 'valibot'
+import { MessageResponseSchema } from '@piny/status/schemas'
 import type { RouterContext, RouterSessionState } from '../types/router'
 
 export const getRouterContext: Koa.Middleware<
@@ -11,9 +12,16 @@ export const getRouterContext: Koa.Middleware<
     return v.parse(schema, await parse.json(this.request))
   }
 
-  context.reply = function replyJSON(status, schema, output) {
-    context.response.status = status
-    context.response.body = v.parse(schema, output)
+  context.reply = function replyJSON(status, schemaOrMessage, output) {
+    if (typeof schemaOrMessage === 'string') {
+      context.response.status = status
+      context.response.body = v.parse(MessageResponseSchema, {
+        message: schemaOrMessage,
+      })
+    } else {
+      context.response.status = status
+      context.response.body = v.parse(schemaOrMessage, output)
+    }
   }
 
   return next()
