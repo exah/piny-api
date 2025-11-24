@@ -1,118 +1,99 @@
-import parse from 'co-body'
-import { User } from '@piny/user/entities'
+import * as v from 'valibot'
+import { UserEntity } from '@piny/user/entities'
 import { assert } from '@piny/tools/assert'
-import {
-  BadRequest,
-  NotAuthorized,
-  NotFound,
-  Denied,
-} from '@piny/error/response'
+import { Unauthorized, NotFound, Forbidden } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
-import { Session } from './entities'
+import type { MessageResponse } from '@piny/status/types'
+import { SessionEntity } from './entities'
 import { createRefreshedSession } from './functions'
 import { hash, createToken, getTokenExpiration } from './utils'
+import type { TokenResponse } from './types'
+import { TokenResponseSchema } from './schemas'
+import {
+  LoginPayloadSchema,
+  SignupPayloadSchema,
+  SessionTokenSchema,
+} from './schemas'
 
-interface LoginPayload {
-  user: string
-  pass: string
-}
+const parseSessionToken = v.parserAsync(SessionTokenSchema)
 
-interface SignupPayload extends LoginPayload {
-  email: string
-}
-
-function assertLoginPayload(body: unknown): asserts body is LoginPayload {
-  if (body && typeof body === 'object' && 'user' in body && 'pass' in body)
-    return
-
-  throw new BadRequest(`🤦‍♂️ request body should contain 'user' and 'pass'`)
-}
-
-function assertSignupPayload(body: unknown): asserts body is SignupPayload {
-  assertLoginPayload(body)
-
-  if ('email' in body) return
-
-  throw new BadRequest(`🤦‍♂️ request body should contain 'email'`)
-}
-
-function getToken(input: string | null, prefix = 'Bearer ') {
+async function getToken(input: string | null, prefix = 'Bearer ') {
   if (input?.startsWith(prefix)) {
-    return input.slice(prefix.length)
+    return parseSessionToken(input.slice(prefix.length))
   }
 
   return null
 }
 
-export async function login({ request, response }: RouterContext) {
-  const body = await parse.json(request)
-
-  assertLoginPayload(body)
-
-  const user = await User.findOne({
+export async function login({
+  receive,
+  response,
+}: RouterContext<TokenResponse>) {
+  const body = await receive(LoginPayloadSchema)
+  const user = await UserEntity.findOne({
     where: { name: body.user },
     select: ['id', 'pass'],
     relations: { sessions: true },
   })
 
-  if (user == null) {
-    throw new NotFound()
-  }
+  assert(user, new NotFound())
 
   if (user.pass !== hash(body.user, body.pass)) {
-    throw new Denied()
+    throw new Forbidden()
   }
 
   const expiration = getTokenExpiration()
   const token = await createToken(user.name, expiration)
 
-  await Session.create({ token, expiration, user }).save()
+  await SessionEntity.create({ token, expiration, user }).save()
 
   response.status = 200
   response.body = { token }
 }
 
-export async function logout({ request, response }: RouterContext) {
-  const token = getToken(request.get('Authorization'))
+export async function logout({
+  request,
+  reply,
+}: RouterContext<MessageResponse>) {
+  const token = await getToken(request.get('Authorization'))
 
-  if (!token) {
-    throw new NotAuthorized()
+  if (token === null) {
+    throw new Unauthorized()
   }
 
-  const session = await Session.findOne({
+  const session = await SessionEntity.findOne({
     where: { token },
   })
 
-  if (!session) {
-    throw new NotFound()
-  }
+  assert(session, new NotFound())
+  await SessionEntity.remove(session)
 
-  await Session.remove(session)
-
-  response.body = { message: '👋 Bye' }
+  reply(200, '👋 Bye')
 }
 
-export async function signup({ request, response }: RouterContext) {
-  const body = await parse.json(request)
-  assertSignupPayload(body)
+export async function signup({
+  receive,
+  reply,
+}: RouterContext<MessageResponse>) {
+  const body = await receive(SignupPayloadSchema)
 
-  const nameCount = await User.count({
+  const nameCount = await UserEntity.count({
     where: { name: body.user },
   })
 
   if (nameCount > 0) {
-    throw new Denied('👯‍♀️ Use different `user`')
+    throw new Forbidden('👯‍♀️ Use different `user`')
   }
 
-  const emailCount = await User.count({
+  const emailCount = await UserEntity.count({
     where: { email: body.email },
   })
 
   if (emailCount > 0) {
-    throw new Denied('💌 Use different `email`')
+    throw new Forbidden('💌 Use different `email`')
   }
 
-  const user = User.create({
+  const user = UserEntity.create({
     name: body.user,
     email: body.email,
     pass: hash(body.user, body.pass),
@@ -120,15 +101,16 @@ export async function signup({ request, response }: RouterContext) {
 
   await user.save()
 
-  response.status = 200
-  response.body = { message: '👋 Welcome, please /login' }
+  reply(200, '👋 Welcome, please /login')
 }
 
-export async function refreshSession({ response, state }: RouterContext) {
-  assert(state.session)
+export async function refreshSession({
+  state,
+  reply,
+}: RouterContext<TokenResponse>) {
+  assert(state.session, new Forbidden())
 
   const session = await createRefreshedSession(state.session)
 
-  response.status = 200
-  response.body = { token: session.token }
+  reply(200, TokenResponseSchema, { token: session.token })
 }

@@ -1,0 +1,8 @@
+{
+  "name": "@piny/web",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./api": "./api.ts"
+  }
+}

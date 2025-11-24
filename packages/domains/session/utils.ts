@@ -1,12 +1,12 @@
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
+import * as v from 'valibot'
 import { Time } from '@piny/tools/constants'
+import { SessionTokenSchema } from './schemas'
+import { ensure } from '@piny/tools/assert'
+import type { SessionToken } from './types'
 
-const key = process.env.KEY
-
-if (typeof key !== 'string') {
-  throw new Error(`Please, add 'KEY' env variable`)
-}
+const key = ensure(process.env.KEY, new Error(`Please, add 'KEY' env variable`))
 
 export const hash = (name: string, pass: string) =>
   crypto
@@ -15,7 +15,7 @@ export const hash = (name: string, pass: string) =>
     .digest('hex')
 
 export const createToken = (iss: string, exp: number) =>
-  new Promise<string>((resolve, reject) =>
+  new Promise<SessionToken>((resolve, reject) =>
     jwt.sign(
       { iss, iat: Date.now(), exp },
       key,
@@ -28,25 +28,32 @@ export const createToken = (iss: string, exp: number) =>
         if (result === undefined) {
           return reject(new TypeError('sign result is undefined'))
         } else {
-          return resolve(result)
+          return resolve(v.parseAsync(SessionTokenSchema, result))
         }
       }
     )
   )
 
 export const validateToken = (input: string) =>
-  new Promise<string | object>((resolve, reject) =>
+  new Promise<boolean>((resolve, reject) =>
     jwt.verify(input, key, { algorithms: ['HS256'] }, (error, result) => {
       if (error) {
         return reject(error)
       }
 
-      if (result === undefined) {
-        return reject(new TypeError('verify result is undefined'))
-      } else {
-        return resolve(result)
-      }
+      return resolve(result !== undefined)
     })
   )
+
+export async function getPrefixedToken(
+  input: string | null,
+  prefix = 'Bearer '
+) {
+  if (input?.startsWith(prefix)) {
+    return v.parseAsync(SessionTokenSchema, input.slice(prefix.length))
+  }
+
+  return null
+}
 
 export const getTokenExpiration = (now = Date.now()) => now + 4 * Time.WEEK

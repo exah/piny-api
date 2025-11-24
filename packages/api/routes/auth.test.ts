@@ -1,7 +1,9 @@
 import { expect, test } from 'vitest'
 import { api } from '@piny/tests/api'
-import type { User } from '@piny/user/entities'
+import { Unauthorized } from '@piny/status/errors'
 import { createSessionMock } from '@piny/session/mocks'
+import type { User } from '@piny/user/types'
+import type { TokenResponse } from '@piny/session/types'
 
 test('refresh session', async ({ annotate }) => {
   const initialSession = await createSessionMock()
@@ -18,7 +20,7 @@ test('refresh session', async ({ annotate }) => {
 
   expect(initialUser.id).toEqual(initialSession.user.id)
   expect(initialUser.name).toEqual(initialSession.user.name)
-  expect(initialUser.email).toEqual(initialSession.user.email)
+  expect(initialUser.type).toBe('current')
 
   await annotate('session token is updated')
 
@@ -26,7 +28,7 @@ test('refresh session', async ({ annotate }) => {
     .post('/refresh-session', {
       headers: { Authorization: `Bearer ${initialSession.token}` },
     })
-    .json<{ token: string }>()
+    .json<TokenResponse>()
 
   expect(refreshSession.token).toEqual(expect.any(String))
   expect(refreshSession.token).not.toEqual(initialSession.token)
@@ -34,7 +36,7 @@ test('refresh session', async ({ annotate }) => {
   await annotate('initial session token is expired')
 
   await expect(() => requestUser(initialSession.token)).rejects.toThrowError(
-    'Request failed with status code 401'
+    Unauthorized
   )
 
   await annotate('updated session token returns the same user')

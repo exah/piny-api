@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
-import { Link } from './entities'
+import { LinkEntity } from './entities'
 
 export function createLinkMock(url = faker.internet.url()) {
-  const link = Link.create({
+  const link = LinkEntity.create({
     url,
   })
 

@@ -1,106 +1,30 @@
-import parse from 'co-body'
 import { assert } from '@piny/tools/assert'
-import { Link } from '@piny/link/entities'
-import { Tag } from '@piny/tag/entities'
-import { User } from '@piny/user/entities'
-import {
-  NotAcceptable,
-  BadRequest,
-  Denied,
-  Conflict,
-  NotFound,
-} from '@piny/error/response'
+import { UserEntity } from '@piny/user/entities'
+import type { MessageResponse } from '@piny/status/types'
+import { Forbidden, Conflict, NotFound } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
+import type { UserParams } from '@piny/user/types'
+import { getLinkForURL } from '@piny/link/functions'
+import { getOrCreateTags } from '@piny/tag/functions'
+import type { Bookmark, BookmarkParams, BookmarksListResponse } from './types'
 import { Privacy, State } from './constants'
-import { Bookmark } from './entities'
-
-type UserParams = {
-  user: string
-}
-
-type BookmarkParams = {
-  id: string
-}
-
-interface BookmarkPayload {
-  url: string
-  privacy: Privacy
-  title?: string | null
-  description?: string | null
-  tags?: string[]
-  state?: State
-}
-
-function assertPartialBookmarkPayload(
-  input: unknown
-): asserts input is Partial<BookmarkPayload> {
-  if (input !== null && typeof input === 'object') return
-
-  throw new NotAcceptable()
-}
-
-function assertBookmarkPayload(
-  input: unknown
-): asserts input is BookmarkPayload {
-  assertPartialBookmarkPayload(input)
-
-  if (
-    typeof input.url === 'string' &&
-    typeof input.privacy === 'string' &&
-    input.privacy in Privacy
-  ) {
-    return
-  }
-
-  throw new BadRequest(
-    `🤦‍♂️ request body should contain 'url' and valid 'privacy' fields`
-  )
-}
-
-async function getLink(input: string): Promise<Link> {
-  const url = new URL(input)
-
-  const foundLink = await Link.findOne({
-    where: { url: url.toString() },
-  })
-
-  const link = foundLink ?? Link.create({ url: url.toString() })
-
-  return link.save()
-}
-
-async function getTags(input: string[] = [], user: User) {
-  const nextTags: Tag[] = []
-
-  for (const name of input) {
-    const foundTag = await Tag.findOne({
-      where: { name },
-      relations: { users: true },
-    })
-
-    const tag = foundTag ?? Tag.create({ name })
-
-    if (tag.users) {
-      tag.users.push(user)
-    } else {
-      tag.users = [user]
-    }
-
-    nextTags.push(await tag.save())
-  }
-
-  return nextTags
-}
+import { BookmarkEntity } from './entities'
+import {
+  CreateBookmarkPayloadSchema,
+  UpdateBookmarkPayloadSchema,
+  BookmarkSchema,
+  BookmarksListResponseSchema,
+} from './schemas'
 
 export async function all({
-  response,
   params,
   state,
-}: RouterContext<UserParams>) {
-  let user: User
+  reply,
+}: RouterContext<BookmarksListResponse, UserParams>) {
+  let user: UserEntity
 
   if (params.user) {
-    const foundUser = await User.findOne({
+    const foundUser = await UserEntity.findOne({
       where: { name: params.user },
       select: ['id'],
     })
@@ -113,11 +37,11 @@ export async function all({
   } else if (state.session) {
     user = state.session.user
   } else {
-    throw new Denied()
+    throw new Forbidden()
   }
 
   const where: {
-    user: Pick<User, 'id'>
+    user: Pick<UserEntity, 'id'>
     state: State
     privacy?: Privacy
   } = {
@@ -130,7 +54,7 @@ export async function all({
     delete where.privacy
   }
 
-  const bookmarks = await Bookmark.find({
+  const bookmarks = await BookmarkEntity.find({
     where,
     relations: { link: true, tags: true },
     order: { createdAt: 'DESC' },
@@ -140,32 +64,33 @@ export async function all({
     throw new NotFound()
   }
 
-  response.status = 200
-  response.body = bookmarks
+  reply(200, BookmarksListResponseSchema, bookmarks)
 }
 
-export async function get({ response, params }: RouterContext<BookmarkParams>) {
-  const bookmark = await Bookmark.findOne({
-    where: { id: params.id },
+export async function get({
+  params,
+  reply,
+}: RouterContext<Bookmark, BookmarkParams>) {
+  const bookmark = await BookmarkEntity.findOne({
+    where: { id: params.bookmarkId },
     relations: { link: true, tags: true },
   })
 
-  if (bookmark === undefined) {
-    throw new NotFound()
-  }
-
-  response.status = 200
-  response.body = bookmark
+  assert(bookmark, new NotFound())
+  reply(200, BookmarkSchema, bookmark)
 }
 
-export async function add({ request, response, state }: RouterContext<never>) {
-  const body = await parse.json(request)
-
+export async function add({
+  receive,
+  reply,
+  state,
+}: RouterContext<MessageResponse>) {
   assert(state.session)
-  assertBookmarkPayload(body)
 
-  const link = await getLink(body.url)
-  const count = await Bookmark.count({
+  const body = await receive(CreateBookmarkPayloadSchema)
+  const link = await getLinkForURL(body.url)
+
+  const count = await BookmarkEntity.count({
     where: {
       link: { id: link.id },
       user: { id: state.session.user.id },
@@ -177,7 +102,7 @@ export async function add({ request, response, state }: RouterContext<never>) {
     throw new Conflict()
   }
 
-  const bookmark = Bookmark.create({
+  const bookmark = BookmarkEntity.create({
     title: body.title,
     description: body.description,
     state: State.active,
@@ -187,34 +112,30 @@ export async function add({ request, response, state }: RouterContext<never>) {
   })
 
   if (Array.isArray(body.tags)) {
-    bookmark.tags = await getTags(body.tags, state.session.user)
+    bookmark.tags = await getOrCreateTags(body.tags, state.session.user)
   }
 
   await bookmark.save()
 
-  response.status = 201
-  response.body = { message: '✨ Created' }
+  reply(201, '✨ Created')
 }
 
 export async function edit({
-  request,
-  response,
+  receive,
+  reply,
   params,
   state,
-}: RouterContext<BookmarkParams>) {
-  assert(state.session)
+}: RouterContext<MessageResponse, BookmarkParams>) {
+  assert(state.session, new Forbidden())
+  assert(params.bookmarkId, new NotFound())
 
-  const bookmark = await Bookmark.findOne({
-    where: { id: params.id, user: { id: state.session.user.id } },
+  const bookmark = await BookmarkEntity.findOne({
+    where: { id: params.bookmarkId, user: { id: state.session.user.id } },
   })
 
-  if (!bookmark) {
-    throw new NotFound()
-  }
+  assert(bookmark, new NotFound())
 
-  const body = await parse.json(request)
-
-  assertPartialBookmarkPayload(body)
+  const body = await receive(UpdateBookmarkPayloadSchema)
 
   if (body.title !== undefined) {
     bookmark.title = body.title
@@ -224,47 +145,43 @@ export async function edit({
     bookmark.description = body.description
   }
 
-  if (typeof body.privacy === 'string' && body.privacy in Privacy) {
+  if (body.privacy !== undefined) {
     bookmark.privacy = body.privacy
   }
 
-  if (typeof body.url === 'string') {
-    bookmark.link = await getLink(body.url)
+  if (body.url !== undefined) {
+    bookmark.link = await getLinkForURL(body.url)
   }
 
-  if (typeof body.state === 'string' && body.state in State) {
+  if (body.state !== undefined) {
     bookmark.state = body.state
   }
 
-  if (Array.isArray(body.tags)) {
-    bookmark.tags = await getTags(body.tags, state.session.user)
+  if (body.tags !== undefined) {
+    bookmark.tags = await getOrCreateTags(body.tags, state.session.user)
   }
 
   await bookmark.save()
 
-  response.status = 200
-  response.body = { message: '💾 Saved' }
+  reply(200, '💾 Saved')
 }
 
 export async function remove({
-  response,
   params,
+  reply,
   state,
-}: RouterContext<BookmarkParams>) {
-  assert(state.session)
+}: RouterContext<MessageResponse, BookmarkParams>) {
+  assert(state.session, new Forbidden())
+  assert(params.bookmarkId, new NotFound())
 
-  const bookmark = await Bookmark.findOne({
-    where: { id: params.id, user: { id: state.session.user.id } },
+  const bookmark = await BookmarkEntity.findOne({
+    where: { id: params.bookmarkId, user: { id: state.session.user.id } },
   })
 
-  if (!bookmark) {
-    throw new NotFound()
-  }
+  assert(bookmark, new NotFound())
 
   bookmark.state = State.removed
-
   await bookmark.save()
 
-  response.status = 200
-  response.body = { message: '🗑 Removed' }
+  reply(200, '🗑 Removed')
 }

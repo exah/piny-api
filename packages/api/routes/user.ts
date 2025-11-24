@@ -7,6 +7,6 @@ import { Path } from '../constants'
 
 export const userRoutes = new Router()
 
-userRoutes.get(Path.USER, auth.verify, user.get)
+userRoutes.get(Path.USER, auth.verify, user.getUser)
 userRoutes.get(Path.USER_BOOKMARKS, auth.session, bookmark.all)
-userRoutes.get(Path.USER_TAGS, auth.verify, tag.all)
+userRoutes.get(Path.USER_TAGS, auth.session, tag.getTags)

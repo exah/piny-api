@@ -1,34 +1,33 @@
+import { match } from 'lil-match'
 import { assert } from '@piny/tools/assert'
 import type { RouterContext } from '@piny/api/types/router'
-import { NotFound } from '@piny/error/response'
-import { User } from './entities'
+import type { User, UserParams } from './types'
+import { Forbidden, NotFound } from '@piny/status/errors'
+import { UserSchema } from './schemas'
+import { getSessionUserType, getUserByName } from './functions'
 
-export async function get({
-  response,
+export async function getUser({
   params,
   state,
-}: RouterContext<{ user: string }>) {
-  assert(state.session)
+  reply,
+}: RouterContext<User, UserParams>) {
+  assert(state.session, new Forbidden())
+  assert(params.user, new NotFound())
 
-  const select: (keyof User)[] = ['id', 'name']
-  if (state.session.user.name === params.user) {
-    select.push('email')
-  }
+  const user = await getUserByName(params.user)
+  const data = match(getSessionUserType(state.session, user))
+    .with('current', (type) => ({
+      id: user.id,
+      type,
+      name: user.name,
+      email: user.email,
+    }))
+    .with('other', (type) => ({
+      id: user.id,
+      type,
+      name: user.name,
+    }))
+    .exhaustive('Invalid user type')
 
-  const user = await User.findOne({
-    where: { name: params.user },
-    select,
-  })
-
-  if (user === null) {
-    throw new NotFound('User not found')
-  }
-
-  const exposedUser: Partial<User> = { ...user }
-
-  if (state.session.user.id !== user.id) {
-    delete exposedUser.email
-  }
-
-  response.body = exposedUser
+  reply(200, UserSchema, data)
 }

@@ -18,6 +18,6 @@ jobs:
       - name: Check types
         run: npx tsc
       - name: Check tests
-        run: KEY="secret-key" npm -w @piny/tests t
+        run: KEY="secret-key" npm -w @piny/tests run api
       - name: Check API server
         run: KEY="secret-key" npm -w @piny/api t

@@ -1,8 +1,9 @@
 import { createUserMock } from '@piny/user/mocks'
-import { Session } from './entities'
+import { SessionEntity } from './entities'
 import { createToken, getTokenExpiration } from './utils'
 
-interface SessionMock extends Partial<Pick<Session, 'user' | 'expiration'>> {}
+interface SessionMock
+  extends Partial<Pick<SessionEntity, 'user' | 'expiration'>> {}
 
 export async function createSessionMock({
   user: mockedUser,
@@ -11,7 +12,7 @@ export async function createSessionMock({
   const user = mockedUser ?? (await createUserMock())
   const token = await createToken(user.name, expiration)
 
-  const session = Session.create({
+  const session = SessionEntity.create({
     user,
     token,
     expiration,

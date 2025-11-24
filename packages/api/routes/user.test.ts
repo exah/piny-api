@@ -1,6 +1,8 @@
 import { expect, test, describe } from 'vitest'
 import { api } from '@piny/tests/api'
-import type { Bookmark } from '@piny/bookmark/entities'
+import type { Bookmark } from '@piny/bookmark/types'
+import type { Tag } from '@piny/tag/types'
+import { Unauthorized, NotFound } from '@piny/status/errors'
 import { createSessionMock } from '@piny/session/mocks'
 import { createUserMock } from '@piny/user/mocks'
 import { createBookmarkMock } from '@piny/bookmark/mocks'
@@ -10,7 +12,7 @@ describe('get user', () => {
     const user = await createUserMock()
 
     await expect(() => api.get(`/${user.name}`)).rejects.toThrowError(
-      'Request failed with status code 401'
+      Unauthorized
     )
   })
 
@@ -23,6 +25,7 @@ describe('get user', () => {
     expect(response.status).toBe(200)
     expect(await response.json()).toStrictEqual({
       id: expect.any(String),
+      type: 'current',
       name: session.user.name,
       email: session.user.email,
     })
@@ -39,6 +42,7 @@ describe('get user', () => {
     expect(response.status).toBe(200)
     expect(await response.json()).toStrictEqual({
       id: expect.any(String),
+      type: 'other',
       name: user.name,
     })
   })
@@ -74,7 +78,37 @@ describe('get user bookmarks', () => {
     await createBookmarkMock({ user, privacy: 'private' })
 
     await expect(() => api.get(`/${user.name}/bookmarks`)).rejects.toThrowError(
-      'Request failed with status code 404'
+      NotFound
+    )
+  })
+
+  test('unauthorized -> public tags', async () => {
+    const user = await createUserMock()
+
+    await createBookmarkMock({ user, privacy: 'private' })
+    const publicBookmarks = [
+      await createBookmarkMock({ user, privacy: 'public' }),
+    ]
+
+    const tags = new Set(
+      publicBookmarks.flatMap((item) => item.tags).map((tag) => tag.name)
+    )
+
+    const json = await api.get(`/${user.name}/tags`).json<Tag[]>()
+
+    expect(json).toHaveLength(tags.size)
+    expect(json).toContainEqual({
+      id: publicBookmarks[0].tags[0].id,
+      name: publicBookmarks[0].tags[0].name,
+    })
+  })
+
+  test('unauthorized -> public tags -> not found', async () => {
+    const user = await createUserMock()
+
+    await createBookmarkMock({ user, privacy: 'private' })
+    await expect(() => api.get(`/${user.name}/tags`)).rejects.toThrowError(
+      NotFound
     )
   })
 
@@ -83,7 +117,6 @@ describe('get user bookmarks', () => {
     const bookmarks = [
       await createBookmarkMock({ user: session.user, privacy: 'private' }),
       await createBookmarkMock({ user: session.user, privacy: 'public' }),
-      await createBookmarkMock({ user: session.user, privacy: 'private' }),
     ]
 
     const json = await api
@@ -96,7 +129,31 @@ describe('get user bookmarks', () => {
     expect(json).toStrictEqual([
       expect.objectContaining({ id: bookmarks[0].id }),
       expect.objectContaining({ id: bookmarks[1].id }),
-      expect.objectContaining({ id: bookmarks[2].id }),
     ])
+  })
+
+  test('authorized -> all tags', async () => {
+    const session = await createSessionMock()
+
+    const bookmarks = [
+      await createBookmarkMock({ user: session.user, privacy: 'private' }),
+      await createBookmarkMock({ user: session.user, privacy: 'public' }),
+    ]
+
+    const tags = new Set(
+      bookmarks.flatMap((item) => item.tags).map((tag) => tag.name)
+    )
+
+    const json = await api
+      .get(`/${session.user.name}/tags`, {
+        headers: { Authorization: `Bearer ${session.token}` },
+      })
+      .json<Tag[]>()
+
+    expect(json).toHaveLength(tags.size)
+    expect(json).toContainEqual({
+      id: bookmarks[0].tags[0].id,
+      name: bookmarks[0].tags[0].name,
+    })
   })
 })

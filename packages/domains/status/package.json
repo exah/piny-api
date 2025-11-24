@@ -1,0 +1,17 @@
+{
+  "name": "@piny/status",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./constants": "./constants/index.ts",
+    "./errors": "./errors.ts",
+    "./middlewares": "./middlewares.ts",
+    "./registry": "./registry.ts",
+    "./schemas": "./schemas.ts",
+    "./types": "./types.ts",
+    "./utils": "./utils.ts"
+  },
+  "dependencies": {
+    "valibot": "^1.1.0"
+  }
+}
