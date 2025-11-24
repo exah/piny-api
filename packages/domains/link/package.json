@@ -4,6 +4,7 @@
   "private": true,
   "exports": {
     "./entities": "./entities.ts",
+    "./functions": "./functions.ts",
     "./mocks": "./mocks.ts",
     "./schemas": "./schemas.ts",
     "./types": "./types.ts"

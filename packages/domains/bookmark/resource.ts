@@ -1,11 +1,11 @@
 import { assert } from '@piny/tools/assert'
-import { LinkEntity } from '@piny/link/entities'
-import { TagEntity } from '@piny/tag/entities'
 import { UserEntity } from '@piny/user/entities'
 import type { MessageResponse } from '@piny/status/types'
 import { Forbidden, Conflict, NotFound } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import type { UserParams } from '@piny/user/types'
+import { getLinkForURL } from '@piny/link/functions'
+import { getOrCreateTags } from '@piny/tag/functions'
 import type { Bookmark, BookmarkParams, BookmarksListResponse } from './types'
 import { Privacy, State } from './constants'
 import { BookmarkEntity } from './entities'
@@ -15,41 +15,6 @@ import {
   BookmarkSchema,
   BookmarksListResponseSchema,
 } from './schemas'
-
-async function getLink(input: string): Promise<LinkEntity> {
-  const url = new URL(input)
-
-  const foundLink = await LinkEntity.findOne({
-    where: { url: url.toString() },
-  })
-
-  const link = foundLink ?? LinkEntity.create({ url: url.toString() })
-
-  return link.save()
-}
-
-async function getTags(input: string[] = [], user: UserEntity) {
-  const nextTags: TagEntity[] = []
-
-  for (const name of input) {
-    const foundTag = await TagEntity.findOne({
-      where: { name },
-      relations: { users: true },
-    })
-
-    const tag = foundTag ?? TagEntity.create({ name })
-
-    if (tag.users) {
-      tag.users.push(user)
-    } else {
-      tag.users = [user]
-    }
-
-    nextTags.push(await tag.save())
-  }
-
-  return nextTags
-}
 
 export async function all({
   params,
@@ -126,7 +91,7 @@ export async function add({
   assert(state.session)
 
   const body = await receive(CreateBookmarkPayloadSchema)
-  const link = await getLink(body.url)
+  const link = await getLinkForURL(body.url)
 
   const count = await BookmarkEntity.count({
     where: {
@@ -150,7 +115,7 @@ export async function add({
   })
 
   if (Array.isArray(body.tags)) {
-    bookmark.tags = await getTags(body.tags, state.session.user)
+    bookmark.tags = await getOrCreateTags(body.tags, state.session.user)
   }
 
   await bookmark.save()
@@ -185,20 +150,20 @@ export async function edit({
     bookmark.description = body.description
   }
 
-  if (typeof body.privacy === 'string' && body.privacy in Privacy) {
+  if (body.privacy !== undefined) {
     bookmark.privacy = body.privacy
   }
 
-  if (typeof body.url === 'string') {
-    bookmark.link = await getLink(body.url)
+  if (body.url !== undefined) {
+    bookmark.link = await getLinkForURL(body.url)
   }
 
-  if (typeof body.state === 'string' && body.state in State) {
+  if (body.state !== undefined) {
     bookmark.state = body.state
   }
 
-  if (Array.isArray(body.tags)) {
-    bookmark.tags = await getTags(body.tags, state.session.user)
+  if (body.tags !== undefined) {
+    bookmark.tags = await getOrCreateTags(body.tags, state.session.user)
   }
 
   await bookmark.save()
@@ -223,7 +188,6 @@ export async function remove({
   }
 
   bookmark.state = State.removed
-
   await bookmark.save()
 
   reply(200, '🗑 Removed')
