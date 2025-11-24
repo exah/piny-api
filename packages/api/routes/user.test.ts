@@ -1,6 +1,6 @@
 import { expect, test, describe } from 'vitest'
 import { api } from '@piny/tests/api'
-import type { BookmarkEntity } from '@piny/bookmark/entities'
+import type { Bookmark } from '@piny/bookmark/types'
 import type { Tag } from '@piny/tag/types'
 import { Unauthorized, NotFound } from '@piny/status/errors'
 import { createSessionMock } from '@piny/session/mocks'
@@ -61,9 +61,7 @@ describe('get user bookmarks', () => {
       await createBookmarkMock({ user, privacy: 'public' }),
     ]
 
-    const json = await api
-      .get(`/${user.name}/bookmarks`)
-      .json<BookmarkEntity[]>()
+    const json = await api.get(`/${user.name}/bookmarks`).json<Bookmark[]>()
 
     expect(json).toHaveLength(publicBookmarks.length)
     expect(json).toStrictEqual([
@@ -92,11 +90,17 @@ describe('get user bookmarks', () => {
       await createBookmarkMock({ user, privacy: 'public' }),
     ]
 
-    const tags = publicBookmarks.flatMap((item) => item.tags)
+    const tags = new Set(
+      publicBookmarks.flatMap((item) => item.tags).map((tag) => tag.name)
+    )
+
     const json = await api.get(`/${user.name}/tags`).json<Tag[]>()
 
-    expect(json).toHaveLength(tags.length)
-    expect(json).toContainEqual({ id: tags[0].id, name: tags[0].name })
+    expect(json).toHaveLength(tags.size)
+    expect(json).toContainEqual({
+      id: publicBookmarks[0].tags[0].id,
+      name: publicBookmarks[0].tags[0].name,
+    })
   })
 
   test('unauthorized -> public tags -> not found', async () => {
@@ -119,7 +123,7 @@ describe('get user bookmarks', () => {
       .get(`/${session.user.name}/bookmarks`, {
         headers: { Authorization: `Bearer ${session.token}` },
       })
-      .json<BookmarkEntity[]>()
+      .json<Bookmark[]>()
 
     expect(json).toHaveLength(bookmarks.length)
     expect(json).toStrictEqual([
@@ -136,14 +140,20 @@ describe('get user bookmarks', () => {
       await createBookmarkMock({ user: session.user, privacy: 'public' }),
     ]
 
-    const tags = bookmarks.flatMap((item) => item.tags)
+    const tags = new Set(
+      bookmarks.flatMap((item) => item.tags).map((tag) => tag.name)
+    )
+
     const json = await api
       .get(`/${session.user.name}/tags`, {
         headers: { Authorization: `Bearer ${session.token}` },
       })
       .json<Tag[]>()
 
-    expect(json).toHaveLength(tags.length)
-    expect(json).toContainEqual({ id: tags[0].id, name: tags[0].name })
+    expect(json).toHaveLength(tags.size)
+    expect(json).toContainEqual({
+      id: bookmarks[0].tags[0].id,
+      name: bookmarks[0].tags[0].name,
+    })
   })
 })

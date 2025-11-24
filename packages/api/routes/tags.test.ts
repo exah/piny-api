@@ -2,6 +2,7 @@ import { expect, test } from 'vitest'
 import { api } from '@piny/tests/api'
 import { createSessionMock } from '@piny/session/mocks'
 import { createBookmarkMock } from '@piny/bookmark/mocks'
+import type { Tag } from '@piny/tag/types'
 
 test('get tags', async () => {
   const session = await createSessionMock()
@@ -13,12 +14,19 @@ test('get tags', async () => {
     await createBookmarkMock({ user: session.user, privacy: 'private' }),
   ]
 
-  const tags = bookmarks.flatMap((item) => item.tags)
+  const tags = new Set(
+    bookmarks.flatMap((item) => item.tags).map((tag) => tag.name)
+  )
 
-  const response = await api.get(`/tags`, {
-    headers: { Authorization: `Bearer ${session.token}` },
+  const json = await api
+    .get(`/tags`, {
+      headers: { Authorization: `Bearer ${session.token}` },
+    })
+    .json<Tag[]>()
+
+  expect(json).toHaveLength(tags.size)
+  expect(json).toContainEqual({
+    id: bookmarks[0].tags[0].id,
+    name: bookmarks[0].tags[0].name,
   })
-
-  expect(response.status).toBe(200)
-  expect(await response.json()).toHaveLength(tags.length)
 })

@@ -1,8 +1,9 @@
 import { expect, test } from 'vitest'
 import { api } from '@piny/tests/api'
 import { Unauthorized } from '@piny/status/errors'
-import type { User } from '@piny/user/types'
 import { createSessionMock } from '@piny/session/mocks'
+import type { User } from '@piny/user/types'
+import type { TokenResponse } from '@piny/session/types'
 
 test('refresh session', async ({ annotate }) => {
   const initialSession = await createSessionMock()
@@ -27,7 +28,7 @@ test('refresh session', async ({ annotate }) => {
     .post('/refresh-session', {
       headers: { Authorization: `Bearer ${initialSession.token}` },
     })
-    .json<{ token: string }>()
+    .json<TokenResponse>()
 
   expect(refreshSession.token).toEqual(expect.any(String))
   expect(refreshSession.token).not.toEqual(initialSession.token)
