@@ -7,7 +7,7 @@ import { getServerHostPort, getServerURL } from '@piny/api/config'
 import { ErrorResponseSchema } from '@piny/status/schemas'
 
 export const api = YF.create({
-  base: getServerURL(getServerHostPort()).toString(),
+  base: getServerURL(getServerHostPort()),
   async onRequest(_, options) {
     const requestId = crypto.randomUUID()
     options.headers.set('X-Request-ID', requestId)
