@@ -6,7 +6,7 @@ import { SessionTokenSchema } from './schemas'
 import { ensure } from '@piny/tools/assert'
 import type { SessionToken } from './types'
 
-const key = ensure(process.env.KEY, `Please, add 'KEY' env variable`)
+const key = ensure(process.env.KEY, new Error(`Please, add 'KEY' env variable`))
 
 export const hash = (name: string, pass: string) =>
   crypto
