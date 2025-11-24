@@ -1,15 +1,15 @@
 export function assert<I>(
   input: I,
-  message = 'Assertion failed'
+  error = new Error('Assertion failed')
 ): asserts input {
   if (input != null) {
     return
   }
 
-  throw new Error(message)
+  throw error
 }
 
-export function ensure<I>(input: I | null | undefined, message?: string): I {
-  assert(input, message)
+export function ensure<I>(input: I | null | undefined, error?: Error): I {
+  assert(input, error)
   return input
 }

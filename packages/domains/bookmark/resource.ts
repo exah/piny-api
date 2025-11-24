@@ -76,10 +76,7 @@ export async function get({
     relations: { link: true, tags: true },
   })
 
-  if (bookmark === null) {
-    throw new NotFound()
-  }
-
+  assert(bookmark, new NotFound())
   reply(200, BookmarkSchema, bookmark)
 }
 
@@ -129,16 +126,14 @@ export async function edit({
   params,
   state,
 }: RouterContext<MessageResponse, BookmarkParams>) {
-  assert(params.bookmarkId)
-  assert(state.session)
+  assert(state.session, new Forbidden())
+  assert(params.bookmarkId, new NotFound())
 
   const bookmark = await BookmarkEntity.findOne({
     where: { id: params.bookmarkId, user: { id: state.session.user.id } },
   })
 
-  if (!bookmark) {
-    throw new NotFound()
-  }
+  assert(bookmark, new NotFound())
 
   const body = await receive(UpdateBookmarkPayloadSchema)
 
@@ -176,16 +171,14 @@ export async function remove({
   reply,
   state,
 }: RouterContext<MessageResponse, BookmarkParams>) {
-  assert(params.bookmarkId)
-  assert(state.session)
+  assert(state.session, new Forbidden())
+  assert(params.bookmarkId, new NotFound())
 
   const bookmark = await BookmarkEntity.findOne({
     where: { id: params.bookmarkId, user: { id: state.session.user.id } },
   })
 
-  if (!bookmark) {
-    throw new NotFound()
-  }
+  assert(bookmark, new NotFound())
 
   bookmark.state = State.removed
   await bookmark.save()

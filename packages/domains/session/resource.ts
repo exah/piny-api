@@ -30,16 +30,13 @@ export async function login({
   response,
 }: RouterContext<TokenResponse>) {
   const body = await receive(LoginPayloadSchema)
-
   const user = await UserEntity.findOne({
     where: { name: body.user },
     select: ['id', 'pass'],
     relations: { sessions: true },
   })
 
-  if (user == null) {
-    throw new NotFound()
-  }
+  assert(user, new NotFound())
 
   if (user.pass !== hash(body.user, body.pass)) {
     throw new Forbidden()
@@ -68,10 +65,7 @@ export async function logout({
     where: { token },
   })
 
-  if (!session) {
-    throw new NotFound()
-  }
-
+  assert(session, new NotFound())
   await SessionEntity.remove(session)
 
   reply(200, '👋 Bye')
@@ -114,7 +108,7 @@ export async function refreshSession({
   state,
   reply,
 }: RouterContext<TokenResponse>) {
-  assert(state.session)
+  assert(state.session, new Forbidden())
 
   const session = await createRefreshedSession(state.session)
 

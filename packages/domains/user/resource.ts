@@ -2,6 +2,7 @@ import { match } from 'lil-match'
 import { assert } from '@piny/tools/assert'
 import type { RouterContext } from '@piny/api/types/router'
 import type { User, UserParams } from './types'
+import { Forbidden, NotFound } from '@piny/status/errors'
 import { UserSchema } from './schemas'
 import { getSessionUserType, getUserByName } from './functions'
 
@@ -10,8 +11,8 @@ export async function getUser({
   state,
   reply,
 }: RouterContext<User, UserParams>) {
-  assert(state.session)
-  assert(params.user)
+  assert(state.session, new Forbidden())
+  assert(params.user, new NotFound())
 
   const user = await getUserByName(params.user)
   const data = match(getSessionUserType(state.session, user))
