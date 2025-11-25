@@ -1,72 +1,33 @@
-import * as v from 'valibot'
-import { UserEntity } from '@piny/user/entities'
 import { assert } from '@piny/tools/assert'
-import { Unauthorized, NotFound, Forbidden } from '@piny/status/errors'
+import { Unauthorized, Forbidden } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import type { MessageResponse } from '@piny/status/types'
-import { SessionEntity } from './entities'
-import { createRefreshedSession } from './functions'
-import { hash, createToken, getTokenExpiration } from './utils'
+import {
+  createUser,
+  createSession,
+  createRefreshedSession,
+  removeSession,
+} from './functions'
 import type { TokenResponse } from './types'
 import { TokenResponseSchema } from './schemas'
-import {
-  LoginPayloadSchema,
-  SignupPayloadSchema,
-  SessionTokenSchema,
-} from './schemas'
+import { getPrefixedToken } from './utils'
+import { LoginPayloadSchema, SignupPayloadSchema } from './schemas'
 
-const parseSessionToken = v.parserAsync(SessionTokenSchema)
-
-async function getToken(input: string | null, prefix = 'Bearer ') {
-  if (input?.startsWith(prefix)) {
-    return parseSessionToken(input.slice(prefix.length))
-  }
-
-  return null
-}
-
-export async function login({
-  receive,
-  response,
-}: RouterContext<TokenResponse>) {
+export async function login({ receive, reply }: RouterContext<TokenResponse>) {
   const body = await receive(LoginPayloadSchema)
-  const user = await UserEntity.findOne({
-    where: { name: body.user },
-    select: ['id', 'pass'],
-    relations: { sessions: true },
-  })
+  const session = await createSession(body)
 
-  assert(user, new NotFound())
-
-  if (user.pass !== hash(body.user, body.pass)) {
-    throw new Forbidden()
-  }
-
-  const expiration = getTokenExpiration()
-  const token = await createToken(user.name, expiration)
-
-  await SessionEntity.create({ token, expiration, user }).save()
-
-  response.status = 200
-  response.body = { token }
+  reply(200, TokenResponseSchema, { token: session.token })
 }
 
 export async function logout({
   request,
   reply,
 }: RouterContext<MessageResponse>) {
-  const token = await getToken(request.get('Authorization'))
+  const token = await getPrefixedToken(request.get('Authorization'))
 
-  if (token === null) {
-    throw new Unauthorized()
-  }
-
-  const session = await SessionEntity.findOne({
-    where: { token },
-  })
-
-  assert(session, new NotFound())
-  await SessionEntity.remove(session)
+  assert(token, new Unauthorized())
+  await removeSession(token)
 
   reply(200, '👋 Bye')
 }
@@ -77,29 +38,7 @@ export async function signup({
 }: RouterContext<MessageResponse>) {
   const body = await receive(SignupPayloadSchema)
 
-  const nameCount = await UserEntity.count({
-    where: { name: body.user },
-  })
-
-  if (nameCount > 0) {
-    throw new Forbidden('👯‍♀️ Use different `user`')
-  }
-
-  const emailCount = await UserEntity.count({
-    where: { email: body.email },
-  })
-
-  if (emailCount > 0) {
-    throw new Forbidden('💌 Use different `email`')
-  }
-
-  const user = UserEntity.create({
-    name: body.user,
-    email: body.email,
-    pass: hash(body.user, body.pass),
-  })
-
-  await user.save()
+  await createUser(body)
 
   reply(200, '👋 Welcome, please /login')
 }
