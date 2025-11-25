@@ -1,7 +1,7 @@
 import { NotFound } from '@piny/status/errors'
 import { SessionEntity } from '@piny/session/entities'
 import { UserEntity } from './entities'
-import type { UserType } from './types'
+import type { UserType, UserName } from './types'
 
 export function getSessionUserType(
   session: SessionEntity,
@@ -10,7 +10,7 @@ export function getSessionUserType(
   return session.user.id === user.id ? 'current' : 'other'
 }
 
-export async function getUserByName(name: string): Promise<UserEntity> {
+export async function getUserByName(name: UserName): Promise<UserEntity> {
   const user = await UserEntity.findOne({
     where: { name },
     select: ['id', 'name', 'email'],

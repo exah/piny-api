@@ -1,3 +1,4 @@
+import type { Next } from 'koa'
 import { SessionEntity } from '@piny/session/entities'
 import { Unauthorized } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
@@ -22,7 +23,7 @@ async function getSession(input: string | null) {
 
 export async function session(
   { request, state }: RouterContext<never>,
-  next: () => Promise<void>
+  next: Next
 ) {
   const session = await getSession(request.get('Authorization'))
 
@@ -37,11 +38,11 @@ export async function session(
 
 export async function verify(
   { request, state }: RouterContext<never>,
-  next: () => Promise<void>
+  next: Next
 ) {
   const session = await getSession(request.get('Authorization'))
 
-  if (session !== null) {
+  if (session != null) {
     state.session = session
     return next()
   } else {

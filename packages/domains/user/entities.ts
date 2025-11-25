@@ -13,7 +13,7 @@ import { AuthType } from '@piny/session/constants'
 import { SessionEntity } from '@piny/session/entities'
 import { BookmarkEntity } from '@piny/bookmark/entities'
 import { TagEntity } from '@piny/tag/entities'
-import type { UserId } from './types'
+import type { UserId, UserName, UserEmail } from './types'
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -21,10 +21,10 @@ export class UserEntity extends BaseEntity {
   id: UserId
 
   @Column({ type: 'text', unique: true })
-  name: string
+  name: UserName
 
   @Column({ type: 'text', unique: true })
-  email: string
+  email: UserEmail
 
   @Column({
     type: 'simple-enum',
