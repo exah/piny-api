@@ -13,11 +13,6 @@ export const LoginPayloadSchema = v.object({
   pass: v.string(),
 })
 
-export const SignupPayloadSchema = v.object({
-  ...LoginPayloadSchema.entries,
-  email: v.pipe(v.string(), v.email()),
-})
-
 export const TokenResponseSchema = v.object({
   token: SessionTokenSchema,
 })

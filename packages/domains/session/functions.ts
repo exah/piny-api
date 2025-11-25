@@ -1,12 +1,13 @@
 import { UserEntity } from '@piny/user/entities'
 import { Forbidden, NotFound } from '@piny/status/errors'
+import type { CreateUserPayload } from '@piny/user/types'
 import { assert } from '@piny/tools/assert'
 import { SessionEntity } from './entities'
 import { createToken, getTokenExpiration } from './utils'
-import type { LoginPayload, SignupPayload, SessionToken } from './types'
+import type { LoginPayload, SessionToken } from './types'
 import { hash } from './utils'
 
-export async function createUser(payload: SignupPayload) {
+export async function createUser(payload: CreateUserPayload) {
   const nameCount = await UserEntity.count({
     where: { name: payload.user },
   })

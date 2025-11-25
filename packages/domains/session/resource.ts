@@ -2,6 +2,7 @@ import { assert } from '@piny/tools/assert'
 import { Unauthorized, Forbidden } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import type { MessageResponse } from '@piny/status/types'
+import { CreateUserPayloadSchema } from '@piny/user/schemas'
 import {
   createUser,
   createSession,
@@ -11,7 +12,7 @@ import {
 import type { TokenResponse } from './types'
 import { TokenResponseSchema } from './schemas'
 import { getPrefixedToken } from './utils'
-import { LoginPayloadSchema, SignupPayloadSchema } from './schemas'
+import { LoginPayloadSchema } from './schemas'
 
 export async function login({ receive, reply }: RouterContext<TokenResponse>) {
   const body = await receive(LoginPayloadSchema)
@@ -36,7 +37,7 @@ export async function signup({
   receive,
   reply,
 }: RouterContext<MessageResponse>) {
-  const body = await receive(SignupPayloadSchema)
+  const body = await receive(CreateUserPayloadSchema)
 
   await createUser(body)
 

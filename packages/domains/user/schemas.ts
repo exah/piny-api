@@ -19,3 +19,9 @@ export const UserSchema = v.variant('type', [
 export const UserParamsSchema = v.object({
   user: v.optional(v.string()),
 })
+
+export const CreateUserPayloadSchema = v.object({
+  email: v.pipe(v.string(), v.email()),
+  user: v.string(),
+  pass: v.string(),
+})
