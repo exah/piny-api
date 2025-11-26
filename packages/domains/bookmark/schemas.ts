@@ -30,8 +30,8 @@ export const BookmarkParamsSchema = v.object({
 export const CreateBookmarkPayloadSchema = v.object({
   url: v.pipe(v.string(), v.url()),
   privacy: v.enum(Privacy),
-  title: v.optional(v.string()),
-  description: v.optional(v.string()),
+  title: v.nullable(v.string()),
+  description: v.nullable(v.string()),
   tags: v.optional(v.array(v.string())),
   state: v.optional(v.enum(State)),
 })
