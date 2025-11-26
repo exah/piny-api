@@ -9,7 +9,7 @@ export const getRouterContext: Koa.Middleware<
   RouterContext<unknown>
 > = (context, next) => {
   context.receive = async function receiveJSON(schema) {
-    return v.parse(schema, await parse.json(this.request))
+    return v.parse(schema, await parse.json(context.request))
   }
 
   context.reply = function replyJSON(status, schemaOrMessage, output) {
