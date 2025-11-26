@@ -12,7 +12,7 @@ import { BookmarkEntity } from '@piny/bookmark/entities'
 import type { LinkId } from './types'
 
 @Entity()
-export class LinkEntity extends BaseEntity {
+class Link extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: LinkId
 
@@ -28,3 +28,5 @@ export class LinkEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date
 }
+
+export { Link as LinkEntity }

@@ -16,7 +16,7 @@ import { TagEntity } from '@piny/tag/entities'
 import type { UserId, UserName, UserEmail } from './types'
 
 @Entity()
-export class UserEntity extends BaseEntity {
+class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: UserId
 
@@ -51,3 +51,5 @@ export class UserEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date
 }
+
+export { User as UserEntity }
