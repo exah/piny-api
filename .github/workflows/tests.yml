@@ -17,6 +17,8 @@ jobs:
         run: npm ci
       - name: Check types
         run: npx tsc
+      - name: Lint
+        run: npx eslint
       - name: Check tests
         run: KEY="secret-key" npm -w @piny/tests run api
       - name: Check API server

@@ -5,7 +5,7 @@ import type { MessageResponse } from '@piny/status/types'
 
 export interface RouterContext<
   Response = never,
-  Params extends Record<string, string> = {},
+  Params extends Record<string, string> = Record<string, string>,
   State = RouterSessionState
 > extends Koa.RouterContext<State, unknown, Response> {
   params: Params

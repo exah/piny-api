@@ -21,5 +21,12 @@
     "semi": false,
     "trailingComma": "es5",
     "printWidth": 80
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "jiti": "^2.6.1",
+    "typescript-eslint": "^8.48.0"
   }
 }
