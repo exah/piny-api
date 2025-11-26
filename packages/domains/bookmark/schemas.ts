@@ -17,6 +17,7 @@ export const BookmarkSchema = v.object({
   description: v.nullable(v.string()),
   tags: v.nullable(v.array(TagSchema)),
   state: v.nullable(v.enum(State)),
+  createdAt: v.date(),
 })
 
 export const BookmarksListResponseSchema = v.array(BookmarkSchema)
