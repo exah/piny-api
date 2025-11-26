@@ -9,9 +9,13 @@ function getResponseError(error: unknown) {
   if (isValiError(error)) {
     return new BadRequest(
       `🤦‍♂️ Bad request: ${error.issues
-        .map((issue) => issue.message)
+        .map((issue) =>
+          issue.path
+            ? `${issue.path.join(',')} ${issue.message}`
+            : issue.message
+        )
         .join(', ')}`,
-      { cause: error, meta: error.issues }
+      { cause: error, meta: JSON.stringify(error.issues) }
     )
   } else if (isResponseError(error)) {
     return error

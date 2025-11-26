@@ -5,6 +5,11 @@
   "exports": {
     "./assert": "./assert.ts",
     "./constants": "./constants/index.ts",
-    "./create-path": "./create-path.ts"
+    "./create-path": "./create-path.ts",
+    "./logger": "./logger.ts"
+  },
+  "dependencies": {
+    "pino": "^10.1.0",
+    "pino-pretty": "^13.1.2"
   }
 }
