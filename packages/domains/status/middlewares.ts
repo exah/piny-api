@@ -30,6 +30,8 @@ export async function catchErrors(
     const id = await createErrorId()
     const responseError = getResponseError(error)
 
+    console.error(responseError)
+
     context.response.status = responseError.status
     context.response.body = {
       id,
