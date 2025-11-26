@@ -26,8 +26,6 @@
     "@piny/tools": "*",
     "@piny/user": "*",
     "koa": "^2.16.3",
-    "koa-pino-logger": "^5.0.0",
-    "pino-pretty": "^13.1.2",
     "tsx": "^4.20.6",
     "typeorm": "^0.3.27"
   },
