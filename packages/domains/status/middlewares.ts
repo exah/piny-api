@@ -15,7 +15,7 @@ function getResponseError(error: unknown) {
             : issue.message
         )
         .join(', ')}`,
-      { cause: error, meta: JSON.stringify(error.issues) }
+      { cause: error, meta: error.issues }
     )
   } else if (isResponseError(error)) {
     return error
