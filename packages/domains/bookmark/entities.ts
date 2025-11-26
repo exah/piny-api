@@ -17,7 +17,7 @@ import { Privacy, State } from './constants'
 import type { BookmarkId } from './types'
 
 @Entity()
-export class BookmarkEntity extends BaseEntity {
+class Bookmark extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: BookmarkId
 
@@ -48,3 +48,5 @@ export class BookmarkEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date
 }
+
+export { Bookmark as BookmarkEntity }

@@ -14,7 +14,7 @@ import { BookmarkEntity } from '@piny/bookmark/entities'
 import type { TagId } from './types'
 
 @Entity()
-export class TagEntity extends BaseEntity {
+class Tag extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: TagId
 
@@ -35,3 +35,5 @@ export class TagEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date
 }
+
+export { Tag as TagEntity }

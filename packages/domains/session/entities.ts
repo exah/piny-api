@@ -12,7 +12,7 @@ import { UserEntity } from '@piny/user/entities'
 import type { SessionId, SessionToken } from './types'
 
 @Entity()
-export class SessionEntity extends BaseEntity {
+class Session extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: SessionId
 
@@ -31,3 +31,5 @@ export class SessionEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date
 }
+
+export { Session as SessionEntity }
