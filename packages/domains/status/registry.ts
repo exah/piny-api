@@ -6,6 +6,7 @@ import {
   NotAcceptableError,
   ConflictError,
   InternalServerError,
+  ParsingError,
 } from './errors'
 
 export type RegisteredResponseError =
@@ -16,6 +17,7 @@ export type RegisteredResponseError =
   | NotAcceptableError
   | ConflictError
   | InternalServerError
+  | ParsingError
 
 export const ERRORS_REGISTRY = [
   BadRequestError,
@@ -25,4 +27,5 @@ export const ERRORS_REGISTRY = [
   NotAcceptableError,
   ConflictError,
   InternalServerError,
+  ParsingError,
 ] as const

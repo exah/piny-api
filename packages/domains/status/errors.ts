@@ -1,4 +1,5 @@
-import type { ErrorCode } from './types'
+import type * as v from 'valibot'
+import type { ErrorCode, UnknownSchema } from './types'
 import { ErrorCodeSchema } from './schemas'
 import { getErrorCode } from './utils'
 
@@ -76,4 +77,27 @@ export class InternalServerError<Meta = never> extends ResponseError<Meta> {
   static code = ErrorCodeSchema.enum.INTERNAL_SERVER_ERROR
   status = 500
   message = '😭 Something went wrong'
+}
+
+export class ParsingError<
+  Issue extends v.GenericIssue = v.GenericIssue
+> extends BadRequestError<Issue[]> {
+  static code = ErrorCodeSchema.enum.PARSING_ERROR
+
+  constructor(cause: v.ValiError<UnknownSchema<Issue>>) {
+    const reasons = cause.issues.map((issue) => {
+      if (!issue.path) {
+        return issue.message
+      }
+
+      return `'${issue.path.map((item) => item.key).join('.')}': ${
+        issue.message
+      }`
+    })
+
+    super(`🤦‍♂️ Parsing error:\n${reasons.join('\n')}`, {
+      cause,
+      meta: cause.issues,
+    })
+  }
 }
