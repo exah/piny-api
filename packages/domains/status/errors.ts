@@ -36,44 +36,44 @@ export abstract class ResponseError<Meta = never> extends Error {
   }
 }
 
-export class BadRequest<Meta = never> extends ResponseError<Meta> {
+export class BadRequestError<Meta = never> extends ResponseError<Meta> {
   static code = ErrorCodeSchema.enum.BAD_REQUEST
   status = 400
   message = '👎 Bad request'
 }
 
-export class Unauthorized<Meta = never> extends ResponseError<Meta> {
+export class UnauthorizedError<Meta = never> extends ResponseError<Meta> {
   static code = ErrorCodeSchema.enum.UNAUTHORIZED
   status = 401
   message = '🙅‍♂️ Unauthorized'
 }
 
-export class Forbidden<Meta = never> extends ResponseError<Meta> {
+export class ForbiddenError<Meta = never> extends ResponseError<Meta> {
   static code = ErrorCodeSchema.enum.FORBIDDEN
   status = 403
   message = '✋ Denied'
 }
 
-export class NotFound<Meta = never> extends ResponseError<Meta> {
+export class NotFoundError<Meta = never> extends ResponseError<Meta> {
   static code = ErrorCodeSchema.enum.NOT_FOUND
   status = 404
   message = '🤷‍♂️ Not found'
 }
 
-export class NotAcceptable<Meta = never> extends ResponseError<Meta> {
+export class NotAcceptableError<Meta = never> extends ResponseError<Meta> {
   static code = ErrorCodeSchema.enum.NOT_ACCEPTABLE
   status = 406
   message = '👀 What is it?'
 }
 
-export class Conflict<Meta = never> extends ResponseError<Meta> {
+export class ConflictError<Meta = never> extends ResponseError<Meta> {
   static code = ErrorCodeSchema.enum.CONFLICT
   status = 409
   message = '🙅‍♂️ Already exists'
 }
 
-export class SomethingWentWrong<Meta = never> extends ResponseError<Meta> {
-  static code = ErrorCodeSchema.enum.SOMETHING_WENT_WRONG
+export class InternalServerError<Meta = never> extends ResponseError<Meta> {
+  static code = ErrorCodeSchema.enum.INTERNAL_SERVER_ERROR
   status = 500
   message = '😭 Something went wrong'
 }

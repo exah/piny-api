@@ -1,4 +1,4 @@
-import { NotFound } from '@piny/status/errors'
+import { NotFoundError } from '@piny/status/errors'
 import { SessionEntity } from '@piny/session/entities'
 import { UserEntity } from './entities'
 import type { UserType, UserName } from './types'
@@ -17,7 +17,7 @@ export async function getUserByName(name: UserName): Promise<UserEntity> {
   })
 
   if (user === null) {
-    throw new NotFound('User not found')
+    throw new NotFoundError('User not found')
   }
 
   return user

@@ -1,5 +1,5 @@
 import { UserEntity } from '@piny/user/entities'
-import { Forbidden, NotFound } from '@piny/status/errors'
+import { ForbiddenError, NotFoundError } from '@piny/status/errors'
 import type { CreateUserPayload } from '@piny/user/types'
 import { assert } from '@piny/tools/assert'
 import { SessionEntity } from './entities'
@@ -13,7 +13,7 @@ export async function createUser(payload: CreateUserPayload) {
   })
 
   if (nameCount > 0) {
-    throw new Forbidden('👯‍♀️ Use different `user`')
+    throw new ForbiddenError('👯‍♀️ Use different `user`')
   }
 
   const emailCount = await UserEntity.count({
@@ -21,7 +21,7 @@ export async function createUser(payload: CreateUserPayload) {
   })
 
   if (emailCount > 0) {
-    throw new Forbidden('💌 Use different `email`')
+    throw new ForbiddenError('💌 Use different `email`')
   }
 
   const user = UserEntity.create({
@@ -40,10 +40,10 @@ export async function createSession(payload: LoginPayload) {
     relations: { sessions: true },
   })
 
-  assert(user, new NotFound())
+  assert(user, new NotFoundError())
 
   if (user.pass !== hash(payload.user, payload.pass)) {
-    throw new Forbidden()
+    throw new ForbiddenError()
   }
 
   const expiration = getTokenExpiration()
@@ -77,6 +77,6 @@ export async function removeSession(token: SessionToken) {
     where: { token },
   })
 
-  assert(session, new NotFound())
+  assert(session, new NotFoundError())
   await SessionEntity.remove(session)
 }

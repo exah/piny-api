@@ -1,5 +1,5 @@
 import { assert } from '@piny/tools/assert'
-import { Unauthorized, Forbidden } from '@piny/status/errors'
+import { UnauthorizedError, ForbiddenError } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import type { MessageResponse } from '@piny/status/types'
 import { CreateUserPayloadSchema } from '@piny/user/schemas'
@@ -27,7 +27,7 @@ export async function logout({
 }: RouterContext<MessageResponse>) {
   const token = await getPrefixedToken(request.get('Authorization'))
 
-  assert(token, new Unauthorized())
+  assert(token, new UnauthorizedError())
   await removeSession(token)
 
   reply(200, '👋 Bye')
@@ -48,7 +48,7 @@ export async function refreshSession({
   state,
   reply,
 }: RouterContext<TokenResponse>) {
-  assert(state.session, new Forbidden())
+  assert(state.session, new ForbiddenError())
 
   const session = await createRefreshedSession(state.session)
 

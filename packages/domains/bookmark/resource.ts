@@ -1,7 +1,11 @@
 import { assert } from '@piny/tools/assert'
 import { UserEntity } from '@piny/user/entities'
 import type { MessageResponse } from '@piny/status/types'
-import { Forbidden, Conflict, NotFound } from '@piny/status/errors'
+import {
+  ForbiddenError,
+  ConflictError,
+  NotFoundError,
+} from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import type { UserParams } from '@piny/user/types'
 import { getLinkForURL } from '@piny/link/functions'
@@ -30,14 +34,14 @@ export async function all({
     })
 
     if (foundUser == null) {
-      throw new NotFound()
+      throw new NotFoundError()
     }
 
     user = foundUser
   } else if (state.session) {
     user = state.session.user
   } else {
-    throw new Forbidden()
+    throw new ForbiddenError()
   }
 
   const where: {
@@ -61,7 +65,7 @@ export async function all({
   })
 
   if (bookmarks.length === 0 && where.privacy === Privacy.public) {
-    throw new NotFound()
+    throw new NotFoundError()
   }
 
   reply(200, BookmarksListResponseSchema, bookmarks)
@@ -76,7 +80,7 @@ export async function get({
     relations: { link: true, tags: true },
   })
 
-  assert(bookmark, new NotFound())
+  assert(bookmark, new NotFoundError())
   reply(200, BookmarkSchema, bookmark)
 }
 
@@ -99,7 +103,7 @@ export async function add({
   })
 
   if (count > 0) {
-    throw new Conflict()
+    throw new ConflictError()
   }
 
   const bookmark = BookmarkEntity.create({
@@ -126,14 +130,14 @@ export async function edit({
   params,
   state,
 }: RouterContext<MessageResponse, BookmarkParams>) {
-  assert(state.session, new Forbidden())
-  assert(params.bookmarkId, new NotFound())
+  assert(state.session, new ForbiddenError())
+  assert(params.bookmarkId, new NotFoundError())
 
   const bookmark = await BookmarkEntity.findOne({
     where: { id: params.bookmarkId, user: { id: state.session.user.id } },
   })
 
-  assert(bookmark, new NotFound())
+  assert(bookmark, new NotFoundError())
 
   const body = await receive(UpdateBookmarkPayloadSchema)
 
@@ -171,14 +175,14 @@ export async function remove({
   reply,
   state,
 }: RouterContext<MessageResponse, BookmarkParams>) {
-  assert(state.session, new Forbidden())
-  assert(params.bookmarkId, new NotFound())
+  assert(state.session, new ForbiddenError())
+  assert(params.bookmarkId, new NotFoundError())
 
   const bookmark = await BookmarkEntity.findOne({
     where: { id: params.bookmarkId, user: { id: state.session.user.id } },
   })
 
-  assert(bookmark, new NotFound())
+  assert(bookmark, new NotFoundError())
 
   bookmark.state = State.removed
   await bookmark.save()

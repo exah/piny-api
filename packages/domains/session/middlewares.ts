@@ -1,6 +1,6 @@
 import type { Next } from 'koa'
 import { SessionEntity } from '@piny/session/entities'
-import { Unauthorized } from '@piny/status/errors'
+import { UnauthorizedError } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import { getPrefixedToken, validateToken } from './utils'
 
@@ -49,5 +49,5 @@ export async function verify(
     delete state.session
   }
 
-  throw new Unauthorized()
+  throw new UnauthorizedError()
 }

@@ -2,7 +2,7 @@ import { expect, test, describe } from 'vitest'
 import { api } from '@piny/tests/api'
 import type { Bookmark } from '@piny/bookmark/types'
 import type { Tag } from '@piny/tag/types'
-import { Unauthorized, NotFound } from '@piny/status/errors'
+import { UnauthorizedError, NotFoundError } from '@piny/status/errors'
 import { createSessionMock } from '@piny/session/mocks'
 import { createUserMock } from '@piny/user/mocks'
 import { createBookmarkMock } from '@piny/bookmark/mocks'
@@ -12,7 +12,7 @@ describe('get user', () => {
     const user = await createUserMock()
 
     await expect(() => api.get(`/${user.name}`)).rejects.toThrowError(
-      Unauthorized
+      UnauthorizedError
     )
   })
 
@@ -78,7 +78,7 @@ describe('get user bookmarks', () => {
     await createBookmarkMock({ user, privacy: 'private' })
 
     await expect(() => api.get(`/${user.name}/bookmarks`)).rejects.toThrowError(
-      NotFound
+      NotFoundError
     )
   })
 
@@ -108,7 +108,7 @@ describe('get user bookmarks', () => {
 
     await createBookmarkMock({ user, privacy: 'private' })
     await expect(() => api.get(`/${user.name}/tags`)).rejects.toThrowError(
-      NotFound
+      NotFoundError
     )
   })
 

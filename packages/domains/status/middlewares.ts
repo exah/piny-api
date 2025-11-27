@@ -1,7 +1,7 @@
 import { Next } from 'koa'
 import * as v from 'valibot'
 import { RouterContext } from '@piny/api/types/router'
-import { BadRequest, SomethingWentWrong } from './errors'
+import { BadRequestError, InternalServerError } from './errors'
 import { createErrorId, isResponseError } from './utils'
 import type { ErrorResponse } from './types'
 
@@ -13,14 +13,14 @@ function getReadableIssueMessage(issue: v.BaseIssue<unknown>) {
 
 function getResponseError(error: unknown) {
   if (v.isValiError(error)) {
-    return new BadRequest(
+    return new BadRequestError(
       `🤦‍♂️ Bad request: ${error.issues.map(getReadableIssueMessage).join(', ')}`,
       { cause: error, meta: error.issues }
     )
   } else if (isResponseError(error)) {
     return error
   } else {
-    return new SomethingWentWrong(undefined, { cause: error })
+    return new InternalServerError(undefined, { cause: error })
   }
 }
 

@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { api } from '@piny/tests/api'
-import { Unauthorized } from '@piny/status/errors'
+import { UnauthorizedError } from '@piny/status/errors'
 import { createSessionMock } from '@piny/session/mocks'
 import type { User } from '@piny/user/types'
 import type { TokenResponse } from '@piny/session/types'
@@ -36,7 +36,7 @@ test('refresh session', async ({ annotate }) => {
   await annotate('initial session token is expired')
 
   await expect(() => requestUser(initialSession.token)).rejects.toThrowError(
-    Unauthorized
+    UnauthorizedError
   )
 
   await annotate('updated session token returns the same user')

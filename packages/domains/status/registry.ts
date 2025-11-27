@@ -1,28 +1,28 @@
 import {
-  BadRequest,
-  Unauthorized,
-  Forbidden,
-  NotFound,
-  NotAcceptable,
-  Conflict,
-  SomethingWentWrong,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  NotFoundError,
+  NotAcceptableError,
+  ConflictError,
+  InternalServerError,
 } from './errors'
 
 export type RegisteredResponseError =
-  | BadRequest
-  | Unauthorized
-  | Forbidden
-  | NotFound
-  | NotAcceptable
-  | Conflict
-  | SomethingWentWrong
+  | BadRequestError
+  | UnauthorizedError
+  | ForbiddenError
+  | NotFoundError
+  | NotAcceptableError
+  | ConflictError
+  | InternalServerError
 
 export const ERRORS_REGISTRY = [
-  BadRequest,
-  Unauthorized,
-  Forbidden,
-  NotFound,
-  NotAcceptable,
-  Conflict,
-  SomethingWentWrong,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  NotFoundError,
+  NotAcceptableError,
+  ConflictError,
+  InternalServerError,
 ] as const

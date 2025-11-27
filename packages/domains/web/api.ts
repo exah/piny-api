@@ -1,6 +1,6 @@
 import * as YF from 'ya-fetch'
 import * as v from 'valibot'
-import { SomethingWentWrong } from '@piny/status/errors'
+import { InternalServerError } from '@piny/status/errors'
 import { ERRORS_REGISTRY } from '@piny/status/registry'
 import { ensure } from '@piny/tools/assert'
 import { getServerHostPort, getServerURL } from '@piny/api/config'
@@ -29,6 +29,6 @@ export const api = YF.create({
       })
     }
 
-    throw new SomethingWentWrong()
+    throw new InternalServerError()
   },
 })

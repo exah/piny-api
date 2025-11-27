@@ -1,6 +1,6 @@
 import { UserEntity } from '@piny/user/entities'
 import type { RouterContext } from '@piny/api/types/router'
-import { NotFound } from '@piny/status/errors'
+import { NotFoundError } from '@piny/status/errors'
 import { getSessionUserType, getUserByName } from '@piny/user/functions'
 import type { UserType, UserParams } from '@piny/user/types'
 import { ensure } from '@piny/tools/assert'
@@ -27,7 +27,7 @@ export async function getTags({
   const tags = await getUserTags(user, userType)
 
   if (tags.length === 0 && userType === 'other') {
-    throw new NotFound()
+    throw new NotFoundError()
   }
 
   reply(200, TagsListResponseSchema, tags)
