@@ -1,4 +1,5 @@
-import { NotFoundError } from '@piny/status/errors'
+import { NotFoundError, UnauthorizedError } from '@piny/status/errors'
+import { assert, ensure } from '@piny/tools/assert'
 import { SessionEntity } from '@piny/session/entities'
 import { UserEntity } from './entities'
 import type { UserType, UserName } from './types'
@@ -16,9 +17,24 @@ export async function getUserByName(name: UserName): Promise<UserEntity> {
     select: ['id', 'name', 'email'],
   })
 
-  if (user === null) {
-    throw new NotFoundError('User not found')
+  assert(user, new NotFoundError('User not found'))
+  return user
+}
+
+export async function getSessionUser(
+  session?: SessionEntity,
+  name?: UserName
+): Promise<[UserEntity, UserType]> {
+  let user: UserEntity
+  if (name) {
+    user = await getUserByName(name)
+  } else {
+    user = ensure(session, new UnauthorizedError()).user
   }
 
-  return user
+  const userType: UserType = session
+    ? getSessionUserType(session, user)
+    : 'other'
+
+  return [user, userType]
 }

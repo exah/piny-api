@@ -1,6 +1,6 @@
+import * as orm from 'typeorm'
 import type { UserEntity } from '@piny/user/entities'
 import type { UserType } from '@piny/user/types'
-import * as orm from 'typeorm'
 import { match } from 'lil-match'
 import { Privacy } from '@piny/bookmark/constants'
 import { TagEntity } from './entities'

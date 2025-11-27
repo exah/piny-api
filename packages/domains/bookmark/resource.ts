@@ -1,5 +1,4 @@
 import { assert } from '@piny/tools/assert'
-import { UserEntity } from '@piny/user/entities'
 import type { MessageResponse } from '@piny/status/types'
 import {
   ForbiddenError,
@@ -11,7 +10,8 @@ import type { UserParams } from '@piny/user/types'
 import { getLinkForURL } from '@piny/link/functions'
 import { getOrCreateTags } from '@piny/tag/functions'
 import type { Bookmark, BookmarkParams, BookmarksListResponse } from './types'
-import { Privacy, State } from './constants'
+import { State } from './constants'
+import { getSessionUser } from '@piny/user/functions'
 import { BookmarkEntity } from './entities'
 import {
   CreateBookmarkPayloadSchema,
@@ -19,54 +19,15 @@ import {
   BookmarkSchema,
   BookmarksListResponseSchema,
 } from './schemas'
+import { getUserBookmarks } from './functions'
 
 export async function all({
   params,
   state,
   reply,
 }: RouterContext<BookmarksListResponse, UserParams>) {
-  let user: UserEntity
-
-  if (params.user) {
-    const foundUser = await UserEntity.findOne({
-      where: { name: params.user },
-      select: ['id'],
-    })
-
-    if (foundUser == null) {
-      throw new NotFoundError()
-    }
-
-    user = foundUser
-  } else if (state.session) {
-    user = state.session.user
-  } else {
-    throw new ForbiddenError()
-  }
-
-  const where: {
-    user: Pick<UserEntity, 'id'>
-    state: State
-    privacy?: Privacy
-  } = {
-    user: { id: user.id },
-    state: State.active,
-    privacy: Privacy.public,
-  }
-
-  if (state.session?.user.id === user.id) {
-    delete where.privacy
-  }
-
-  const bookmarks = await BookmarkEntity.find({
-    where,
-    relations: { link: true, tags: true },
-    order: { createdAt: 'DESC' },
-  })
-
-  if (bookmarks.length === 0 && where.privacy === Privacy.public) {
-    throw new NotFoundError()
-  }
+  const [user, userType] = await getSessionUser(state.session, params.user)
+  const bookmarks = await getUserBookmarks(user, userType)
 
   reply(200, BookmarksListResponseSchema, bookmarks)
 }
