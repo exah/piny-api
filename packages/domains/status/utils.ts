@@ -11,8 +11,7 @@ import {
   InternalServerError,
   ParsingError,
 } from './errors'
-import { ErrorIdSchema } from './schemas'
-import { BaseErrorCode, ApiErrorCode } from './constants'
+import { ErrorIdSchema, ErrorCodeSchema } from './schemas'
 import type { ErrorCode, RegisteredResponseError } from './types'
 
 export const createErrorId = () =>
@@ -24,14 +23,14 @@ export const isResponseError = (
 
 export const getErrorByCode = (code: ErrorCode) =>
   match<ErrorCode>(code)
-    .with(BaseErrorCode.BAD_REQUEST, () => BadRequestError)
-    .with(BaseErrorCode.CONFLICT, () => ConflictError)
-    .with(BaseErrorCode.FORBIDDEN, () => ForbiddenError)
-    .with(BaseErrorCode.UNAUTHORIZED, () => UnauthorizedError)
-    .with(BaseErrorCode.NOT_FOUND, () => NotFoundError)
-    .with(BaseErrorCode.NOT_ACCEPTABLE, () => NotAcceptableError)
-    .with(BaseErrorCode.INTERNAL_SERVER_ERROR, () => InternalServerError)
-    .with(ApiErrorCode.PARSING_ERROR, () => ParsingError)
+    .with(ErrorCodeSchema.enum.BAD_REQUEST, () => BadRequestError)
+    .with(ErrorCodeSchema.enum.CONFLICT, () => ConflictError)
+    .with(ErrorCodeSchema.enum.FORBIDDEN, () => ForbiddenError)
+    .with(ErrorCodeSchema.enum.UNAUTHORIZED, () => UnauthorizedError)
+    .with(ErrorCodeSchema.enum.NOT_FOUND, () => NotFoundError)
+    .with(ErrorCodeSchema.enum.NOT_ACCEPTABLE, () => NotAcceptableError)
+    .with(ErrorCodeSchema.enum.INTERNAL_SERVER_ERROR, () => InternalServerError)
+    .with(ErrorCodeSchema.enum.PARSING_ERROR, () => ParsingError)
     .exhaustive(`Unhandled error code: ${code}`)
 
 export const createErrorByCode = (code: ErrorCode) =>
