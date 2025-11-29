@@ -4,6 +4,7 @@ export const UserIdSchema = v.pipe(v.string(), v.uuid(), v.brand('UserId'))
 
 export const UserNameSchema = v.pipe(
   v.string(),
+  v.nonEmpty(),
   v.regex(/[a-z0-9.-]/),
   v.toLowerCase(),
   v.brand('UserName')

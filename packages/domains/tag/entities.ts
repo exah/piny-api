@@ -11,7 +11,7 @@ import {
 
 import { UserEntity } from '@piny/user/entities'
 import { BookmarkEntity } from '@piny/bookmark/entities'
-import type { TagId } from './types'
+import type { TagId, TagName } from './types'
 
 @Entity()
 class Tag extends BaseEntity {
@@ -19,7 +19,7 @@ class Tag extends BaseEntity {
   id: TagId
 
   @Column({ type: 'text', unique: true })
-  name: string
+  name: TagName
 
   @ManyToMany(() => UserEntity, (user) => user.tags)
   @JoinTable()

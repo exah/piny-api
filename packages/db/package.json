@@ -9,7 +9,9 @@
     "./sync": "./sync.ts"
   },
   "scripts": {
-    "sync": "tsx sync.ts"
+    "sync": "tsx sync.ts",
+    "migrate": "tsx migrate.ts",
+    "create-migration": "npx typeorm migration:create"
   },
   "dependencies": {
     "@piny/bookmark": "*",
@@ -20,6 +22,7 @@
     "@piny/user": "*",
     "@types/sqlite3": "^3.1.11",
     "sqlite3": "^5.1.7",
+    "tsx": "^4.20.6",
     "typeorm": "^0.3.27"
   }
 }
