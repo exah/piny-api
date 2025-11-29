@@ -5,6 +5,5 @@ WORKDIR /app
 
 COPY . ./
 RUN npm ci --omit=dev
-RUN npm -w @piny/db run migrate
 
 CMD npm -w @piny/api start
