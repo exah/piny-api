@@ -39,3 +39,5 @@ export type Schema<
 
 export type UnknownSchema<Issue extends v.GenericIssue = v.GenericIssue> =
   Schema<unknown, unknown, Issue>
+
+export type UnknownIssue = v.GenericIssue<unknown>

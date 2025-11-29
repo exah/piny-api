@@ -1,5 +1,5 @@
 import * as v from 'valibot'
-import type { UnknownSchema } from './types'
+import type { UnknownSchema, UnknownIssue } from './types'
 import { ErrorCodeSchema } from './schemas'
 
 interface ResponseErrorOptions<Meta = unknown> {
@@ -83,18 +83,15 @@ export class InternalServerError<Meta = unknown> extends ResponseError<Meta> {
   message = '😭 Something went wrong'
 }
 
-export class ParsingError extends ResponseError<v.GenericIssue[]> {
+export class ParsingError extends ResponseError<UnknownIssue[]> {
   readonly code = ErrorCodeSchema.enum.PARSING_ERROR
   readonly status = 400
 
   constructor(cause: v.ValiError<UnknownSchema>)
-  constructor(
-    message?: string,
-    options?: ResponseErrorOptions<v.GenericIssue[]>
-  )
+  constructor(message?: string, options?: ResponseErrorOptions<UnknownIssue[]>)
   constructor(
     input?: v.ValiError<UnknownSchema> | string,
-    options?: ResponseErrorOptions<v.GenericIssue[]>
+    options?: ResponseErrorOptions<UnknownIssue[]>
   ) {
     if (!v.isValiError(input)) {
       super(input, options)
