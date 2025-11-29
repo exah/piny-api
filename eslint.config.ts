@@ -18,6 +18,7 @@ export default defineConfig([
         'error',
         { allowInterfaces: 'with-single-extends' },
       ],
+      '@typescript-eslint/no-unused-vars': 0,
     },
   },
 ])

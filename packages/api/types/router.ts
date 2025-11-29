@@ -13,7 +13,7 @@ export interface RouterContext<
     schema: S
   ): Promise<v.InferOutput<S>>
   reply: Response extends Strict<MessageResponse>
-    ? (status: number, message: string) => void
+    ? (status: number, message: Response['message']) => void
     : <const S extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
         status: number,
         schema: S,

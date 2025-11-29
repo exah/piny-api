@@ -5,6 +5,26 @@ import type {
   ErrorResponseSchema,
   MessageResponseSchema,
 } from './schemas'
+import type {
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  NotFoundError,
+  NotAcceptableError,
+  ConflictError,
+  InternalServerError,
+  ParsingError,
+} from './errors'
+
+export type RegisteredResponseError =
+  | BadRequestError
+  | UnauthorizedError
+  | ForbiddenError
+  | NotFoundError
+  | NotAcceptableError
+  | ConflictError
+  | InternalServerError
+  | ParsingError
 
 export type ErrorId = v.InferOutput<typeof ErrorIdSchema>
 export type ErrorCode = v.InferOutput<typeof ErrorCodeSchema>

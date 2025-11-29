@@ -12,6 +12,7 @@
     "./utils": "./utils.ts"
   },
   "dependencies": {
+    "lil-match": "^1.2.1",
     "valibot": "^1.1.0"
   }
 }

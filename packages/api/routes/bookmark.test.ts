@@ -37,7 +37,7 @@ test('unauthorized', async () => {
   await createBookmarkMock({ privacy: 'public' })
   await createBookmarkMock({ privacy: 'private' })
 
-  expect(() => api.get(`/bookmarks`).json<Bookmark[]>()).rejects.toThrowError(
+  await expect(() => api.get(`/bookmarks`)).rejects.toThrowError(
     UnauthorizedError
   )
 })

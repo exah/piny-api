@@ -1,33 +1,30 @@
-import type * as v from 'valibot'
-import type { ErrorCode, UnknownSchema } from './types'
+import * as v from 'valibot'
+import type { UnknownSchema } from './types'
 import { ErrorCodeSchema } from './schemas'
-import { getErrorCode } from './utils'
 
-interface ResponseErrorOptions<Meta = never> {
+interface ResponseErrorOptions<Meta = unknown> {
   cause?: unknown
   meta?: Meta
   url?: URL
   id?: string
 }
 
-export abstract class ResponseError<Meta = never> extends Error {
+export abstract class ResponseError<Meta = unknown> extends Error {
   name = 'ResponseError'
   expose = true
 
-  readonly code: ErrorCode
+  readonly code: unknown
   readonly status: number
-  readonly message: string
 
+  message: string
   description?: string
   cause?: unknown
-  meta?: unknown
+  meta: Meta
   url?: URL
   id?: string
 
   constructor(description?: string, options?: ResponseErrorOptions<Meta>) {
     super()
-    if ('code' in this.constructor)
-      this.code = getErrorCode(this.constructor.code)
 
     if (description) this.description = description
     if (options?.cause) this.cause = options.cause
@@ -37,55 +34,74 @@ export abstract class ResponseError<Meta = never> extends Error {
   }
 }
 
-export class BadRequestError<Meta = never> extends ResponseError<Meta> {
-  static code = ErrorCodeSchema.enum.BAD_REQUEST
-  status = 400
+export class BadRequestError<Meta = unknown> extends ResponseError<Meta> {
+  readonly code = ErrorCodeSchema.enum.BAD_REQUEST
+  readonly status = 400
+
   message = '👎 Bad request'
 }
 
-export class UnauthorizedError<Meta = never> extends ResponseError<Meta> {
-  static code = ErrorCodeSchema.enum.UNAUTHORIZED
-  status = 401
+export class UnauthorizedError<Meta = unknown> extends ResponseError<Meta> {
+  readonly code = ErrorCodeSchema.enum.UNAUTHORIZED
+  readonly status = 401
+
   message = '🙅‍♂️ Unauthorized'
 }
 
-export class ForbiddenError<Meta = never> extends ResponseError<Meta> {
-  static code = ErrorCodeSchema.enum.FORBIDDEN
-  status = 403
+export class ForbiddenError<Meta = unknown> extends ResponseError<Meta> {
+  readonly code = ErrorCodeSchema.enum.FORBIDDEN
+  readonly status = 403
+
   message = '✋ Denied'
 }
 
-export class NotFoundError<Meta = never> extends ResponseError<Meta> {
-  static code = ErrorCodeSchema.enum.NOT_FOUND
-  status = 404
+export class NotFoundError<Meta = unknown> extends ResponseError<Meta> {
+  readonly code = ErrorCodeSchema.enum.NOT_FOUND
+  readonly status = 404
+
   message = '🤷‍♂️ Not found'
 }
 
-export class NotAcceptableError<Meta = never> extends ResponseError<Meta> {
-  static code = ErrorCodeSchema.enum.NOT_ACCEPTABLE
-  status = 406
+export class NotAcceptableError<Meta = unknown> extends ResponseError<Meta> {
+  readonly code = ErrorCodeSchema.enum.NOT_ACCEPTABLE
+  readonly status = 406
+
   message = '👀 What is it?'
 }
 
-export class ConflictError<Meta = never> extends ResponseError<Meta> {
-  static code = ErrorCodeSchema.enum.CONFLICT
-  status = 409
+export class ConflictError<Meta = unknown> extends ResponseError<Meta> {
+  readonly code = ErrorCodeSchema.enum.CONFLICT
+  readonly status = 409
+
   message = '🙅‍♂️ Already exists'
 }
 
-export class InternalServerError<Meta = never> extends ResponseError<Meta> {
-  static code = ErrorCodeSchema.enum.INTERNAL_SERVER_ERROR
-  status = 500
+export class InternalServerError<Meta = unknown> extends ResponseError<Meta> {
+  readonly code = ErrorCodeSchema.enum.INTERNAL_SERVER_ERROR
+  readonly status = 500
+
   message = '😭 Something went wrong'
 }
 
-export class ParsingError<
-  Issue extends v.GenericIssue = v.GenericIssue
-> extends BadRequestError<Issue[]> {
-  static code = ErrorCodeSchema.enum.PARSING_ERROR
+export class ParsingError extends ResponseError<v.GenericIssue[]> {
+  readonly code = ErrorCodeSchema.enum.PARSING_ERROR
+  readonly status = 400
 
-  constructor(cause: v.ValiError<UnknownSchema<Issue>>) {
-    const reasons = cause.issues.map((issue) => {
+  constructor(cause: v.ValiError<UnknownSchema>)
+  constructor(
+    message?: string,
+    options?: ResponseErrorOptions<v.GenericIssue[]>
+  )
+  constructor(
+    input?: v.ValiError<UnknownSchema> | string,
+    options?: ResponseErrorOptions<v.GenericIssue[]>
+  ) {
+    if (!v.isValiError(input)) {
+      super(input, options)
+      return
+    }
+
+    const reasons = input.issues.map((issue) => {
       if (!issue.path) {
         return issue.message
       }
@@ -96,8 +112,8 @@ export class ParsingError<
     })
 
     super(`🤦‍♂️ Parsing error:\n${reasons.join('\n')}`, {
-      cause,
-      meta: cause.issues,
+      cause: input,
+      meta: input.issues,
     })
   }
 }

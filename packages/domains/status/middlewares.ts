@@ -3,9 +3,10 @@ import * as v from 'valibot'
 import { RouterContext } from '@piny/api/types/router'
 import { InternalServerError, ParsingError } from './errors'
 import { createErrorId, isResponseError } from './utils'
-import type { ErrorResponse } from './types'
+import type { RegisteredResponseError, ErrorResponse } from './types'
+import { ErrorResponseSchema } from './schemas'
 
-function getResponseError(error: unknown) {
+function getResponseError(error: unknown): RegisteredResponseError {
   if (v.isValiError(error)) {
     return new ParsingError(error)
   } else if (isResponseError(error)) {
@@ -29,12 +30,12 @@ export async function catchErrors(
     responseError.url = context.URL
 
     context.response.status = responseError.status
-    context.response.body = {
+    context.response.body = v.parse(ErrorResponseSchema, {
       id,
       code: responseError.code,
       meta: responseError.meta,
       message: responseError.description || responseError.message,
-    }
+    })
 
     context.app.emit('error', responseError, context)
   }
