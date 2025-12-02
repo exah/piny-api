@@ -13,7 +13,7 @@ async function getSession(input: string | null) {
       relations: { user: true },
     })
 
-    if (session && session.expiration > Date.now()) {
+    if (session && session.expiresAt.getTime() > Date.now()) {
       return session
     }
   }

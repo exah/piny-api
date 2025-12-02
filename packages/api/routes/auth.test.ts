@@ -1,4 +1,5 @@
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
+import { Time } from '@piny/tools/constants'
 import { api } from '@piny/tests/api'
 import { UnauthorizedError } from '@piny/status/errors'
 import { createSessionMock } from '@piny/session/mocks'
@@ -6,6 +7,9 @@ import type { User } from '@piny/user/types'
 import type { TokenResponse } from '@piny/session/types'
 
 test('refresh session', async ({ annotate }) => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date())
+
   const initialSession = await createSessionMock()
   const requestUser = (token: string) =>
     api
@@ -23,6 +27,7 @@ test('refresh session', async ({ annotate }) => {
   expect(initialUser.type).toBe('current')
 
   await annotate('session token is updated')
+  await vi.runAllTimersAsync()
 
   const refreshSession = await api
     .post('/refresh-session', {
@@ -30,10 +35,14 @@ test('refresh session', async ({ annotate }) => {
     })
     .json<TokenResponse>()
 
-  expect(refreshSession.token).toEqual(expect.any(String))
   expect(refreshSession.token).not.toEqual(initialSession.token)
+  expect(refreshSession).toEqual({
+    token: expect.any(String),
+    expiresAt: expect.any(String),
+  })
 
   await annotate('initial session token is expired')
+  await vi.advanceTimersByTimeAsync(Time.MINUTE)
 
   await expect(() => requestUser(initialSession.token)).rejects.toThrowError(
     UnauthorizedError
@@ -43,4 +52,6 @@ test('refresh session', async ({ annotate }) => {
 
   const user = await requestUser(refreshSession.token)
   expect(user).toEqual(initialUser)
+
+  vi.useRealTimers()
 })

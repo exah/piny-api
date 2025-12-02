@@ -3,7 +3,7 @@ import * as v from 'valibot'
 import { InternalServerError } from '@piny/status/errors'
 import { getServerHostPort, getServerURL } from '@piny/api/config'
 import { ErrorResponseSchema } from '@piny/status/schemas'
-import { createErrorByCode } from '@piny/status/utils'
+import { getErrorByCode } from '@piny/status/utils'
 
 export const api = YF.create({
   base: getServerURL(getServerHostPort()),
@@ -15,7 +15,7 @@ export const api = YF.create({
     if (error instanceof YF.ResponseError) {
       const json = await error.response.json()
       const data = await v.parseAsync(ErrorResponseSchema, json)
-      const responseError = createErrorByCode(data.code)
+      const responseError = new (getErrorByCode(data.code))()
 
       responseError.id = data.id
       responseError.url = new URL(error.response.url)

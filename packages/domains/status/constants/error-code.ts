@@ -6,3 +6,4 @@ export const NOT_ACCEPTABLE = 406
 export const CONFLICT = 409
 export const INTERNAL_SERVER_ERROR = 500
 export const PARSING_ERROR = 1000
+export const SESSION_ALREADY_REFRESHED = 1001

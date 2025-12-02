@@ -1,8 +1,39 @@
-import { NotFoundError, UnauthorizedError } from '@piny/status/errors'
+import {
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+} from '@piny/status/errors'
 import { assert, ensure } from '@piny/tools/assert'
 import { SessionEntity } from '@piny/session/entities'
 import { UserEntity } from './entities'
-import type { UserType, UserName } from './types'
+import { hash } from '@piny/session/utils'
+import type { UserType, UserName, CreateUserPayload } from './types'
+
+export async function createUser(payload: CreateUserPayload) {
+  const nameCount = await UserEntity.count({
+    where: { name: payload.user },
+  })
+
+  if (nameCount > 0) {
+    throw new ForbiddenError('👯‍♀️ Use different `user`')
+  }
+
+  const emailCount = await UserEntity.count({
+    where: { email: payload.email },
+  })
+
+  if (emailCount > 0) {
+    throw new ForbiddenError('💌 Use different `email`')
+  }
+
+  const user = UserEntity.create({
+    name: payload.user,
+    email: payload.email,
+    pass: hash(payload.user, payload.pass),
+  })
+
+  await user.save()
+}
 
 export function getSessionUserType(
   session: SessionEntity,

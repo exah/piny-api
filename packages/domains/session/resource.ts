@@ -3,14 +3,14 @@ import { UnauthorizedError, ForbiddenError } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import type { MessageResponse } from '@piny/status/types'
 import { CreateUserPayloadSchema } from '@piny/user/schemas'
+import { createUser } from '@piny/user/functions'
 import {
-  createUser,
   createSession,
   createRefreshedSession,
   removeSession,
 } from './functions'
 import type { TokenResponse } from './types'
-import { TokenResponseSchema } from './schemas'
+import { SessionResponseSchema } from './schemas'
 import { getPrefixedToken } from './utils'
 import { LoginPayloadSchema } from './schemas'
 
@@ -18,7 +18,7 @@ export async function login({ receive, reply }: RouterContext<TokenResponse>) {
   const body = await receive(LoginPayloadSchema)
   const session = await createSession(body)
 
-  reply(200, TokenResponseSchema, { token: session.token })
+  reply(200, SessionResponseSchema, session)
 }
 
 export async function logout({
@@ -52,5 +52,5 @@ export async function refreshSession({
 
   const session = await createRefreshedSession(state.session)
 
-  reply(200, TokenResponseSchema, { token: session.token })
+  reply(200, SessionResponseSchema, session)
 }

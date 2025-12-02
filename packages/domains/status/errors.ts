@@ -114,3 +114,12 @@ export class ParsingError extends ResponseError<UnknownIssue[]> {
     })
   }
 }
+
+export class SessionAlreadyRefreshedError<
+  Meta = unknown
+> extends ResponseError<Meta> {
+  readonly code = ErrorCodeSchema.enum.SESSION_ALREADY_REFRESHED
+  readonly status = 409
+
+  message = '🙅‍♂️ Already refreshed'
+}

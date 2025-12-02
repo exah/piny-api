@@ -10,8 +10,11 @@
   },
   "scripts": {
     "sync": "tsx sync.ts",
-    "migrate": "tsx migrate.ts",
-    "create-migration": "npx typeorm migration:create"
+    "typeorm": "NODE_OPTIONS='--import tsx' typeorm -d ./source.ts",
+    "migration:run": "npm run typeorm migration:run",
+    "migration:create": "npm run typeorm migration:create",
+    "migration:generate": "npm run typeorm migration:generate",
+    "migration:revert": "npm run typeorm migration:revert"
   },
   "dependencies": {
     "@piny/bookmark": "*",

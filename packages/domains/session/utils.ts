@@ -56,4 +56,5 @@ export async function getPrefixedToken(
   return null
 }
 
-export const getTokenExpiration = (now = Date.now()) => now + 4 * Time.WEEK
+export const getTokenExpiration = (now = Date.now()) =>
+  new Date(now + 4 * Time.WEEK)

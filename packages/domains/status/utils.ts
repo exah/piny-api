@@ -32,6 +32,3 @@ export const getErrorByCode = (code: ErrorCode) =>
     .with(ErrorCodeSchema.enum.INTERNAL_SERVER_ERROR, () => InternalServerError)
     .with(ErrorCodeSchema.enum.PARSING_ERROR, () => ParsingError)
     .exhaustive(`Unhandled error code: ${code}`)
-
-export const createErrorByCode = (code: ErrorCode) =>
-  new (getErrorByCode(code))()
