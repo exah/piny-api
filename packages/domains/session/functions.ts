@@ -78,5 +78,7 @@ export async function removeSession(token: SessionToken) {
   })
 
   assert(session, new NotFoundError())
-  await SessionEntity.softRemove(session)
+  session.expiresAt = new Date()
+
+  await session.save()
 }

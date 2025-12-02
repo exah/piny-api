@@ -55,3 +55,32 @@ test('refresh session', async ({ annotate }) => {
 
   vi.useRealTimers()
 })
+
+test('logout', async ({ annotate }) => {
+  const session = await createSessionMock()
+  const requestUser = (token: string) =>
+    api
+      .get(`/${session.user.name}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .json<User>()
+
+  await annotate('session token is valid before logout')
+
+  const user = await requestUser(session.token)
+  expect(user.id).toEqual(session.user.id)
+  expect(user.name).toEqual(session.user.name)
+  expect(user.type).toBe('current')
+
+  await annotate('logout invalidates the session')
+
+  await api.post('/logout', {
+    headers: { Authorization: `Bearer ${session.token}` },
+  })
+
+  await annotate('session token is invalid after logout')
+
+  await expect(() => requestUser(session.token)).rejects.toThrowError(
+    UnauthorizedError
+  )
+})
