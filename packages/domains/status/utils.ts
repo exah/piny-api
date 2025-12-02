@@ -10,6 +10,7 @@ import {
   ConflictError,
   InternalServerError,
   ParsingError,
+  SessionAlreadyRefreshedError,
 } from './errors'
 import { ErrorIdSchema, ErrorCodeSchema } from './schemas'
 import type { ErrorCode, RegisteredResponseError } from './types'
@@ -31,4 +32,8 @@ export const getErrorByCode = (code: ErrorCode) =>
     .with(ErrorCodeSchema.enum.NOT_ACCEPTABLE, () => NotAcceptableError)
     .with(ErrorCodeSchema.enum.INTERNAL_SERVER_ERROR, () => InternalServerError)
     .with(ErrorCodeSchema.enum.PARSING_ERROR, () => ParsingError)
+    .with(
+      ErrorCodeSchema.enum.SESSION_ALREADY_REFRESHED,
+      () => SessionAlreadyRefreshedError
+    )
     .exhaustive(`Unhandled error code: ${code}`)

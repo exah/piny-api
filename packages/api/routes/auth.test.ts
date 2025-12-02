@@ -1,7 +1,10 @@
 import { expect, test, vi } from 'vitest'
 import { Time } from '@piny/tools/constants'
 import { api } from '@piny/tests/api'
-import { UnauthorizedError } from '@piny/status/errors'
+import {
+  UnauthorizedError,
+  SessionAlreadyRefreshedError,
+} from '@piny/status/errors'
 import { createSessionMock } from '@piny/session/mocks'
 import type { User } from '@piny/user/types'
 import type { TokenResponse } from '@piny/session/types'
@@ -11,12 +14,20 @@ test('refresh session', async ({ annotate }) => {
   vi.setSystemTime(new Date())
 
   const initialSession = await createSessionMock()
+
   const requestUser = (token: string) =>
     api
       .get(`/${initialSession.user.name}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .json<User>()
+
+  const refreshSession = () =>
+    api
+      .post('/refresh-session', {
+        headers: { Authorization: `Bearer ${initialSession.token}` },
+      })
+      .json<TokenResponse>()
 
   await annotate('initial session token is valid')
 
@@ -29,17 +40,20 @@ test('refresh session', async ({ annotate }) => {
   await annotate('session token is updated')
   await vi.runAllTimersAsync()
 
-  const refreshSession = await api
-    .post('/refresh-session', {
-      headers: { Authorization: `Bearer ${initialSession.token}` },
-    })
-    .json<TokenResponse>()
+  const refreshedSession = await refreshSession()
 
-  expect(refreshSession.token).not.toEqual(initialSession.token)
-  expect(refreshSession).toEqual({
+  expect(refreshedSession.token).not.toEqual(initialSession.token)
+  expect(refreshedSession).toEqual({
     token: expect.any(String),
     expiresAt: expect.any(String),
   })
+
+  await annotate('session refreshes only once')
+  await vi.runAllTimersAsync()
+
+  await expect(() => refreshSession()).rejects.toThrowError(
+    SessionAlreadyRefreshedError
+  )
 
   await annotate('initial session token is expired')
   await vi.advanceTimersByTimeAsync(Time.MINUTE)
@@ -50,7 +64,7 @@ test('refresh session', async ({ annotate }) => {
 
   await annotate('updated session token returns the same user')
 
-  const user = await requestUser(refreshSession.token)
+  const user = await requestUser(refreshedSession.token)
   expect(user).toEqual(initialUser)
 
   vi.useRealTimers()

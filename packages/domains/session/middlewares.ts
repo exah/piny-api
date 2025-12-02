@@ -10,7 +10,7 @@ async function getSession(input: string | null) {
   if (token !== null && (await validateToken(token))) {
     const session = await SessionEntity.findOne({
       where: { token },
-      relations: { user: true },
+      relations: { user: true, succeedingSession: true },
     })
 
     if (session && session.expiresAt.getTime() > Date.now()) {
