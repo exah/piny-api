@@ -25,6 +25,7 @@
     "@piny/tag": "*",
     "@piny/tools": "*",
     "@piny/user": "*",
+    "dedent": "^1.7.0",
     "koa": "^2.16.3",
     "tsx": "^4.20.6",
     "typeorm": "^0.3.27"
