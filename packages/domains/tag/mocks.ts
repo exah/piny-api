@@ -7,7 +7,7 @@ export function createTagsListMock(
   user: UserEntity
 ) {
   return getOrCreateTags(
-    tags.map(() => faker.string.nanoid()),
+    tags.map((tag) => tag ?? faker.string.nanoid()),
     user
   )
 }

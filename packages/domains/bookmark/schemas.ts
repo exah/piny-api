@@ -15,8 +15,8 @@ export const BookmarkSchema = v.object({
   privacy: v.enum(Privacy),
   title: v.nullable(v.string()),
   description: v.nullable(v.string()),
-  tags: v.nullable(v.array(TagSchema)),
-  state: v.nullable(v.enum(State)),
+  tags: v.array(TagSchema),
+  state: v.enum(State),
   createdAt: v.date(),
   updatedAt: v.date(),
 })
@@ -30,8 +30,8 @@ export const BookmarkParamsSchema = v.object({
 export const CreateBookmarkPayloadSchema = v.object({
   url: v.pipe(v.string(), v.url()),
   privacy: v.enum(Privacy),
-  title: v.nullable(v.string()),
-  description: v.nullable(v.string()),
+  title: v.optional(v.nullable(v.string())),
+  description: v.optional(v.nullable(v.string())),
   tags: v.optional(v.array(v.string())),
   state: v.optional(v.enum(State)),
 })

@@ -15,9 +15,12 @@ test('get current user tags', async ({ annotate }) => {
     await createBookmarkMock({ user: session.user, privacy: 'private' }),
   ]
 
-  const tags = new Set(
-    bookmarks.flatMap((item) => item.tags).map((tag) => tag.name)
-  )
+  const bookmarksTags = bookmarks
+    .flatMap((item) => item.bookmarkTags)
+    .map(({ tag }) => tag)
+
+  const tags = new Set(bookmarksTags.map((tag) => tag.name))
+
   await annotate('unique tags with bookmarks')
 
   const json1 = await api
@@ -28,8 +31,8 @@ test('get current user tags', async ({ annotate }) => {
 
   expect(json1).toHaveLength(tags.size)
   expect(json1).toContainEqual({
-    id: bookmarks[0].tags[0].id,
-    name: bookmarks[0].tags[0].name,
+    id: bookmarksTags[0].id,
+    name: bookmarksTags[0].name,
   })
 
   await annotate('not to contain orphan tags (no bookmarks links)')

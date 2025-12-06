@@ -90,16 +90,18 @@ describe('get user bookmarks', () => {
       await createBookmarkMock({ user, privacy: 'public' }),
     ]
 
-    const tags = new Set(
-      publicBookmarks.flatMap((item) => item.tags).map((tag) => tag.name)
-    )
+    const bookmarksTags = publicBookmarks
+      .flatMap((item) => item.bookmarkTags)
+      .map(({ tag }) => tag)
+
+    const tags = new Set(bookmarksTags.map((tag) => tag.name))
 
     const json = await api.get(`/${user.name}/tags`).json<Tag[]>()
 
     expect(json).toHaveLength(tags.size)
     expect(json).toContainEqual({
-      id: publicBookmarks[0].tags[0].id,
-      name: publicBookmarks[0].tags[0].name,
+      id: bookmarksTags[0].id,
+      name: bookmarksTags[0].name,
     })
   })
 
@@ -140,9 +142,11 @@ describe('get user bookmarks', () => {
       await createBookmarkMock({ user: session.user, privacy: 'public' }),
     ]
 
-    const tags = new Set(
-      bookmarks.flatMap((item) => item.tags).map((tag) => tag.name)
-    )
+    const bookmarksTags = bookmarks
+      .flatMap((item) => item.bookmarkTags)
+      .map(({ tag }) => tag)
+
+    const tags = new Set(bookmarksTags.map((tag) => tag.name))
 
     const json = await api
       .get(`/${session.user.name}/tags`, {
@@ -152,8 +156,8 @@ describe('get user bookmarks', () => {
 
     expect(json).toHaveLength(tags.size)
     expect(json).toContainEqual({
-      id: bookmarks[0].tags[0].id,
-      name: bookmarks[0].tags[0].name,
+      id: bookmarksTags[0].id,
+      name: bookmarksTags[0].name,
     })
   })
 })

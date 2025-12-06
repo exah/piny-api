@@ -2,7 +2,7 @@ import {
   Entity,
   BaseEntity,
   ManyToOne,
-  ManyToMany,
+  OneToMany,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
@@ -36,8 +36,8 @@ class Bookmark extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.bookmarks)
   user: UserEntity
 
-  @ManyToMany(() => TagEntity, (tag) => tag.bookmarks)
-  tags: TagEntity[]
+  @OneToMany(() => BookmarkTag, (bookmarkTag) => bookmarkTag.bookmark)
+  bookmarkTags: BookmarkTag[]
 
   @ManyToOne(() => LinkEntity, (link) => link.bookmarks)
   link: LinkEntity
@@ -50,3 +50,20 @@ class Bookmark extends BaseEntity {
 }
 
 export { Bookmark as BookmarkEntity }
+
+@Entity()
+class BookmarkTag extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string
+
+  @ManyToOne(() => Bookmark, (bookmark) => bookmark.bookmarkTags)
+  bookmark: Bookmark
+
+  @ManyToOne(() => TagEntity, (tag) => tag.bookmarkTags)
+  tag: TagEntity
+
+  @Column({ type: 'int' })
+  order: number
+}
+
+export { BookmarkTag as BookmarkTagEntity }

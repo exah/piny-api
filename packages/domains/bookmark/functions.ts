@@ -16,13 +16,16 @@ export async function getUserBookmarks(user: UserEntity, userType: UserType) {
         .with('other', () => orm.In([Privacy.public]))
         .exhaustive('Unhandled user type'),
     },
-    relations: { link: true, tags: true },
-    order: { createdAt: 'DESC' },
+    relations: { link: true, bookmarkTags: { tag: true } },
+    order: { createdAt: 'DESC', bookmarkTags: { order: 'ASC' } },
   })
 
   if (bookmarks.length === 0 && userType === 'other') {
     throw new NotFoundError()
   }
 
-  return bookmarks
+  return bookmarks.map((bookmark) => ({
+    ...bookmark,
+    tags: bookmark.bookmarkTags.map(({ tag }) => tag),
+  }))
 }

@@ -3,6 +3,7 @@ import {
   BaseEntity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
@@ -10,7 +11,7 @@ import {
 } from 'typeorm'
 
 import { UserEntity } from '@piny/user/entities'
-import { BookmarkEntity } from '@piny/bookmark/entities'
+import { BookmarkTagEntity } from '@piny/bookmark/entities'
 import type { TagId, TagName } from './types'
 
 @Entity()
@@ -25,9 +26,8 @@ class Tag extends BaseEntity {
   @JoinTable()
   users: UserEntity[]
 
-  @ManyToMany(() => BookmarkEntity, (bookmark) => bookmark.tags)
-  @JoinTable()
-  bookmarks: BookmarkEntity[]
+  @OneToMany(() => BookmarkTagEntity, (bookmarkTag) => bookmarkTag.tag)
+  bookmarkTags: BookmarkTagEntity[]
 
   @CreateDateColumn()
   createdAt: Date

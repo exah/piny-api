@@ -12,7 +12,7 @@ import { getOrCreateTags } from '@piny/tag/functions'
 import type { Bookmark, BookmarkParams, BookmarksListResponse } from './types'
 import { State } from './constants'
 import { getSessionUser } from '@piny/user/functions'
-import { BookmarkEntity } from './entities'
+import { BookmarkEntity, BookmarkTagEntity } from './entities'
 import {
   CreateBookmarkPayloadSchema,
   UpdateBookmarkPayloadSchema,
@@ -20,6 +20,7 @@ import {
   BookmarksListResponseSchema,
 } from './schemas'
 import { getUserBookmarks } from './functions'
+import { dataSource } from '@piny/db/source'
 
 export async function all({
   params,
@@ -38,11 +39,16 @@ export async function get({
 }: RouterContext<Bookmark, BookmarkParams>) {
   const bookmark = await BookmarkEntity.findOne({
     where: { id: params.bookmarkId },
-    relations: { link: true, tags: true },
+    relations: { link: true, bookmarkTags: { tag: true } },
+    order: { bookmarkTags: { order: 'ASC' } },
   })
 
   assert(bookmark, new NotFoundError())
-  reply(200, BookmarkSchema, bookmark)
+
+  reply(200, BookmarkSchema, {
+    ...bookmark,
+    tags: bookmark.bookmarkTags.map(({ tag }) => tag),
+  })
 }
 
 export async function add({
@@ -50,37 +56,44 @@ export async function add({
   reply,
   state,
 }: RouterContext<MessageResponse>) {
-  assert(state.session)
+  assert(state.session, new ForbiddenError())
 
+  const user = state.session.user
   const body = await receive(CreateBookmarkPayloadSchema)
   const link = await getLinkForURL(body.url)
 
-  const count = await BookmarkEntity.count({
-    where: {
-      link: { id: link.id },
-      user: { id: state.session.user.id },
+  await dataSource.transaction(async (manager) => {
+    const existing = await manager.findOne(BookmarkEntity, {
+      where: {
+        link: { id: link.id },
+        user: { id: user.id },
+        state: State.active,
+      },
+    })
+
+    if (existing) {
+      throw new ConflictError()
+    }
+
+    const bookmark = BookmarkEntity.create({
+      title: body.title,
+      description: body.description,
       state: State.active,
-    },
+      privacy: body.privacy,
+      user,
+      link,
+    })
+
+    await manager.save(bookmark)
+
+    if (Array.isArray(body.tags)) {
+      const tags = await getOrCreateTags(body.tags, user)
+      const bookmarkTags = tags.map((tag, index) =>
+        BookmarkTagEntity.create({ bookmark, tag, order: index })
+      )
+      await manager.save(bookmarkTags)
+    }
   })
-
-  if (count > 0) {
-    throw new ConflictError()
-  }
-
-  const bookmark = BookmarkEntity.create({
-    title: body.title,
-    description: body.description,
-    state: State.active,
-    privacy: body.privacy,
-    user: state.session.user,
-    link,
-  })
-
-  if (Array.isArray(body.tags)) {
-    bookmark.tags = await getOrCreateTags(body.tags, state.session.user)
-  }
-
-  await bookmark.save()
 
   reply(201, '✨ Created')
 }
@@ -94,39 +107,49 @@ export async function edit({
   assert(state.session, new ForbiddenError())
   assert(params.bookmarkId, new NotFoundError())
 
-  const bookmark = await BookmarkEntity.findOne({
-    where: { id: params.bookmarkId, user: { id: state.session.user.id } },
-  })
-
-  assert(bookmark, new NotFoundError())
-
+  const user = state.session.user
   const body = await receive(UpdateBookmarkPayloadSchema)
 
-  if (body.title !== undefined) {
-    bookmark.title = body.title
-  }
+  await dataSource.transaction(async (manager) => {
+    const bookmark = await BookmarkEntity.findOne({
+      where: { id: params.bookmarkId, user: { id: user.id } },
+      relations: { bookmarkTags: true },
+    })
 
-  if (body.description !== undefined) {
-    bookmark.description = body.description
-  }
+    assert(bookmark, new NotFoundError())
 
-  if (body.privacy !== undefined) {
-    bookmark.privacy = body.privacy
-  }
+    if (body.title !== undefined) {
+      bookmark.title = body.title
+    }
 
-  if (body.url !== undefined) {
-    bookmark.link = await getLinkForURL(body.url)
-  }
+    if (body.description !== undefined) {
+      bookmark.description = body.description
+    }
 
-  if (body.state !== undefined) {
-    bookmark.state = body.state
-  }
+    if (body.privacy !== undefined) {
+      bookmark.privacy = body.privacy
+    }
 
-  if (body.tags !== undefined) {
-    bookmark.tags = await getOrCreateTags(body.tags, state.session.user)
-  }
+    if (body.url !== undefined) {
+      bookmark.link = await getLinkForURL(body.url)
+    }
 
-  await bookmark.save()
+    if (body.state !== undefined) {
+      bookmark.state = body.state
+    }
+
+    if (body.tags !== undefined) {
+      await manager.remove(bookmark.bookmarkTags)
+
+      const tags = await getOrCreateTags(body.tags, user)
+      const bookmarkTags = tags.map((tag, index) =>
+        BookmarkTagEntity.create({ bookmark, tag, order: index })
+      )
+      await manager.save(bookmarkTags)
+    }
+
+    await manager.save(bookmark)
+  })
 
   reply(200, '💾 Saved')
 }
