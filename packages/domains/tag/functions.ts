@@ -11,8 +11,16 @@ export async function getUserTags(user: UserEntity, type: UserType) {
     where: {
       users: [{ id: user.id }],
       bookmarks: match(type)
-        .with('other', () => [{ privacy: Privacy.public }])
-        .with('current', () => [])
+        .with('other', () => [
+          {
+            privacy: Privacy.public,
+          },
+        ])
+        .with('current', () => [
+          {
+            privacy: orm.In([Privacy.public, Privacy.private]),
+          },
+        ])
         .exhaustive('Unhandled user type'),
     },
   })
