@@ -10,4 +10,13 @@ export const app = new Koa<RouterSessionState, RouterContext<unknown>>()
 app.use(getRouterContext)
 app.use(catchErrors)
 app.use(routes.middleware())
-app.on('error', (error: unknown) => logger.error(error))
+app.on('error', (error: unknown) => {
+  if (
+    ['test'].includes(process.env.NODE_ENV || '') &&
+    !['test', '*'].includes(process.env.DEBUG || '')
+  ) {
+    return
+  }
+
+  logger.error(error)
+})
