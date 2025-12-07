@@ -26,8 +26,8 @@ export async function createBookmarkMock({
   linkURL,
   tagsList,
 }: BookmarkMock = {}) {
-  const result = await transaction(async (manager) => {
-    const user = mockedUser ?? (await createUserMock(undefined))
+  return transaction(async (manager) => {
+    const user = mockedUser ?? (await createUserMock())
     const link = mockedLink ?? (await createLinkMock(linkURL))
     const tags = mockedTags ?? (await createTagsListMock(tagsList, user))
 
@@ -52,6 +52,4 @@ export async function createBookmarkMock({
 
     return bookmark
   })
-
-  return result
 }
