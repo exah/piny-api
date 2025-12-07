@@ -31,7 +31,7 @@ export async function getOrCreateTags(
   manager = dataSource.manager
 ) {
   const nextTags: TagEntity[] = []
-  const foundTags = await TagEntity.find({
+  const foundTags = await manager.find(TagEntity, {
     where: { name: orm.In(input) },
     relations: { users: true },
   })

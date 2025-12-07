@@ -59,9 +59,9 @@ export async function add({
 
   const user = state.session.user
   const body = await receive(CreateBookmarkPayloadSchema)
-  const link = await getLinkForURL(body.url)
 
   const result = await dataSource.transaction(async (manager) => {
+    const link = await getLinkForURL(body.url, manager)
     const existing = await manager.findOne(BookmarkEntity, {
       where: {
         link: { id: link.id },
@@ -115,7 +115,7 @@ export async function edit({
   const body = await receive(UpdateBookmarkPayloadSchema)
 
   await dataSource.transaction(async (manager) => {
-    const bookmark = await BookmarkEntity.findOne({
+    const bookmark = await manager.findOne(BookmarkEntity, {
       where: { id: params.bookmarkId, user: { id: user.id } },
       relations: { bookmarkTags: true },
     })
@@ -135,7 +135,7 @@ export async function edit({
     }
 
     if (body.url !== undefined) {
-      bookmark.link = await getLinkForURL(body.url)
+      bookmark.link = await getLinkForURL(body.url, manager)
     }
 
     if (body.state !== undefined) {
