@@ -1,5 +1,4 @@
 import type { Next } from 'koa'
-import parser from 'co-body'
 import * as v from 'valibot'
 import { RouterContext } from '@piny/api/types/router'
 import { InternalServerError, ParsingError } from './errors'
@@ -28,7 +27,6 @@ export async function catchErrors(context: RouterContext<ErrorResponse>, next: N
     responseError.url = context.URL
     responseError.method = context.method
     responseError.headers = context.headers
-    responseError.payload = await parser(context.request).catch(() => null)
 
     context.reply(responseError.status, ErrorResponseSchema, {
       id,
