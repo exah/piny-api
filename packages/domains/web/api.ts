@@ -21,6 +21,7 @@ export const api = YF.create({
       responseError.url = new URL(error.response.url)
       responseError.meta = data.meta
       responseError.cause = error
+      responseError.method = error.response.options.method
       responseError.message = data.message
 
       throw responseError

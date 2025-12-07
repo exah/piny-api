@@ -16,10 +16,7 @@ function getResponseError(error: unknown): RegisteredResponseError {
   }
 }
 
-export async function catchErrors(
-  context: RouterContext<ErrorResponse>,
-  next: Next
-) {
+export async function catchErrors(context: RouterContext<ErrorResponse>, next: Next) {
   try {
     await next()
   } catch (error) {
@@ -28,6 +25,7 @@ export async function catchErrors(
 
     responseError.id = id
     responseError.url = context.URL
+    responseError.method = context.method
 
     context.reply(responseError.status, ErrorResponseSchema, {
       id,

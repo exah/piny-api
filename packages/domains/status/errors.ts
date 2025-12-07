@@ -3,6 +3,7 @@ import type { UnknownSchema, UnknownIssue } from './types'
 import { ErrorCodeSchema } from './schemas'
 
 interface ResponseErrorOptions<Meta = unknown> {
+  method?: string
   cause?: unknown
   meta?: Meta
   url?: URL
@@ -18,6 +19,7 @@ export abstract class ResponseError<Meta = unknown> extends Error {
 
   message: string
   description?: string
+  method?: string
   cause?: unknown
   meta: Meta
   url?: URL
@@ -103,9 +105,7 @@ export class ParsingError extends ResponseError<UnknownIssue[]> {
         return issue.message
       }
 
-      return `'${issue.path.map((item) => item.key).join('.')}': ${
-        issue.message
-      }`
+      return `'${issue.path.map((item) => item.key).join('.')}': ${issue.message}`
     })
 
     super(`🤦‍♂️ Parsing error:\n${reasons.join('\n')}`, {
@@ -115,9 +115,7 @@ export class ParsingError extends ResponseError<UnknownIssue[]> {
   }
 }
 
-export class SessionAlreadyRefreshedError<
-  Meta = unknown
-> extends ResponseError<Meta> {
+export class SessionAlreadyRefreshedError<Meta = unknown> extends ResponseError<Meta> {
   readonly code = ErrorCodeSchema.enum.SESSION_ALREADY_REFRESHED
   readonly status = 409
 
