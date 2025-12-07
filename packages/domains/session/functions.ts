@@ -46,10 +46,7 @@ export async function createRefreshedSession(
     throw new SessionAlreadyRefreshedError()
   }
 
-  const token = await createToken(
-    previousSession.user.name,
-    expiration.getTime()
-  )
+  const token = await createToken(previousSession.user.name, expiration.getTime())
 
   const refreshedSession = SessionEntity.create({
     token,
@@ -59,13 +56,12 @@ export async function createRefreshedSession(
     deviceDescription: previousSession.deviceDescription,
   })
 
-  previousSession.succeedingSession = refreshedSession
-  previousSession.expiresAt = new Date(
-    Math.min(previousSession.expiresAt.getTime(), Date.now() + Time.MINUTE)
-  )
-
   await dataSource.transaction(async (manager) => {
-    await manager.save(refreshedSession)
+    previousSession.succeedingSession = await manager.save(refreshedSession)
+    previousSession.expiresAt = new Date(
+      Math.min(previousSession.expiresAt.getTime(), Date.now() + Time.MINUTE)
+    )
+
     await manager.save(previousSession)
   })
 
