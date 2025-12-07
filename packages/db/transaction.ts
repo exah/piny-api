@@ -13,7 +13,7 @@ export async function transaction<T>(
 ): Promise<T> {
   const existingManager = context.getStore()
 
-  if (existingManager) {
+  if (existingManager?.queryRunner?.isTransactionActive) {
     return cb(existingManager)
   }
 
