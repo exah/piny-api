@@ -2,6 +2,7 @@ import Koa from 'koa'
 import { catchErrors } from '@piny/status/middlewares'
 import { logger } from '@piny/tools/logger'
 import { routes } from './routes'
+import { ResponseError } from '@piny/status/errors'
 import { getRouterContext } from './middlewares'
 import type { RouterSessionState, RouterContext } from './types/router'
 
@@ -13,7 +14,9 @@ app.use(routes.middleware())
 app.on('error', (error: unknown) => {
   if (
     ['test'].includes(process.env.NODE_ENV || '') &&
-    !['test', '*'].includes(process.env.DEBUG || '')
+    !['test', '*'].includes(process.env.DEBUG || '') &&
+    error instanceof ResponseError &&
+    error.status !== 500
   ) {
     return
   }
