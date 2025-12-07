@@ -4,7 +4,7 @@ import {
   NotFoundError,
   SessionAlreadyRefreshedError,
 } from '@piny/status/errors'
-import { dataSource } from '@piny/db/source'
+import { transaction, manager } from '@piny/db/transaction'
 import { assert } from '@piny/tools/assert'
 import { Time } from '@piny/tools/constants'
 import { SessionEntity } from './entities'
@@ -28,13 +28,15 @@ export async function createSession(payload: LoginPayload) {
   const expiration = getTokenExpiration()
   const token = await createToken(user.name, expiration.getTime())
 
-  return SessionEntity.create({
-    token,
-    user,
-    expiresAt: new Date(expiration),
-    deviceId: payload.device.id,
-    deviceDescription: payload.device.description,
-  }).save()
+  return manager().save(
+    SessionEntity.create({
+      token,
+      user,
+      expiresAt: new Date(expiration),
+      deviceId: payload.device.id,
+      deviceDescription: payload.device.description,
+    })
+  )
 }
 
 export async function createRefreshedSession(
@@ -56,7 +58,7 @@ export async function createRefreshedSession(
     deviceDescription: previousSession.deviceDescription,
   })
 
-  await dataSource.transaction(async (manager) => {
+  await transaction(async (manager) => {
     previousSession.succeedingSession = await manager.save(refreshedSession)
     previousSession.expiresAt = new Date(
       Math.min(previousSession.expiresAt.getTime(), Date.now() + Time.MINUTE)
@@ -69,12 +71,12 @@ export async function createRefreshedSession(
 }
 
 export async function removeSession(token: SessionToken) {
-  const session = await SessionEntity.findOne({
+  const session = await manager().findOne(SessionEntity, {
     where: { token },
   })
 
   assert(session, new NotFoundError())
   session.expiresAt = new Date()
 
-  await session.save()
+  await manager().save(session)
 }

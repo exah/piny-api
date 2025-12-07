@@ -6,7 +6,8 @@
     "./entities": "./entities.ts",
     "./init": "./init.ts",
     "./source": "./source.ts",
-    "./sync": "./sync.ts"
+    "./sync": "./sync.ts",
+    "./transaction": "./transaction.ts"
   },
   "scripts": {
     "sync": "tsx sync.ts",

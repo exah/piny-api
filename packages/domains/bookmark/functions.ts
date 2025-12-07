@@ -1,5 +1,6 @@
 import * as orm from 'typeorm'
 import { match } from 'lil-match'
+import { manager } from '@piny/db/transaction'
 import { NotFoundError } from '@piny/status/errors'
 import type { UserEntity } from '@piny/user/entities'
 import type { UserType } from '@piny/user/types'
@@ -7,7 +8,7 @@ import { Privacy, State } from './constants'
 import { BookmarkEntity } from './entities'
 
 export async function getUserBookmarks(user: UserEntity, userType: UserType) {
-  const bookmarks = await BookmarkEntity.find({
+  const bookmarks = await manager().find(BookmarkEntity, {
     where: {
       user: { id: user.id },
       state: State.active,

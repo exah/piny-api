@@ -1,14 +1,11 @@
 import { faker } from '@faker-js/faker'
-import { dataSource } from '@piny/db/source'
+import { transaction } from '@piny/db/transaction'
 import { LinkEntity } from './entities'
 
-export function createLinkMock(
-  url = faker.internet.url(),
-  manager = dataSource.manager
-) {
+export function createLinkMock(url = faker.internet.url()) {
   const link = LinkEntity.create({
     url: new URL(url).toString(),
   })
 
-  return manager.save(link)
+  return transaction((manager) => manager.save(link))
 }

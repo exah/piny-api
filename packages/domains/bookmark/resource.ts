@@ -1,5 +1,6 @@
 import { assert } from '@piny/tools/assert'
 import type { MessageResponse } from '@piny/status/types'
+import { transaction } from '@piny/db/transaction'
 import { ForbiddenError, ConflictError, NotFoundError } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import type { UserParams } from '@piny/user/types'
@@ -22,7 +23,6 @@ import {
   BookmarksListResponseSchema,
 } from './schemas'
 import { getUserBookmarks } from './functions'
-import { dataSource } from '@piny/db/source'
 
 export async function all({
   params,
@@ -60,8 +60,8 @@ export async function add({
   const user = state.session.user
   const body = await receive(CreateBookmarkPayloadSchema)
 
-  const result = await dataSource.transaction(async (manager) => {
-    const link = await getLinkForURL(body.url, manager)
+  const result = await transaction(async (manager) => {
+    const link = await getLinkForURL(body.url)
     const existing = await manager.findOne(BookmarkEntity, {
       where: {
         link: { id: link.id },
@@ -86,7 +86,7 @@ export async function add({
     await manager.save(bookmark)
 
     if (Array.isArray(body.tags)) {
-      const tags = await getOrCreateTags(body.tags, user, manager)
+      const tags = await getOrCreateTags(body.tags, user)
       const bookmarkTags = tags.map((tag, index) =>
         BookmarkTagEntity.create({ bookmark, tag, order: index })
       )
@@ -114,7 +114,7 @@ export async function edit({
   const user = state.session.user
   const body = await receive(UpdateBookmarkPayloadSchema)
 
-  await dataSource.transaction(async (manager) => {
+  await transaction(async (manager) => {
     const bookmark = await manager.findOne(BookmarkEntity, {
       where: { id: params.bookmarkId, user: { id: user.id } },
       relations: { bookmarkTags: true },
@@ -135,7 +135,7 @@ export async function edit({
     }
 
     if (body.url !== undefined) {
-      bookmark.link = await getLinkForURL(body.url, manager)
+      bookmark.link = await getLinkForURL(body.url)
     }
 
     if (body.state !== undefined) {
@@ -144,7 +144,7 @@ export async function edit({
 
     if (body.tags !== undefined) {
       await manager.remove(bookmark.bookmarkTags)
-      const tags = await getOrCreateTags(body.tags, user, manager)
+      const tags = await getOrCreateTags(body.tags, user)
 
       bookmark.bookmarkTags = await manager.save(
         tags.map((tag, index) =>

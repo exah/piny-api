@@ -1,13 +1,13 @@
 import * as orm from 'typeorm'
 import type { UserEntity } from '@piny/user/entities'
 import type { UserType } from '@piny/user/types'
-import { dataSource } from '@piny/db/source'
+import { transaction, manager } from '@piny/db/transaction'
 import { match } from 'lil-match'
 import { Privacy } from '@piny/bookmark/constants'
 import { TagEntity } from './entities'
 
 export async function getUserTags(user: UserEntity, type: UserType) {
-  const tags = await TagEntity.find({
+  const tags = await manager().find(TagEntity, {
     select: ['id', 'name'],
     where: {
       users: [{ id: user.id }],
@@ -25,29 +25,27 @@ export async function getUserTags(user: UserEntity, type: UserType) {
   return tags
 }
 
-export async function getOrCreateTags(
-  input: string[] = [],
-  user: UserEntity,
-  manager = dataSource.manager
-) {
-  const nextTags: TagEntity[] = []
-  const foundTags = await manager.find(TagEntity, {
-    where: { name: orm.In(input) },
-    relations: { users: true },
-  })
+export function getOrCreateTags(input: string[] = [], user: UserEntity) {
+  return transaction(async (manager) => {
+    const nextTags: TagEntity[] = []
+    const foundTags = await manager.find(TagEntity, {
+      where: { name: orm.In(input) },
+      relations: { users: true },
+    })
 
-  for (const name of input) {
-    const foundTag = foundTags.find((tag) => tag.name === name)
-    const tag = foundTag ?? TagEntity.create({ name })
+    for (const name of input) {
+      const foundTag = foundTags.find((tag) => tag.name === name)
+      const tag = foundTag ?? TagEntity.create({ name })
 
-    if (tag.users === undefined) {
-      tag.users = [user]
-    } else if (!tag.users.some((tagUser) => tagUser.id === user.id)) {
-      tag.users.push(user)
+      if (tag.users === undefined) {
+        tag.users = [user]
+      } else if (!tag.users.some((tagUser) => tagUser.id === user.id)) {
+        tag.users.push(user)
+      }
+
+      nextTags.push(tag)
     }
 
-    nextTags.push(tag)
-  }
-
-  return manager.save(nextTags)
+    return manager.save(nextTags)
+  })
 }

@@ -1,9 +1,6 @@
-import {
-  NotFoundError,
-  UnauthorizedError,
-  ForbiddenError,
-} from '@piny/status/errors'
+import { NotFoundError, UnauthorizedError, ForbiddenError } from '@piny/status/errors'
 import { assert, ensure } from '@piny/tools/assert'
+import { manager } from '@piny/db/transaction'
 import { SessionEntity } from '@piny/session/entities'
 import { UserEntity } from './entities'
 import { hash } from '@piny/session/utils'
@@ -32,18 +29,15 @@ export async function createUser(payload: CreateUserPayload) {
     pass: hash(payload.user, payload.pass),
   })
 
-  await user.save()
+  await manager().save(user)
 }
 
-export function getSessionUserType(
-  session: SessionEntity,
-  user: UserEntity
-): UserType {
+export function getSessionUserType(session: SessionEntity, user: UserEntity): UserType {
   return session.user.id === user.id ? 'current' : 'other'
 }
 
 export async function getUserByName(name: UserName): Promise<UserEntity> {
-  const user = await UserEntity.findOne({
+  const user = await manager().findOne(UserEntity, {
     where: { name },
     select: ['id', 'name', 'email'],
   })
@@ -63,9 +57,7 @@ export async function getSessionUser(
     user = ensure(session, new UnauthorizedError()).user
   }
 
-  const userType: UserType = session
-    ? getSessionUserType(session, user)
-    : 'other'
+  const userType: UserType = session ? getSessionUserType(session, user) : 'other'
 
   return [user, userType]
 }

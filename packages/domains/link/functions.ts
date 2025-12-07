@@ -1,18 +1,12 @@
-import type { EntityManager } from 'typeorm'
-import { dataSource } from '@piny/db/source'
+import { manager } from '@piny/db/transaction'
 import { LinkEntity } from './entities'
 
-export async function getLinkForURL(
-  linkURL: string,
-  manager: EntityManager = dataSource.manager
-): Promise<LinkEntity> {
+export async function getLinkForURL(linkURL: string): Promise<LinkEntity> {
   const url = new URL(linkURL)
 
-  const foundLink = await manager.findOne(LinkEntity, {
+  const link = await manager().findOne(LinkEntity, {
     where: { url: url.toString() },
   })
 
-  const link = foundLink ?? LinkEntity.create({ url: url.toString() })
-
-  return manager.save(link)
+  return link ?? (await manager().save(LinkEntity.create({ url: url.toString() })))
 }

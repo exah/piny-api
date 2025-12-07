@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { dataSource } from '@piny/db/source'
+import { transaction } from '@piny/db/transaction'
 import { createUserMock } from '@piny/user/mocks'
 import { createLinkMock } from '@piny/link/mocks'
 import { createTagsListMock } from '@piny/tag/mocks'
@@ -15,24 +15,21 @@ interface BookmarkMock
   tags?: TagEntity[]
 }
 
-export async function createBookmarkMock(
-  {
-    user: mockedUser,
-    title = faker.lorem.lines(1),
-    description = faker.lorem.lines(2),
-    link: mockedLink,
-    state = 'active',
-    privacy = 'public',
-    tags: mockedTags,
-    linkURL,
-    tagsList,
-  }: BookmarkMock = {},
-  manager = dataSource.manager
-) {
-  const result = await manager.transaction(async (manager) => {
-    const user = mockedUser ?? (await createUserMock(undefined, manager))
-    const link = mockedLink ?? (await createLinkMock(linkURL, manager))
-    const tags = mockedTags ?? (await createTagsListMock(tagsList, user, manager))
+export async function createBookmarkMock({
+  user: mockedUser,
+  title = faker.lorem.lines(1),
+  description = faker.lorem.lines(2),
+  link: mockedLink,
+  state = 'active',
+  privacy = 'public',
+  tags: mockedTags,
+  linkURL,
+  tagsList,
+}: BookmarkMock = {}) {
+  const result = await transaction(async (manager) => {
+    const user = mockedUser ?? (await createUserMock(undefined))
+    const link = mockedLink ?? (await createLinkMock(linkURL))
+    const tags = mockedTags ?? (await createTagsListMock(tagsList, user))
 
     const bookmark = BookmarkEntity.create({
       title,
