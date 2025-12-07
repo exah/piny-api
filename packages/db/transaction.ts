@@ -1,21 +1,38 @@
-import type { EntityManager } from 'typeorm'
+import type { QueryRunner, EntityManager } from 'typeorm'
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { dataSource } from './source'
 
-const context = new AsyncLocalStorage<EntityManager>()
+const context = new AsyncLocalStorage<QueryRunner>()
 
 export function manager() {
-  return context.getStore() ?? dataSource.manager
+  return context.getStore()?.manager ?? dataSource.manager
 }
 
 export async function transaction<T>(
   cb: (manager: EntityManager) => Promise<T>
 ): Promise<T> {
-  const existingManager = context.getStore()
+  const existingQueryRunner = context.getStore()
 
-  if (existingManager?.queryRunner?.isTransactionActive) {
-    return cb(existingManager)
+  if (
+    existingQueryRunner &&
+    !existingQueryRunner.isReleased &&
+    existingQueryRunner.isTransactionActive
+  ) {
+    return cb(existingQueryRunner.manager)
   }
 
-  return dataSource.transaction((manager) => context.run(manager, () => cb(manager)))
+  const queryRunner = dataSource.createQueryRunner()
+  await queryRunner.connect()
+  await queryRunner.startTransaction()
+
+  try {
+    const result = await context.run(queryRunner, () => cb(queryRunner.manager))
+    await queryRunner.commitTransaction()
+    return result
+  } catch (error) {
+    await queryRunner.rollbackTransaction()
+    throw error
+  } finally {
+    await queryRunner.release()
+  }
 }
