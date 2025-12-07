@@ -8,7 +8,7 @@ import type {
   CreateUserPayloadSchema,
 } from './schemas'
 
-export type User = Strict<v.InferOutput<typeof UserSchema>>
+export type User = v.InferOutput<typeof UserSchema>
 export type UserId = v.InferOutput<typeof UserIdSchema>
 export type UserName = v.InferOutput<typeof UserNameSchema>
 export type UserEmail = v.InferOutput<typeof UserEmailSchema>

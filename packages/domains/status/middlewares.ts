@@ -29,8 +29,7 @@ export async function catchErrors(
     responseError.id = id
     responseError.url = context.URL
 
-    context.response.status = responseError.status
-    context.response.body = v.parse(ErrorResponseSchema, {
+    context.reply(responseError.status, ErrorResponseSchema, {
       id,
       code: responseError.code,
       meta: responseError.meta,

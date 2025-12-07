@@ -12,8 +12,8 @@ export interface RouterContext<
   receive<const S extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
     schema: S
   ): Promise<v.InferOutput<S>>
-  reply: Response extends Strict<MessageResponse>
-    ? (status: number, message: Response['message']) => void
+  reply: keyof Response extends keyof MessageResponse
+    ? (status: number, message: string, ..._: never[]) => void
     : <const S extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
         status: number,
         schema: S,
