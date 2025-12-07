@@ -1,10 +1,6 @@
 import { expect, test } from 'vitest'
 import { api } from '@piny/tests/api'
-import {
-  UnauthorizedError,
-  NotFoundError,
-  ConflictError,
-} from '@piny/status/errors'
+import { UnauthorizedError, NotFoundError, ConflictError } from '@piny/status/errors'
 import { createSessionMock } from '@piny/session/mocks'
 import { createBookmarkMock } from '@piny/bookmark/mocks'
 import { createLinkMock } from '@piny/link/mocks'
@@ -76,9 +72,7 @@ test('get bookmarks unauthorized', async () => {
   await createBookmarkMock({ privacy: 'public' })
   await createBookmarkMock({ privacy: 'private' })
 
-  await expect(() => api.get(`/bookmarks`)).rejects.toThrowError(
-    UnauthorizedError
-  )
+  await expect(() => api.get(`/bookmarks`)).rejects.toThrowError(UnauthorizedError)
 })
 
 test('get single bookmark', async () => {
@@ -263,6 +257,34 @@ test('edit bookmark tags', async () => {
   expect(bookmarkResponse.tags[2]).toMatchObject({ name: 'baz' })
 })
 
+test('parallel edit bookmark tags', async () => {
+  const session = await createSessionMock()
+  const bookmarkMock = await createBookmarkMock({
+    user: session.user,
+    privacy: 'public',
+    tagsList: ['zebra', 'apple', 'banana'],
+  })
+
+  const updateTag = (tags: string[]) =>
+    api.patch(`/bookmarks/${bookmarkMock.id}`, {
+      headers: { Authorization: `Bearer ${session.token}` },
+      json: { tags },
+    })
+
+  await Promise.all([updateTag(['bar', 'baz', 'foo']), updateTag(['foo', 'bar', 'baz'])])
+
+  const bookmarkResponse = await api
+    .get(`/bookmarks/${bookmarkMock.id}`, {
+      headers: { Authorization: `Bearer ${session.token}` },
+    })
+    .json<Bookmark>()
+
+  expect(bookmarkResponse.tags).toHaveLength(3)
+  expect(bookmarkResponse.tags[0]).toMatchObject({ name: 'foo' })
+  expect(bookmarkResponse.tags[1]).toMatchObject({ name: 'bar' })
+  expect(bookmarkResponse.tags[2]).toMatchObject({ name: 'baz' })
+})
+
 test('edit bookmark unauthorized', async () => {
   const bookmark = await createBookmarkMock({ privacy: 'public' })
 
@@ -316,9 +338,9 @@ test('remove bookmark', async () => {
 test('remove bookmark unauthorized', async () => {
   const bookmark = await createBookmarkMock({ privacy: 'public' })
 
-  await expect(() =>
-    api.delete(`/bookmarks/${bookmark.id}`)
-  ).rejects.toThrowError(UnauthorizedError)
+  await expect(() => api.delete(`/bookmarks/${bookmark.id}`)).rejects.toThrowError(
+    UnauthorizedError
+  )
 })
 
 test('remove bookmark not found', async () => {
