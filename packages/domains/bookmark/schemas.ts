@@ -36,6 +36,11 @@ export const CreateBookmarkPayloadSchema = v.object({
   state: v.optional(v.enum(State)),
 })
 
+export const CreateBookmarkResponseSchema = v.object({
+  id: BookmarkIdSchema,
+  message: v.string(),
+})
+
 export const UpdateBookmarkPayloadSchema = v.partial(
   CreateBookmarkPayloadSchema
 )

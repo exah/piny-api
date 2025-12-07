@@ -9,14 +9,20 @@ import type { RouterContext } from '@piny/api/types/router'
 import type { UserParams } from '@piny/user/types'
 import { getLinkForURL } from '@piny/link/functions'
 import { getOrCreateTags } from '@piny/tag/functions'
-import type { Bookmark, BookmarkParams, BookmarksListResponse } from './types'
+import type {
+  Bookmark,
+  BookmarkParams,
+  CreateBookmarkResponse,
+  BookmarksListResponse,
+} from './types'
 import { State } from './constants'
 import { getSessionUser } from '@piny/user/functions'
 import { BookmarkEntity, BookmarkTagEntity } from './entities'
 import {
-  CreateBookmarkPayloadSchema,
-  UpdateBookmarkPayloadSchema,
   BookmarkSchema,
+  CreateBookmarkPayloadSchema,
+  CreateBookmarkResponseSchema,
+  UpdateBookmarkPayloadSchema,
   BookmarksListResponseSchema,
 } from './schemas'
 import { getUserBookmarks } from './functions'
@@ -55,14 +61,14 @@ export async function add({
   receive,
   reply,
   state,
-}: RouterContext<MessageResponse>) {
+}: RouterContext<CreateBookmarkResponse>) {
   assert(state.session, new ForbiddenError())
 
   const user = state.session.user
   const body = await receive(CreateBookmarkPayloadSchema)
   const link = await getLinkForURL(body.url)
 
-  await dataSource.transaction(async (manager) => {
+  const result = await dataSource.transaction(async (manager) => {
     const existing = await manager.findOne(BookmarkEntity, {
       where: {
         link: { id: link.id },
@@ -93,9 +99,14 @@ export async function add({
       )
       await manager.save(bookmarkTags)
     }
+
+    return bookmark
   })
 
-  reply(201, '✨ Created')
+  reply(201, CreateBookmarkResponseSchema, {
+    id: result.id,
+    message: '✨ Created',
+  })
 }
 
 export async function edit({
@@ -140,12 +151,13 @@ export async function edit({
 
     if (body.tags !== undefined) {
       await manager.remove(bookmark.bookmarkTags)
-
       const tags = await getOrCreateTags(body.tags, user)
-      const bookmarkTags = tags.map((tag, index) =>
-        BookmarkTagEntity.create({ bookmark, tag, order: index })
+
+      bookmark.bookmarkTags = await manager.save(
+        tags.map((tag, index) =>
+          BookmarkTagEntity.create({ bookmark, tag, order: index })
+        )
       )
-      await manager.save(bookmarkTags)
     }
 
     await manager.save(bookmark)

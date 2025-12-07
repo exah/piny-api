@@ -3,6 +3,7 @@ import type {
   BookmarkIdSchema,
   BookmarkParamsSchema,
   CreateBookmarkPayloadSchema,
+  CreateBookmarkResponseSchema,
   UpdateBookmarkPayloadSchema,
   BookmarksListResponseSchema,
   BookmarkSchema,
@@ -18,6 +19,10 @@ export type BookmarksListResponse = v.InferOutput<
 
 export type CreateBookmarkPayload = v.InferOutput<
   typeof CreateBookmarkPayloadSchema
+>
+
+export type CreateBookmarkResponse = v.InferOutput<
+  typeof CreateBookmarkResponseSchema
 >
 
 export type UpdateBookmarkPayload = v.InferOutput<

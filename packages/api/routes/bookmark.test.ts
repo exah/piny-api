@@ -8,7 +8,7 @@ import {
 import { createSessionMock } from '@piny/session/mocks'
 import { createBookmarkMock } from '@piny/bookmark/mocks'
 import { createLinkMock } from '@piny/link/mocks'
-import type { Bookmark } from '@piny/bookmark/types'
+import type { Bookmark, CreateBookmarkResponse } from '@piny/bookmark/types'
 import type { MessageResponse } from '@piny/status/types'
 
 test('get bookmarks', async () => {
@@ -114,11 +114,18 @@ test('get single bookmark', async () => {
 
 test('get single bookmark with stable tag order', async () => {
   const session = await createSessionMock()
-  const bookmark = await createBookmarkMock({
-    user: session.user,
-    privacy: 'public',
-    tagsList: ['zebra', 'apple', 'banana'],
-  })
+  const link = await createLinkMock()
+
+  const bookmark = await api
+    .post(`/bookmarks`, {
+      headers: { Authorization: `Bearer ${session.token}` },
+      json: {
+        url: link.url,
+        privacy: 'private',
+        tags: ['zebra', 'apple', 'banana'],
+      },
+    })
+    .json<CreateBookmarkResponse>()
 
   const json = await api
     .get(`/bookmarks/${bookmark.id}`, {
@@ -167,7 +174,10 @@ test('add bookmark', async () => {
     })
     .json<MessageResponse>()
 
-  expect(json).toStrictEqual({ message: '✨ Created' })
+  expect(json).toStrictEqual({
+    id: expect.any(String),
+    message: '✨ Created',
+  })
 })
 
 test('add bookmark unauthorized', async () => {
@@ -226,22 +236,31 @@ test('edit bookmark', async () => {
 
 test('edit bookmark tags', async () => {
   const session = await createSessionMock()
-  const bookmark = await createBookmarkMock({
+  const bookmarkMock = await createBookmarkMock({
     user: session.user,
     privacy: 'public',
-    tagsList: ['old1', 'old2'],
+    tagsList: ['zebra', 'apple', 'banana'],
   })
 
-  const json = await api
-    .patch(`/bookmarks/${bookmark.id}`, {
-      headers: { Authorization: `Bearer ${session.token}` },
-      json: {
-        tags: ['new1', 'new2', 'new3'],
-      },
-    })
-    .json<MessageResponse>()
+  expect(
+    await api
+      .patch(`/bookmarks/${bookmarkMock.id}`, {
+        headers: { Authorization: `Bearer ${session.token}` },
+        json: { tags: ['foo', 'bar', 'baz'] },
+      })
+      .json<MessageResponse>()
+  ).toStrictEqual({ message: '💾 Saved' })
 
-  expect(json).toStrictEqual({ message: '💾 Saved' })
+  const bookmarkResponse = await api
+    .get(`/bookmarks/${bookmarkMock.id}`, {
+      headers: { Authorization: `Bearer ${session.token}` },
+    })
+    .json<Bookmark>()
+
+  expect(bookmarkResponse.tags).toHaveLength(3)
+  expect(bookmarkResponse.tags[0]).toMatchObject({ name: 'foo' })
+  expect(bookmarkResponse.tags[1]).toMatchObject({ name: 'bar' })
+  expect(bookmarkResponse.tags[2]).toMatchObject({ name: 'baz' })
 })
 
 test('edit bookmark unauthorized', async () => {
