@@ -1,8 +1,11 @@
 import * as v from 'valibot'
+import type { IncomingHttpHeaders } from 'node:http'
 import type { UnknownSchema, UnknownIssue } from './types'
 import { ErrorCodeSchema } from './schemas'
 
 interface ResponseErrorOptions<Meta = unknown> {
+  headers?: Headers | IncomingHttpHeaders
+  payload?: unknown
   method?: string
   cause?: unknown
   meta?: Meta
@@ -19,6 +22,8 @@ export abstract class ResponseError<Meta = unknown> extends Error {
 
   message: string
   description?: string
+  headers?: Headers | IncomingHttpHeaders
+  payload?: unknown
   method?: string
   cause?: unknown
   meta: Meta
@@ -29,6 +34,9 @@ export abstract class ResponseError<Meta = unknown> extends Error {
     super()
 
     if (description) this.description = description
+    if (options?.headers) this.headers = options.headers
+    if (options?.payload) this.payload = options.payload
+    if (options?.method) this.method = options.method
     if (options?.cause) this.cause = options.cause
     if (options?.meta) this.meta = options.meta
     if (options?.url) this.url = options.url

@@ -23,6 +23,8 @@ export const api = YF.create({
       responseError.cause = error
       responseError.method = error.response.options.method
       responseError.message = data.message
+      responseError.headers = error.response.options.headers
+      responseError.payload = error.response.options.json
 
       throw responseError
     }
