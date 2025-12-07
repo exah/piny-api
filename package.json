@@ -20,7 +20,7 @@
     "singleQuote": true,
     "semi": false,
     "trailingComma": "es5",
-    "printWidth": 80
+    "printWidth": 90
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

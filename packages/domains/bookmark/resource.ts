@@ -1,10 +1,6 @@
 import { assert } from '@piny/tools/assert'
 import type { MessageResponse } from '@piny/status/types'
-import {
-  ForbiddenError,
-  ConflictError,
-  NotFoundError,
-} from '@piny/status/errors'
+import { ForbiddenError, ConflictError, NotFoundError } from '@piny/status/errors'
 import type { RouterContext } from '@piny/api/types/router'
 import type { UserParams } from '@piny/user/types'
 import { getLinkForURL } from '@piny/link/functions'
@@ -39,10 +35,7 @@ export async function all({
   reply(200, BookmarksListResponseSchema, bookmarks)
 }
 
-export async function get({
-  params,
-  reply,
-}: RouterContext<Bookmark, BookmarkParams>) {
+export async function get({ params, reply }: RouterContext<Bookmark, BookmarkParams>) {
   const bookmark = await BookmarkEntity.findOne({
     where: { id: params.bookmarkId },
     relations: { link: true, bookmarkTags: { tag: true } },
@@ -93,7 +86,7 @@ export async function add({
     await manager.save(bookmark)
 
     if (Array.isArray(body.tags)) {
-      const tags = await getOrCreateTags(body.tags, user)
+      const tags = await getOrCreateTags(body.tags, user, manager)
       const bookmarkTags = tags.map((tag, index) =>
         BookmarkTagEntity.create({ bookmark, tag, order: index })
       )
@@ -151,7 +144,7 @@ export async function edit({
 
     if (body.tags !== undefined) {
       await manager.remove(bookmark.bookmarkTags)
-      const tags = await getOrCreateTags(body.tags, user)
+      const tags = await getOrCreateTags(body.tags, user, manager)
 
       bookmark.bookmarkTags = await manager.save(
         tags.map((tag, index) =>

@@ -8,33 +8,32 @@ import type { TagEntity } from '@piny/tag/entities'
 
 interface BookmarkMock
   extends Partial<
-    Pick<
-      BookmarkEntity,
-      'title' | 'description' | 'state' | 'privacy' | 'link' | 'user'
-    >
+    Pick<BookmarkEntity, 'title' | 'description' | 'state' | 'privacy' | 'link' | 'user'>
   > {
   linkURL?: string
   tagsList?: string[]
   tags?: TagEntity[]
 }
 
-export async function createBookmarkMock({
-  user: mockedUser,
-  title = faker.lorem.lines(1),
-  description = faker.lorem.lines(2),
-  link: mockedLink,
-  state = 'active',
-  privacy = 'public',
-  tags: mockedTags,
-  linkURL,
-  tagsList,
-}: BookmarkMock = {}) {
-  // TODO: Support transactions
-  const user = mockedUser ?? (await createUserMock())
-  const link = mockedLink ?? (await createLinkMock(linkURL))
-  const tags = mockedTags ?? (await createTagsListMock(tagsList, user))
+export async function createBookmarkMock(
+  {
+    user: mockedUser,
+    title = faker.lorem.lines(1),
+    description = faker.lorem.lines(2),
+    link: mockedLink,
+    state = 'active',
+    privacy = 'public',
+    tags: mockedTags,
+    linkURL,
+    tagsList,
+  }: BookmarkMock = {},
+  manager = dataSource.manager
+) {
+  const result = await manager.transaction(async (manager) => {
+    const user = mockedUser ?? (await createUserMock(undefined, manager))
+    const link = mockedLink ?? (await createLinkMock(linkURL, manager))
+    const tags = mockedTags ?? (await createTagsListMock(tagsList, user, manager))
 
-  const result = await dataSource.transaction(async (manager) => {
     const bookmark = BookmarkEntity.create({
       title,
       description,
