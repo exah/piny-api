@@ -123,3 +123,6 @@ dist
 
 # macOS
 .DS_Store
+
+# Agents
+CLAUDE.md
