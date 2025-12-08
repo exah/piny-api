@@ -1,9 +1,8 @@
 import Koa from 'koa'
-import { catchErrors } from '@piny/status/middlewares'
 import { logger } from '@piny/tools/logger'
-import { routes } from './routes'
 import { ResponseError } from '@piny/status/errors'
-import { getRouterContext } from './middlewares'
+import { routes } from './routes'
+import { getRouterContext, catchErrors } from './middlewares'
 import type { RouterSessionState, RouterContext } from './types/router'
 
 export const app = new Koa<RouterSessionState, RouterContext<unknown>>()
@@ -18,6 +17,16 @@ app.on('error', (error: unknown) => {
     error instanceof ResponseError &&
     error.status !== 500
   ) {
+    return
+  }
+
+  if (error instanceof ResponseError) {
+    logger.error({ ...error }, error.message)
+    return
+  }
+
+  if (error instanceof Error) {
+    logger.error(error, `🔴 ${error.message}`)
     return
   }
 

@@ -1,4 +1,5 @@
 import '@piny/db/init'
+import './setup'
 import dedent from 'dedent'
 import { logger } from '@piny/tools/logger'
 import { getServerHostPort, getServerURL } from './config'

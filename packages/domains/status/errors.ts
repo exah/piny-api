@@ -1,34 +1,37 @@
 import * as v from 'valibot'
+import { StatusCodes } from 'http-status-codes'
 import type { IncomingHttpHeaders } from 'node:http'
-import type { UnknownSchema, UnknownIssue } from './types'
+import type { UnknownSchema, UnknownIssue, ErrorId } from './types'
 import { ErrorCodeSchema } from './schemas'
 
 interface ResponseErrorOptions<Meta = unknown> {
+  requestId?: string
   headers?: Headers | IncomingHttpHeaders
   payload?: unknown
   method?: string
   cause?: unknown
   meta?: Meta
-  url?: URL
-  id?: string
+  url?: string
+  id?: ErrorId
 }
 
 export abstract class ResponseError<Meta = unknown> extends Error {
   name = 'ResponseError'
-  expose = true
 
   readonly code: unknown
   readonly status: number
 
   message: string
+  expose?: boolean
   description?: string
+  requestId?: string
   headers?: Headers | IncomingHttpHeaders
   payload?: unknown
   method?: string
   cause?: unknown
   meta: Meta
-  url?: URL
-  id?: string
+  url?: string
+  id?: ErrorId
 
   constructor(description?: string, options?: ResponseErrorOptions<Meta>) {
     super()
@@ -46,56 +49,66 @@ export abstract class ResponseError<Meta = unknown> extends Error {
 
 export class BadRequestError<Meta = unknown> extends ResponseError<Meta> {
   readonly code = ErrorCodeSchema.enum.BAD_REQUEST
-  readonly status = 400
+  readonly status = StatusCodes.BAD_REQUEST
 
+  name = 'BadRequestError'
   message = '👎 Bad request'
 }
 
 export class UnauthorizedError<Meta = unknown> extends ResponseError<Meta> {
   readonly code = ErrorCodeSchema.enum.UNAUTHORIZED
-  readonly status = 401
+  readonly status = StatusCodes.UNAUTHORIZED
 
+  name = 'UnauthorizedError'
   message = '🙅‍♂️ Unauthorized'
 }
 
 export class ForbiddenError<Meta = unknown> extends ResponseError<Meta> {
   readonly code = ErrorCodeSchema.enum.FORBIDDEN
-  readonly status = 403
+  readonly status = StatusCodes.FORBIDDEN
 
+  name = 'ForbiddenError'
   message = '✋ Denied'
 }
 
 export class NotFoundError<Meta = unknown> extends ResponseError<Meta> {
   readonly code = ErrorCodeSchema.enum.NOT_FOUND
-  readonly status = 404
+  readonly status = StatusCodes.NOT_FOUND
 
+  name = 'NotFoundError'
   message = '🤷‍♂️ Not found'
 }
 
 export class NotAcceptableError<Meta = unknown> extends ResponseError<Meta> {
   readonly code = ErrorCodeSchema.enum.NOT_ACCEPTABLE
-  readonly status = 406
+  readonly status = StatusCodes.NOT_ACCEPTABLE
 
+  name = 'NotAcceptableError'
   message = '👀 What is it?'
 }
 
 export class ConflictError<Meta = unknown> extends ResponseError<Meta> {
   readonly code = ErrorCodeSchema.enum.CONFLICT
-  readonly status = 409
+  readonly status = StatusCodes.CONFLICT
 
+  name = 'ConflictError'
   message = '🙅‍♂️ Already exists'
 }
 
 export class InternalServerError<Meta = unknown> extends ResponseError<Meta> {
   readonly code = ErrorCodeSchema.enum.INTERNAL_SERVER_ERROR
-  readonly status = 500
+  readonly status = StatusCodes.INTERNAL_SERVER_ERROR
 
+  name = 'InternalServerError'
   message = '😭 Something went wrong'
 }
 
 export class ParsingError extends ResponseError<UnknownIssue[]> {
   readonly code = ErrorCodeSchema.enum.PARSING_ERROR
-  readonly status = 400
+  readonly status = StatusCodes.BAD_REQUEST
+
+  name = 'ParsingError'
+  message = '🤦‍♂️ Parsing error'
 
   constructor(cause: v.ValiError<UnknownSchema>)
   constructor(message?: string, options?: ResponseErrorOptions<UnknownIssue[]>)
@@ -125,7 +138,8 @@ export class ParsingError extends ResponseError<UnknownIssue[]> {
 
 export class SessionAlreadyRefreshedError<Meta = unknown> extends ResponseError<Meta> {
   readonly code = ErrorCodeSchema.enum.SESSION_ALREADY_REFRESHED
-  readonly status = 409
+  readonly status = StatusCodes.CONFLICT
 
+  name = 'SessionAlreadyRefreshedError'
   message = '🙅‍♂️ Already refreshed'
 }

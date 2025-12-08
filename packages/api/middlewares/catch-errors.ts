@@ -1,10 +1,11 @@
 import type { Next } from 'koa'
 import * as v from 'valibot'
+import * as Sentry from '@sentry/node'
 import { RouterContext } from '@piny/api/types/router'
-import { InternalServerError, ParsingError } from './errors'
-import { createErrorId, isResponseError } from './utils'
-import type { RegisteredResponseError, ErrorResponse } from './types'
-import { ErrorResponseSchema } from './schemas'
+import { InternalServerError, ParsingError } from '@piny/status/errors'
+import { createErrorId, isResponseError } from '@piny/status/utils'
+import type { RegisteredResponseError, ErrorResponse } from '@piny/status/types'
+import { ErrorResponseSchema } from '@piny/status/schemas'
 
 function getResponseError(error: unknown): RegisteredResponseError {
   if (v.isValiError(error)) {
@@ -24,7 +25,8 @@ export async function catchErrors(context: RouterContext<ErrorResponse>, next: N
     const responseError = getResponseError(error)
 
     responseError.id = id
-    responseError.url = context.URL
+    responseError.url = context.url
+    responseError.expose = true
     responseError.method = context.method
     responseError.headers = context.headers
 
@@ -33,6 +35,14 @@ export async function catchErrors(context: RouterContext<ErrorResponse>, next: N
       code: responseError.code,
       meta: responseError.meta,
       message: responseError.description || responseError.message,
+      requestId: context.requestId,
+    })
+
+    Sentry.captureException(error, {
+      mechanism: {
+        handled: responseError.status !== 500,
+        type: 'piny.middleware.catch-errors',
+      },
     })
 
     context.app.emit('error', responseError, context)

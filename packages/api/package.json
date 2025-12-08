@@ -25,6 +25,7 @@
     "@piny/tag": "*",
     "@piny/tools": "*",
     "@piny/user": "*",
+    "@sentry/node": "^10.29.0",
     "dedent": "^1.7.0",
     "koa": "^2.16.3",
     "tsx": "^4.20.6",

@@ -18,13 +18,14 @@ export const api = YF.create({
       const responseError = new (getErrorByCode(data.code))()
 
       responseError.id = data.id
-      responseError.url = new URL(error.response.url)
+      responseError.url = error.response.url
       responseError.meta = data.meta
       responseError.cause = error
       responseError.method = error.response.options.method
       responseError.message = data.message
       responseError.headers = error.response.options.headers
       responseError.payload = error.response.options.json
+      responseError.requestId = data.requestId
 
       throw responseError
     }

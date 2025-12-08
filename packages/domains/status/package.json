@@ -5,13 +5,13 @@
   "exports": {
     "./constants": "./constants/index.ts",
     "./errors": "./errors.ts",
-    "./middlewares": "./middlewares.ts",
     "./registry": "./registry.ts",
     "./schemas": "./schemas.ts",
     "./types": "./types.ts",
     "./utils": "./utils.ts"
   },
   "dependencies": {
+    "http-status-codes": "^2.3.0",
     "lil-match": "^1.2.1",
     "valibot": "^1.1.0"
   }

@@ -9,6 +9,7 @@ export interface RouterContext<
   State = RouterSessionState
 > extends Koa.RouterContext<State, unknown, Response> {
   params: Params
+  requestId: string
   receive<const S extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
     schema: S
   ): Promise<v.InferOutput<S>>

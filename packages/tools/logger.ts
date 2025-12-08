@@ -1,7 +1,19 @@
-import { pino } from 'pino'
-import pretty from 'pino-pretty'
+import { pino, type Level } from 'pino'
 
-export const logger = pino(
-  { depthLimit: 10 },
-  pretty({ ignore: 'pid,hostname' })
-)
+function getLevel(): Level {
+  if (process.env.NODE_ENV === 'test') {
+    return 'error'
+  }
+
+  if (process.env.DEBUG === '*' || process.env.DEBUG === 'piny') {
+    return 'debug'
+  }
+
+  return 'info'
+}
+
+export const logger = pino({
+  depthLimit: 10,
+  formatters: { level: (label) => ({ level: label }), bindings: () => ({}) },
+  level: getLevel(),
+})
