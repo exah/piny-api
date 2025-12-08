@@ -6,7 +6,6 @@
     "./constants": "./constants.ts",
     "./entities": "./entities.ts",
     "./functions": "./functions.ts",
-    "./middlewares": "./middlewares.ts",
     "./mocks": "./mocks.ts",
     "./resource": "./resource.ts",
     "./schemas": "./schemas.ts",

@@ -2,14 +2,16 @@ import Koa from 'koa'
 import { logger } from '@piny/tools/logger'
 import { ResponseError } from '@piny/status/errors'
 import { routes } from './routes'
-import { getRouterContext, catchErrors } from './middlewares'
+import { getRouterContext, getSessionContext, catchErrors } from './middlewares'
 import type { RouterSessionState, RouterContext } from './types/router'
 
 export const app = new Koa<RouterSessionState, RouterContext<unknown>>()
 
-app.use(getRouterContext)
 app.use(catchErrors)
+app.use(getRouterContext)
+app.use(getSessionContext)
 app.use(routes.middleware())
+
 app.on('error', (error: unknown) => {
   if (
     ['test'].includes(process.env.NODE_ENV || '') &&

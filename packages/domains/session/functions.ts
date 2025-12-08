@@ -1,3 +1,4 @@
+import type { BaseRequest } from 'koa'
 import { UserEntity } from '@piny/user/entities'
 import {
   ForbiddenError,
@@ -8,9 +9,37 @@ import { transaction, manager } from '@piny/db/transaction'
 import { assert } from '@piny/tools/assert'
 import { Time } from '@piny/tools/constants'
 import { SessionEntity } from './entities'
-import { createToken, getTokenExpiration } from './utils'
 import type { LoginPayload, SessionToken } from './types'
-import { hash } from './utils'
+import {
+  createToken,
+  getPrefixedToken,
+  getTokenExpiration,
+  validateToken,
+  hash,
+} from './utils'
+
+export async function getSessionFromToken(token: SessionToken) {
+  const session = await SessionEntity.findOne({
+    where: { token },
+    relations: { user: true, succeedingSession: true },
+  })
+
+  if (session === null || session.expiresAt.getTime() <= Date.now()) {
+    return null
+  }
+
+  return session
+}
+
+export async function getSessionFromRequest(request: BaseRequest) {
+  const token = await getPrefixedToken(request.get('Authorization'))
+
+  if (token === null || !(await validateToken(token))) {
+    return null
+  }
+
+  return getSessionFromToken(token)
+}
 
 export async function createSession(payload: LoginPayload) {
   const user = await UserEntity.findOne({
