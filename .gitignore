@@ -125,4 +125,5 @@ dist
 .DS_Store
 
 # Agents
+AGENTS.md
 CLAUDE.md
