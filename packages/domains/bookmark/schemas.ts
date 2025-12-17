@@ -30,10 +30,9 @@ export const BookmarkParamsSchema = v.object({
 export const CreateBookmarkPayloadSchema = v.object({
   url: v.pipe(v.string(), v.url()),
   privacy: v.enum(Privacy),
-  title: v.optional(v.nullable(v.string())),
-  description: v.optional(v.nullable(v.string())),
-  tags: v.optional(v.array(v.string())),
-  state: v.optional(v.enum(State)),
+  title: v.nullish(v.string()),
+  description: v.nullish(v.string()),
+  tags: v.nullish(v.array(v.string())),
 })
 
 export const CreateBookmarkResponseSchema = v.object({
@@ -41,6 +40,10 @@ export const CreateBookmarkResponseSchema = v.object({
   message: v.string(),
 })
 
-export const UpdateBookmarkPayloadSchema = v.partial(
-  CreateBookmarkPayloadSchema
-)
+export const UpdateBookmarkPayloadSchema = v.object({
+  url: v.nullish(v.pipe(v.string(), v.url())),
+  privacy: v.nullish(v.enum(Privacy)),
+  title: v.nullish(v.string()),
+  description: v.nullish(v.string()),
+  tags: v.nullish(v.array(v.string())),
+})

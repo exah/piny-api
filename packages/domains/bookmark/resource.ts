@@ -85,7 +85,7 @@ export async function add({
 
     await manager.save(bookmark)
 
-    if (Array.isArray(body.tags)) {
+    if (body.tags != null) {
       const tags = await getOrCreateTags(body.tags, user)
       const bookmarkTags = tags.map((tag, index) =>
         BookmarkTagEntity.create({ bookmark, tag, order: index })
@@ -122,27 +122,23 @@ export async function edit({
 
     assert(bookmark, new NotFoundError())
 
-    if (body.title !== undefined) {
+    if (body.title != null) {
       bookmark.title = body.title
     }
 
-    if (body.description !== undefined) {
+    if (body.description != null) {
       bookmark.description = body.description
     }
 
-    if (body.privacy !== undefined) {
+    if (body.privacy != null) {
       bookmark.privacy = body.privacy
     }
 
-    if (body.url !== undefined) {
+    if (body.url != null) {
       bookmark.link = await getLinkForURL(body.url)
     }
 
-    if (body.state !== undefined) {
-      bookmark.state = body.state
-    }
-
-    if (body.tags !== undefined) {
+    if (body.tags != null) {
       await manager.remove(bookmark.bookmarkTags)
       const tags = await getOrCreateTags(body.tags, user)
 

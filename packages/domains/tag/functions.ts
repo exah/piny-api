@@ -25,7 +25,7 @@ export async function getUserTags(user: UserEntity, type: UserType) {
   return tags
 }
 
-export function getOrCreateTags(input: string[] = [], user: UserEntity) {
+export function getOrCreateTags(input: string[], user: UserEntity) {
   return transaction(async (manager) => {
     const nextTags: TagEntity[] = []
     const foundTags = await manager.find(TagEntity, {
