@@ -1,0 +1,28 @@
+{
+  "lexicon": 1,
+  "id": "link.piny.tag",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A user-defined tag for organizing bookmarks.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["name", "createdAt"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "The tag name. Should be unique per user."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Timestamp when the tag was created."
+          }
+        }
+      }
+    }
+  }
+}
