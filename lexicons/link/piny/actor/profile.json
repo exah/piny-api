@@ -1,0 +1,45 @@
+{
+  "lexicon": 1,
+  "id": "link.piny.actor.profile",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A Piny user profile.",
+      "key": "literal:self",
+      "record": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxGraphemes": 64,
+            "maxLength": 640,
+            "description": "Display name for the user."
+          },
+          "description": {
+            "type": "string",
+            "maxGraphemes": 256,
+            "maxLength": 2560,
+            "description": "Free-form profile description text."
+          },
+          "avatar": {
+            "type": "blob",
+            "accept": ["image/png", "image/jpeg"],
+            "maxSize": 1000000,
+            "description": "Small image to be displayed as the user's avatar. Not supported on Piny at the moment."
+          },
+          "banner": {
+            "type": "blob",
+            "accept": ["image/png", "image/jpeg"],
+            "maxSize": 1000000,
+            "description": "Larger horizontal image to display behind the profile. Not supported on Piny at the moment."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Timestamp when the profile was created."
+          }
+        }
+      }
+    }
+  }
+}

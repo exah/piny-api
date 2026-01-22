@@ -1,0 +1,60 @@
+{
+  "lexicon": 1,
+  "id": "link.piny.bookmark",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A bookmarked URL with optional metadata and tags.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["url", "privacy", "createdAt"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "The bookmarked URL."
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Title of the bookmarked page. Can be user-edited or auto-fetched."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000,
+            "description": "User notes or an excerpt from the bookmarked page."
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "format": "at-uri",
+              "description": "Reference to a link.piny.tag record."
+            },
+            "description": "References to tag records (AT-URIs)."
+          },
+          "state": {
+            "type": "string",
+            "knownValues": ["active", "removed"],
+            "default": "active",
+            "description": "Lifecycle state of the bookmark."
+          },
+          "privacy": {
+            "type": "string",
+            "knownValues": ["public", "private"],
+            "default": "private",
+            "description": "Visibility setting. Private bookmarks are not synced to AT Protocol. You must provide public bookmarks only."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Timestamp when the bookmark was created."
+          }
+        }
+      }
+    }
+  }
+}
